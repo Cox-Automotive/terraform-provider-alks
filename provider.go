@@ -1,7 +1,7 @@
 package main
 
 import (
-    // "log"
+    "log"
     "github.com/hashicorp/terraform/helper/schema"
     "github.com/hashicorp/terraform/terraform"
 )
@@ -10,6 +10,12 @@ import (
 func Provider() terraform.ResourceProvider {
     return &schema.Provider{
         Schema: map[string]*schema.Schema{
+            "url": &schema.Schema{
+                Type:        schema.TypeString,
+                Required:    true,
+                Description: "Base URL to ALKS service",
+                DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
+            },
             "username": &schema.Schema{
                 Type:        schema.TypeString,
                 Required:    true,
@@ -40,16 +46,19 @@ func Provider() terraform.ResourceProvider {
             "alks_iamrole": resourceAlksIamRole(),
         },
 
-        // ConfigureFunc: providerConfigure,
+        ConfigureFunc: providerConfigure,
     }
 }
 
-// func providerConfigure(d *schema.ResourceData) (interface{}, error) {
-    // config := Config{
-    //     alksAccount: d.Get("alks_account").(string),
-    //     alksRole: d.Get("alks_role").(string),
-    // }
+func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+    config := Config{
+        Url:      d.Get("url").(string),
+        Username: d.Get("username").(string),
+        Password: d.Get("password").(string),
+        Account:  d.Get("account").(string),
+        Role:     d.Get("role").(string),
+    }
 
-    // log.Println("[INFO] Initializing ALKS client")
-    // return config.Client()
-// }
+    log.Println("[INFO] Initializing ALKS client")
+    return config.Client()
+}
