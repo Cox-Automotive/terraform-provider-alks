@@ -1,13 +1,10 @@
 # ALKS Provider for Terraform
 
-This module is used for creating IAM Roles via the ALKS API. This is intended to be used by user's with the `Admin` role, if you have an `IAMAdmin` role you'll need to have it upgraded to `Admin`.
+This module is used for creating IAM Roles via the ALKS API.
 
-## Building & Testing
+## Pre-Requisites
 
-- Install Dependencies: `make deps`
-- Build: `make build`
-- TF Plan: `make plan`
-- Test: `make test`
+This is intended to be used by user's with the `Admin` role, if you have an `IAMAdmin` role you'll be able to create roles and attach policies, but you wont't be able to create other infrastructure. Upgrading to `Admin` will remedy this.
 
 ## Example
 
@@ -18,15 +15,22 @@ Check out `test.tf` for an very basic Terraform script which:
 3. Attaches a policy to the created role using the AWS provider
 4. Creates a security group using the AWS provider
 
-This example is meant to show how you would combine a typical AWS Terraform script with our custom provider in order to automated the creation of IAM roles.
+This example is meant to show how you would combine a typical AWS Terraform script with our custom provider in order to automate the creation of IAM roles.
 
-First you'll need to export a valid ALKS Admin session to your environment variables. Be sure to insert your own account, this will be used for creating all AWS resources with the exception of roles since those will use the alks role.
+First you'll need to export a valid ALKS session to your environment variables. Be sure to insert your own account, this will be used for attaching policies as well as creating all AWS resources. The alks provider is only responsible for creating the role.
 
-`eval $(alks sessions open -i -a "######/ALKSAdmin - awsaepnp" -r "Admin")`
+`eval $(alks sessions open -i -a "######/ALKSAdmin - sdgsgasf" -r "Admin")`
 
 When prompted enter your network username and password, or export them as environment variables. (`ALKS_USERNAME` and `ALKS_PASSWORD`). You'll also need to provide the same account and role that you provided to `alks sessions` above in your alks provider definition.
 
 Then simply run: `terraform plan` and then `terraform apply`
+
+## Building & Testing
+
+- Install Dependencies: `make deps`
+- Build: `make build`
+- TF Plan: `make plan`
+- Test: `make test`
 
 ## Common Build Issues
 
