@@ -8,6 +8,7 @@ import (
     "fmt"
     "bytes"
     "log"
+    "strings"
     "github.com/hashicorp/go-cleanhttp"
 )
 
@@ -19,10 +20,6 @@ type AlksClient struct {
     Role     string
 
     Http *http.Client
-}
-
-type AlksError struct {
-    Message string `json:"message"`
 }
 
 type CreateIamKeyReq struct {
@@ -50,8 +47,11 @@ type StsResponse struct {
 }
 
 type CreateRoleResponse struct {
-    RoleName string `json:"roleName"`
-    RoleArn  string `json:"roleArn"`
+    RoleName      string   `json:"roleName"`
+    RoleArn       string   `json:"roleArn"`
+    RoleIPArn     string   `json:"instanceProfileArn"`
+    RoleAddedToIP bool     `json:"addedRoleToInstanceProfile"`
+    Errors        []string `json:"errors"`
 }
 
 func NewAlksClient(url string, username string, password string, account string, role string) (*AlksClient, error) {
@@ -87,18 +87,6 @@ func (c *AlksClient) NewRequest(json []byte, method string, endpoint string) (*h
     return req, nil
 }
 
-func parseErr(resp *http.Response) error {
-    errBody := new(AlksError)
-
-    err := decodeBody(resp, &errBody)
-
-    if err != nil {
-        return fmt.Errorf("Error parsing error body for non-200 request: %s", err)
-    }
-
-    return fmt.Errorf("API Error %s: %s", resp.Status, errBody.Message)
-}
-
 func decodeBody(resp *http.Response, out interface{}) error {
     body, err := ioutil.ReadAll(resp.Body)
 
@@ -128,13 +116,13 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
     case i == 204:
         return resp, nil
     case i == 400:
-        return nil, parseErr(resp)
+        return nil, fmt.Errorf("API Error 400: %s", resp.Status)
     case i == 401:
-        return nil, parseErr(resp)
+        return nil, fmt.Errorf("API Error 401: %s", resp.Status)
     case i == 402:
-        return nil, parseErr(resp)
+        return nil, fmt.Errorf("API Error 402: %s", resp.Status)
     case i == 422:
-        return nil, parseErr(resp)
+        return nil, fmt.Errorf("API Error 422: %s", resp.Status)
     default:
         return nil, fmt.Errorf("API Error: %s", resp.Status)
     }
@@ -197,6 +185,10 @@ func (c *AlksClient) CreateIamRole(roleName string, roleType string, includeDefa
 
     if err != nil {
         return nil, fmt.Errorf("Error parsing CreateRole response: %s", err)
+    }
+
+    if len(cr.Errors) > 0 {
+        return nil, fmt.Errorf("Error creating role: %s", strings.Join(cr.Errors[:], ", "))
     }
 
     return cr, nil

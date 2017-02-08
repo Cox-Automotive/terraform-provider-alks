@@ -30,6 +30,18 @@ func resourceAlksIamRole() *schema.Resource {
                 Required: true,
                 ForceNew: true,
             },
+            "role_added_to_ip": &schema.Schema{
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+            "arn": &schema.Schema{
+                Type:     schema.TypeString,
+                Computed: true,
+            },
+            "ip_arn": &schema.Schema{
+                Type:     schema.TypeString,
+                Computed: true,
+            },
         },
     }
 }
@@ -48,10 +60,12 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
         return err
     }
 
-    log.Printf("[INFO] Created role: %s with ARN: %s", resp.RoleName, resp.RoleArn)
-
     d.SetId(resp.RoleArn)
-    d.Set("name", resp.RoleName)
+    d.Set("arn", resp.RoleArn)
+    d.Set("ip_arn", resp.RoleIPArn)
+    d.Set("role_added_to_ip", resp.RoleAddedToIP)
+
+    log.Printf("[INFO] Created role: %s with ARN: %s", resp.RoleName, resp.RoleArn)
 
     return nil
 }
