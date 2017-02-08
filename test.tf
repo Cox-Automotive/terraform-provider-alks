@@ -6,8 +6,8 @@ provider "aws" {
 }
 
 provider "alks" {
-    url      = ""
-    account  = ""
+    url      = "https://uat.alks.coxautoinc.com/rest"
+    account  = "120678615247/ALKSAdmin - awsaepnp"
     role     = "Admin"
 }
 
