@@ -6,6 +6,14 @@
 make
 ```
 
+# Sample STS
+
+```
+alks sessions open -i -a "######/ALKSAdmin - awsaepnp" -r "Admin" -o creds -n "tf-iam" -f
+alks sessions open -a "######/ALKSPowerUser - awsaepnp" -r "PowerUser" -o creds -n "tf-main" -f
+```
+
+
 ## Common build issues
 
 The following build issue can occur if you have an older version of the terraform executable installed.
