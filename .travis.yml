@@ -11,9 +11,6 @@ before_install:
 install:
   - make install
 
-script:
-  - make travis
-
 before_deploy:
   - make release
 
