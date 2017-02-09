@@ -12,13 +12,10 @@ test:
 plan:
 	@terraform plan
 
-.PHONY: install release test travis
+.PHONY: install release test
 
 install:
 	go get -t -v ./...
-
-travis:
-	$(HOME)/gopath/bin/goveralls -service=travis-ci
 
 release:
 	mkdir -p release
