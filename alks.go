@@ -53,9 +53,16 @@ type CreateRoleResponse struct {
 	Errors        []string `json:"errors"`
 }
 
+type GetRoleRequest struct {
+	RoleName string `json:roleName`
+}
+
 type GetRoleResponse struct {
-	RoleName string `json:"roleName"`
-	RoleArn  string `json:"roleArn"`
+	RoleName  string   `json:"roleName"`
+	RoleArn   string   `json:"roleArn"`
+	RoleIPArn string   `json:"instanceProfileArn"`
+	Exists    bool     `json:"roleExists"`
+	Errors    []string `json:"errors"`
 }
 
 func NewAlksClient(url string, username string, password string, account string, role string) (*AlksClient, error) {
@@ -220,11 +227,48 @@ func DeleteIamRole(d *schema.ResourceData, meta interface{}) error {
 }
 
 func (c *AlksClient) GetIamRole(arn string) (*GetRoleResponse, error) {
+	log.Printf("[INFO] Getting IAM role: %s", arn)
 	//  TODO: IMPLEMENT
 	return nil, nil
 }
 
 func (c *AlksClient) GetIamRoleByName(roleName string) (*GetRoleResponse, error) {
-	//  TODO: IMPLEMENT
-	return nil, nil
+	log.Printf("[INFO] Getting IAM role: %s", roleName)
+	getRole := GetRoleRequest{roleName}
+
+	b, err := json.Marshal(struct {
+		GetRoleRequest
+		AlksAccount
+	}{getRole, c.Account})
+
+	if err != nil {
+		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
+	}
+
+	req, err := c.NewRequest(b, "POST", "/checkAWSAccountRoleExists/")
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := checkResp(c.Http.Do(req))
+	if err != nil {
+		return nil, err
+	}
+
+	cr := new(GetRoleResponse)
+	err = decodeBody(resp, &cr)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing GetRole response: %s", err)
+	}
+
+	if len(cr.Errors) > 0 {
+		return nil, fmt.Errorf("Error getting role: %s", strings.Join(cr.Errors[:], ", "))
+	}
+
+	if !cr.Exists {
+		return nil, nil
+	}
+
+	return cr, nil
 }

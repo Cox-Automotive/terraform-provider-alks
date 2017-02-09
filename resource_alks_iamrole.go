@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/hashicorp/terraform/helper/schema"
@@ -10,7 +9,7 @@ import (
 func resourceAlksIamRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlksIamRoleCreate,
-		Read:   resourceAlksIamRoleRead,
+		Read:   resourceAlksIamRoleRead, // WHY ISNT THIS BEING CALLED?!
 		Delete: resourceAlksIamRoleDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -46,7 +45,7 @@ func resourceAlksIamRole() *schema.Resource {
 }
 
 func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] ALKS IAM Role Create")
+	log.Printf("[INFO] ALKS IAM Role Create")
 
 	var roleName = d.Get("name").(string)
 	var roleType = d.Get("type").(string)
@@ -64,41 +63,39 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	d.Set("ip_arn", resp.RoleIPArn)
 	d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
-	log.Printf("[INFO] Created role: %s with ARN: %s", resp.RoleName, resp.RoleArn)
+	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
 
 	return nil
 }
 
 func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] ALKS IAM Role Delete")
+	log.Printf("[INFO] ALKS IAM Role Delete")
 
 	return nil
 }
 
 func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[DEBUG] ALKS IAM Role Read")
+	log.Printf("[INFO] ALKS IAM Role Read")
 
 	client := meta.(*AlksClient)
 
-	_, err := resourceAlksIamRoleRetrieve(d.Id(), client, d)
+	foundrole, err := client.GetIamRoleByName(d.Get("name").(string))
 
 	if err != nil {
 		return err
 	}
 
-	return nil
-}
-
-func resourceAlksIamRoleRetrieve(id string, client *AlksClient, d *schema.ResourceData) (*GetRoleResponse, error) {
-	log.Printf("[DEBUG] ALKS IAM Role Retrieve: %s", id)
-
-	resp, err := client.GetIamRole(id)
-
-	if err != nil {
-		return nil, fmt.Errorf("Error retrieving role: %s", err)
+	if foundrole == nil {
+		d.SetId("")
+		return nil
 	}
 
-	// TODO update resource data with values!
+	return populateResourceDataFromRole(foundrole, d)
+}
 
-	return resp, nil
+func populateResourceDataFromRole(role *GetRoleResponse, d *schema.ResourceData) error {
+	d.Set("arn", role.RoleArn)
+	d.Set("ip_arn", role.RoleIPArn)
+
+	return nil
 }
