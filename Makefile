@@ -1,4 +1,6 @@
-default: build plan
+package = github.com/Cox-Automotive/terraform-provider-alks
+
+# default: build plan
 
 get-deps:
 	go install github.com/hashicorp/terraform
