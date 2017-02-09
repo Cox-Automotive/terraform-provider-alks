@@ -213,7 +213,12 @@ func DeleteIamRole(d *schema.ResourceData, meta interface{}) error {
     return nil
 }
 
-func (c *AlksClient) GetIamRole(roleName string) (*GetRoleResponse, error) {
+func (c *AlksClient) GetIamRole(arn string) (*GetRoleResponse, error) {
+    //  TODO: IMPLEMENT
+    return nil, nil
+}
+
+func (c *AlksClient) GetIamRoleByName(roleName string) (*GetRoleResponse, error) {
     //  TODO: IMPLEMENT
     return nil, nil
 }

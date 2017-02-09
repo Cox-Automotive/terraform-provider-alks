@@ -66,7 +66,7 @@ func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.
 
         client := testAccProvider.Meta().(*AlksClient)
 
-        foundRole, err := client.GetIamRole(rs.Primary.Attributes["name"])
+        foundRole, err := client.GetIamRoleByName(rs.Primary.Attributes["name"])
 
         if err != nil {
             return err

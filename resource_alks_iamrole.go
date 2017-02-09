@@ -2,6 +2,7 @@ package main
 
 import (
     "log"
+    "fmt"
 
     "github.com/hashicorp/terraform/helper/schema"
 )
@@ -29,7 +30,7 @@ func resourceAlksIamRole() *schema.Resource {
                 ForceNew: true,
             },
             "role_added_to_ip": &schema.Schema{
-                Type:     schema.TypeString,
+                Type:     schema.TypeBool,
                 Computed: true,
             },
             "arn": &schema.Schema{
@@ -77,5 +78,27 @@ func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
     log.Printf("[DEBUG] ALKS IAM Role Read")
 
+    client := meta.(*AlksClient)
+
+    _, err := resourceAlksIamRoleRetrieve(d.Id(), client, d)
+
+    if err != nil {
+        return err
+    }
+
     return nil
+}
+
+func resourceAlksIamRoleRetrieve(id string, client *AlksClient, d *schema.ResourceData) (*GetRoleResponse, error) {
+    log.Printf("[DEBUG] ALKS IAM Role Retrieve: %s", id)
+
+    resp, err := client.GetIamRole(id)
+
+    if err != nil {
+        return nil, fmt.Errorf("Error retrieving role: %s", err)
+    }
+
+    // TODO update resource data with values!
+
+    return resp, nil
 }
