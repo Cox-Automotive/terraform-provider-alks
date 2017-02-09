@@ -27,7 +27,7 @@ Then simply run: `terraform plan` and then `terraform apply`
 
 ## Building & Testing
 
-- Install Dependencies: `make deps`
+- Install Dependencies: `make get-deps`
 - Build: `make build`
 - TF Plan: `make plan`
 - Test: `make test`
