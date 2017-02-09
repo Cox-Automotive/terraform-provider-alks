@@ -9,7 +9,9 @@ import (
     "bytes"
     "log"
     "strings"
+
     "github.com/hashicorp/go-cleanhttp"
+    "github.com/hashicorp/terraform/helper/schema"
 )
 
 type AlksClient struct {
@@ -48,10 +50,19 @@ type StsResponse struct {
 
 type CreateRoleResponse struct {
     RoleName      string   `json:"roleName"`
+    RoleType      string   `json:"roleType"`
     RoleArn       string   `json:"roleArn"`
     RoleIPArn     string   `json:"instanceProfileArn"`
     RoleAddedToIP bool     `json:"addedRoleToInstanceProfile"`
     Errors        []string `json:"errors"`
+}
+
+type GetRoleResponse struct {
+    RoleName      string   `json:"roleName"`
+    RoleType      string   `json:"roleType"`
+    RoleArn       string   `json:"roleArn"`
+    RoleIPArn     string   `json:"instanceProfileArn"`
+    IncDefPols    int      `json:"includeDefaultPolicy"`
 }
 
 func NewAlksClient(url string, username string, password string, account string, role string) (*AlksClient, error) {
@@ -190,4 +201,19 @@ func (c *AlksClient) CreateIamRole(roleName string, roleType string, includeDefa
     }
 
     return cr, nil
+}
+
+func DeleteIamRole(d *schema.ResourceData, meta interface{}) error {
+    // client := meta.(*AlksClient)
+
+    log.Printf("[INFO] Deleting IAM role: %s", d.Id())
+
+    // TODO: IMPLEMENT
+
+    return nil
+}
+
+func (c *AlksClient) GetIamRole(roleName string) (*GetRoleResponse, error) {
+    //  TODO: IMPLEMENT
+    return nil, nil
 }
