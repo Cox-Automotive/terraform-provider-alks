@@ -11,6 +11,10 @@ before_install:
 install:
   - make install
 
+# TODO: setup acceptance test (set envs: TF_ACC and all required from provider_test.go)
+script:
+  - make test
+
 before_deploy:
   - make release
 
