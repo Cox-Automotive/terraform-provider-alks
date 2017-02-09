@@ -1,9 +1,9 @@
 ALKS Provider for Terraform
 =========
 
-- [![Build Status](https://travis-ci.org/Cox-Automotive/terraform-provider-alks.svg?branch=master)](https://travis-ci.org/Cox-Automotive/terraform-provider-alks)
-
 This module is used for creating IAM Roles via the ALKS API.
+
+[![Build Status](https://travis-ci.org/Cox-Automotive/terraform-provider-alks.svg?branch=master)](https://travis-ci.org/Cox-Automotive/terraform-provider-alks)
 
 ## Pre-Requisites
 
@@ -28,7 +28,7 @@ When prompted enter your network username and password, or export them as enviro
 
 Then simply run: `terraform plan` and then `terraform apply`
 
-## Building & Testing
+## Building from Source
 
 - Install Dependencies: `make get-deps`
 - Build: `make build`
