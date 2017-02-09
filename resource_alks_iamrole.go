@@ -1,10 +1,7 @@
 package main
 
 import (
-    // "fmt"
-    // "time"
     "log"
-    // "github.com/hashicorp/terraform/helper/resource"
     "github.com/hashicorp/terraform/helper/schema"
 )
 

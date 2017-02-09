@@ -36,7 +36,7 @@ type CreateIamRoleReq struct {
     Account     string `json:"account"`
     Role        string `json:"role"`
     RoleName    string `json:"roleName"`
-    RoleTyep    string `json:"roleType"`
+    RoleType    string `json:"roleType"`
     IncDefPols  int    `json:"includeDefaultPolicy"`
 }
 
@@ -74,8 +74,6 @@ func (c *AlksClient) NewRequest(json []byte, method string, endpoint string) (*h
         return nil, fmt.Errorf("Error parsing base URL: %s", err)
     }
 
-    log.Printf("[INFO] IAM KEY URLZ: %s", u.String())
-    log.Printf("[INFO] IAM KEY URLZ: %s", json)
     req, err := http.NewRequest(method, u.String(), bytes.NewBuffer(json))
 
     if err != nil {
