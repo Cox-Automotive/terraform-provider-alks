@@ -1,22 +1,41 @@
 language: go
-
+sudo: false
 go:
   - 1.6
   - 1.7
   - tip
 
+before_install:
+  - go get github.com/axw/gocov/gocov
+  - go get github.com/mattn/goveralls
+  - go get github.com/hashicorp/terraform
+  - go get github.com/hashicorp/go-cleanhttp
+  - if ! go get github.com/golang/tools/cmd/cover; then go get golang.org/x/tools/cmd/cover; fi
+
 install:
-  - go get ./...
-  - make get-deps
-  - make build
+  - make install
+
+script:
+  - make travis
+
+before_deploy:
+  - make release
 
 deploy:
   provider: releases
   api_key:
     secure: MZOznxDJeaIT3IQYDZHoH7oazeuM8ekgZzvnUTq0gMHZc1gwB9uEYjvCwSVo0OlUKFPymarhv/65GolggV1+fZzig5HPOpJltTFj3w9RBXZZzZiNZ3X+eexyW+so07BtV1S+jytA/Dd8MpnT9EmCYTzpg6Gp/NosyQJ9FbS7hm8UQcH7PLiBWAeoL1Wb/aLZQZUQRBiYr8PmZ6lzVTY+w8h5KISi7TrL6EzbwXj3j3muCGm/9ZqX/6CAxmAydU0ozCjl4QksRqn2MDWgUSYgga2GKBqsTpU4hX05QCEXD/G2BcGmoaOFP29na+zhXlCZ9j7DrOCMisEWH/DiWwqWaNlqUgO81pGbQDayvpZAMGRrYsaSQTz7oEbuU88NeDFriy44WFGE+eE73ykPFQl6JNnptE3mF6dRVPb6GZhG0nzM+UKfNw4hhcWo45hmrfqLS8MJNci9O3HbMy+2Ka45u64RlX2AUnmNexdPFDmZSjARLrnFT4VUuTEeb3CRS8TmNaWEM1o2yWYgtCkM9qnhiAxlrcDt1Y/bqhgbhzoheslHmi+n9TlFeH1xHP9sTEOwji5ljyPv2iN0/YdInkz+lF/4gEQSZ6hvLGGp+v3FUV66PU8dCusw9ysJhlJ40pvobz7MNdsiscDBx0zqiYUAdSR7XSgUQV7aOJH6dmnqwQA=
-  file: terraform-provider-alks
+  file:
+    - release/terraform-provider-alks-linux-amd64
+    - release/terraform-provider-alks-linux-386
+    - release/terraform-provider-alks-linux-arm
   skip_cleanup: true
   on:
     repo: Cox-Automotive/terraform-provider-alks
     tags: true
     all_branches: false
+
+matrix:
+  fast_finish: true
+  allow_failures:
+    - go: tip
