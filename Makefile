@@ -19,12 +19,12 @@ install:
 
 release:
 	mkdir -p release
-	GOOS=darwin	 GOARCH=386   go build -o release/terraform-provider-alks-darwin-386 $(package)
-	GOOS=darwin	 GOARCH=amd64 go build -o release/terraform-provider-alks-darwin-amd64 $(package)
+	GOOS=darwin  GOARCH=386   go build -o release/terraform-provider-alks-darwin-386 $(package)
+	GOOS=darwin  GOARCH=amd64 go build -o release/terraform-provider-alks-darwin-amd64 $(package)
 	GOOS=freebsd GOARCH=386   go build -o release/terraform-provider-alks-freebsd-386 $(package)
 	GOOS=freebsd GOARCH=amd64 go build -o release/terraform-provider-alks-freebsd-amd64 $(package)
-	GOOS=linux	 GOARCH=386   go build -o release/terraform-provider-alks-linux-386 $(package)
-	GOOS=linux	 GOARCH=amd64 go build -o release/terraform-provider-alks-linux-amd64 $(package)
+	GOOS=linux   GOARCH=386   go build -o release/terraform-provider-alks-linux-386 $(package)
+	GOOS=linux   GOARCH=amd64 go build -o release/terraform-provider-alks-linux-amd64 $(package)
 	GOOS=solaris GOARCH=amd64 go build -o release/terraform-provider-alks-solaris-amd64 $(package)
 	GOOS=windows GOARCH=386   go build -o release/terraform-provider-alks-windows-386 $(package)
 	GOOS=windows GOARCH=amd64 go build -o release/terraform-provider-alks-windows-amd64 $(package)
