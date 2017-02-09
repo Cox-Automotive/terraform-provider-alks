@@ -14,29 +14,27 @@ import (
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
+type AlksAccount struct {
+	Username string `json:"userid"`
+	Password string `json:"password"`
+	Account  string `json:"account"`
+	Role     string `json:"role"`
+}
+
 type AlksClient struct {
-	BaseURL  string
-	Username string
-	Password string
-	Account  string
-	Role     string
+	Account AlksAccount
+	BaseURL string
 
 	Http *http.Client
 }
 
 type CreateIamKeyReq struct {
-	Username    string `json:"userid"`
-	Password    string `json:"password"`
-	Account     string `json:"account"`
-	Role        string `json:"role"`
-	SessionTime int    `json:"sessionTime"`
+	Account     AlksAccount
+	SessionTime int `json:"sessionTime"`
 }
 
 type CreateIamRoleReq struct {
-	Username   string `json:"userid"`
-	Password   string `json:"password"`
-	Account    string `json:"account"`
-	Role       string `json:"role"`
+	Account    AlksAccount
 	RoleName   string `json:"roleName"`
 	RoleType   string `json:"roleType"`
 	IncDefPols int    `json:"includeDefaultPolicy"`
@@ -58,21 +56,20 @@ type CreateRoleResponse struct {
 }
 
 type GetRoleResponse struct {
-	RoleName   string `json:"roleName"`
-	RoleType   string `json:"roleType"`
-	RoleArn    string `json:"roleArn"`
-	RoleIPArn  string `json:"instanceProfileArn"`
-	IncDefPols int    `json:"includeDefaultPolicy"`
+	RoleName string `json:"roleName"`
+	RoleArn  string `json:"roleArn"`
 }
 
 func NewAlksClient(url string, username string, password string, account string, role string) (*AlksClient, error) {
 	alksClient := AlksClient{
-		BaseURL:  url,
-		Username: username,
-		Password: password,
-		Account:  account,
-		Role:     role,
-		Http:     cleanhttp.DefaultClient(),
+		Account: AlksAccount{
+			Username: username,
+			Password: password,
+			Account:  account,
+			Role:     role,
+		},
+		BaseURL: url,
+		Http:    cleanhttp.DefaultClient(),
 	}
 
 	return &alksClient, nil
@@ -139,7 +136,15 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 
 func (c *AlksClient) CreateIamKey() (*StsResponse, error) {
 
-	iam := CreateIamKeyReq{c.Username, c.Password, c.Account, c.Role, 1}
+	iam := CreateIamKeyReq{
+		AlksAccount{
+			Username: c.Account.Username,
+			Password: c.Account.Password,
+			Account:  c.Account.Account,
+			Role:     c.Account.Role,
+		},
+		1,
+	}
 	b, err := json.Marshal(iam)
 
 	if err != nil {
@@ -172,7 +177,18 @@ func (c *AlksClient) CreateIamRole(roleName string, roleType string, includeDefa
 		include = 1
 	}
 
-	iam := CreateIamRoleReq{c.Username, c.Password, c.Account, c.Role, roleName, roleType, include}
+	iam := CreateIamRoleReq{
+		AlksAccount{
+			Username: c.Account.Username,
+			Password: c.Account.Password,
+			Account:  c.Account.Account,
+			Role:     c.Account.Role,
+		},
+		roleName,
+		roleType,
+		include,
+	}
+
 	b, err := json.Marshal(iam)
 
 	if err != nil {

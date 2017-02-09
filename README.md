@@ -7,7 +7,7 @@ This module is used for creating IAM Roles via the ALKS API.
 
 ## Pre-Requisites
 
-* This is intended to be used by user's with the `Admin` role, if you have an `IAMAdmin` role you'll be able to create roles and attach policies, but you wont't be able to create other infrastructure. Upgrading to `Admin` will remedy this.
+* This is intended to be used by user's with the `Admin` role, if you have an `IAMAdmin` role you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. Upgrading to `Admin` will remedy this.
 * You'll need to make sure you've [installed Terraform](https://www.terraform.io/) version 1.7 or newer.
 
 ## Installation

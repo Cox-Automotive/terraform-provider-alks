@@ -3,7 +3,11 @@ package = github.com/Cox-Automotive/terraform-provider-alks
 get-deps:
 	go install github.com/hashicorp/terraform
 
+format:
+	go fmt
+
 build:
+	go fmt
 	go build -v -o terraform-provider-alks .
 
 test:
