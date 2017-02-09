@@ -1,4 +1,7 @@
-# ALKS Provider for Terraform
+ALKS Provider for Terraform
+=========
+
+- [![Build Status](https://travis-ci.org/Cox-Automotive/terraform-provider-alks.svg?branch=master)](https://travis-ci.org/Cox-Automotive/terraform-provider-alks)
 
 This module is used for creating IAM Roles via the ALKS API.
 
