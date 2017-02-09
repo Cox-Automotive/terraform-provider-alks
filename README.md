@@ -49,8 +49,8 @@ Provider Options:
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
 * `role` - (Required) The ALKS role to use. This should be `Admin` or `IAMAdmin` Also read from `ENV.ALKS_ROLE`
-* `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - Should be provided via env vars and not stored in your tf files.
-* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - Should be provided via env vars and not stored in your tf files.
+* `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
+* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - **Should be provided via env vars and not stored in your TF files.**
 
 All of these options should match what you configured with the ALKS CLI.
 
@@ -66,14 +66,14 @@ resource "alks_iamrole" "test_role" {
 }
 ```
 
-value                             | Type     | Forces New | Value Type | Description
+Value                             | Type     | Forces New | Value Type | Description
 --------------------------------- | -------- | ---------- | ---------- | -----------
 `name`                           | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
-`type`                           | Required | yes        | string     | The role type to use.
+`type`                           | Required | yes        | string     | The role type to use. [Available Roles](https://gist.github.com/brianantonelli/5769deff6fd8f3ff30e40b844f0b1fb4)
 `include_default_policies`                           | Required | yes        | bool     | Whether or not the default managed policies should be attached to the role.
 `role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
-`ip_arn`                           | Computed | n/a        | string     | Of `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+`ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
 
 ## Example
 
@@ -93,7 +93,7 @@ This example is meant to show how you would combine a typical AWS Terraform scri
 - TF Plan: `make plan`
 - Test: `make test`
 
-## Common Build Issues
+### Common Build Issues
 
 The following build issue can occur if you have an older version of the terraform executable installed.
 
