@@ -6,6 +6,8 @@ go:
   - tip
 
 install:
+  - go get github.com/hashicorp/terraform
+  - go get github.com/hashicorp/go-cleanhttp
   - make get-deps
   - make build
 
