@@ -29,12 +29,10 @@ type AlksClient struct {
 }
 
 type CreateIamKeyReq struct {
-	Account     AlksAccount
 	SessionTime int `json:"sessionTime"`
 }
 
 type CreateIamRoleReq struct {
-	Account    AlksAccount
 	RoleName   string `json:"roleName"`
 	RoleType   string `json:"roleType"`
 	IncDefPols int    `json:"includeDefaultPolicy"`
@@ -136,16 +134,11 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 
 func (c *AlksClient) CreateIamKey() (*StsResponse, error) {
 
-	iam := CreateIamKeyReq{
-		AlksAccount{
-			Username: c.Account.Username,
-			Password: c.Account.Password,
-			Account:  c.Account.Account,
-			Role:     c.Account.Role,
-		},
-		1,
-	}
-	b, err := json.Marshal(iam)
+	iam := CreateIamKeyReq{1}
+	b, err := json.Marshal(struct {
+		CreateIamKeyReq
+		AlksAccount
+	}{iam, c.Account})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create key JSON: %s", err)
@@ -178,18 +171,15 @@ func (c *AlksClient) CreateIamRole(roleName string, roleType string, includeDefa
 	}
 
 	iam := CreateIamRoleReq{
-		AlksAccount{
-			Username: c.Account.Username,
-			Password: c.Account.Password,
-			Account:  c.Account.Account,
-			Role:     c.Account.Role,
-		},
 		roleName,
 		roleType,
 		include,
 	}
 
-	b, err := json.Marshal(iam)
+	b, err := json.Marshal(struct {
+		CreateIamRoleReq
+		AlksAccount
+	}{iam, c.Account})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
