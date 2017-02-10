@@ -1,44 +1,50 @@
 language: go
 sudo: false
 go:
-  - 1.7
-  - tip
-
+- 1.7
+- tip
 before_install:
-  - go get github.com/hashicorp/terraform
-  - go get github.com/hashicorp/go-cleanhttp
-
+- go get github.com/hashicorp/terraform
+- go get github.com/hashicorp/go-cleanhttp
 install:
-  - make install
-
-# TODO: setup acceptance test (set envs: TF_ACC and all required from provider_test.go)
+- make install
 script:
-  - make test
-
+- make test
 before_deploy:
-  - make release
-
+- make release
 deploy:
   provider: releases
   api_key:
     secure: MZOznxDJeaIT3IQYDZHoH7oazeuM8ekgZzvnUTq0gMHZc1gwB9uEYjvCwSVo0OlUKFPymarhv/65GolggV1+fZzig5HPOpJltTFj3w9RBXZZzZiNZ3X+eexyW+so07BtV1S+jytA/Dd8MpnT9EmCYTzpg6Gp/NosyQJ9FbS7hm8UQcH7PLiBWAeoL1Wb/aLZQZUQRBiYr8PmZ6lzVTY+w8h5KISi7TrL6EzbwXj3j3muCGm/9ZqX/6CAxmAydU0ozCjl4QksRqn2MDWgUSYgga2GKBqsTpU4hX05QCEXD/G2BcGmoaOFP29na+zhXlCZ9j7DrOCMisEWH/DiWwqWaNlqUgO81pGbQDayvpZAMGRrYsaSQTz7oEbuU88NeDFriy44WFGE+eE73ykPFQl6JNnptE3mF6dRVPb6GZhG0nzM+UKfNw4hhcWo45hmrfqLS8MJNci9O3HbMy+2Ka45u64RlX2AUnmNexdPFDmZSjARLrnFT4VUuTEeb3CRS8TmNaWEM1o2yWYgtCkM9qnhiAxlrcDt1Y/bqhgbhzoheslHmi+n9TlFeH1xHP9sTEOwji5ljyPv2iN0/YdInkz+lF/4gEQSZ6hvLGGp+v3FUV66PU8dCusw9ysJhlJ40pvobz7MNdsiscDBx0zqiYUAdSR7XSgUQV7aOJH6dmnqwQA=
   file:
-    - release/terraform-provider-alks-darwin-386
-    - release/terraform-provider-alks-darwin-amd64
-    - release/terraform-provider-alks-freebsd-386
-    - release/terraform-provider-alks-freebsd-amd64
-    - release/terraform-provider-alks-linux-386
-    - release/terraform-provider-alks-linux-amd64
-    - release/terraform-provider-alks-solaris-amd64
-    - release/terraform-provider-alks-windows-386
-    - release/terraform-provider-alks-windows-amd64
+  - release/terraform-provider-alks-darwin-386
+  - release/terraform-provider-alks-darwin-amd64
+  - release/terraform-provider-alks-freebsd-386
+  - release/terraform-provider-alks-freebsd-amd64
+  - release/terraform-provider-alks-linux-386
+  - release/terraform-provider-alks-linux-amd64
+  - release/terraform-provider-alks-solaris-amd64
+  - release/terraform-provider-alks-windows-386
+  - release/terraform-provider-alks-windows-amd64
   skip_cleanup: true
   on:
     repo: Cox-Automotive/terraform-provider-alks
     tags: true
     all_branches: false
-
 matrix:
   fast_finish: true
   allow_failures:
-    - go: tip
+  - go: tip
+env:
+  ALKS_URL:
+    secure: BoSZA0voTeuHtvGf/ayIM5OBetzUQxXof0pnDxgztUwVSyHoaYrDETi4hQ4N7Pu5V9atTlG/ifPhgWkk5hcIvOlHHXTHw3QILTtsxqStVtx6CEnrc0YSg5TguvypEwOWyia4fMir2kwozXrgIj2RNPVXly249bPRaLYq5eNDFjWEQWORDafCu3dvrqw7qva7DJQiNQT0A/tY/MYrRTovIVHAf43RC9AMEfJVQTaHM2HqBq2Efj9AXSNa22t1o/qrCjfM6GhsbbcR0ZuvD81ndzJtHOHaG1p7EiguceQ+QI/UMbpgNrUxx8Zr8nRAYwjmzZLFAfixnASiZlgeW58WP9XDmosom3G38i8x5IeBHA30+tcnkeW9ws1yzJ3Az+LXF3nQGZ6NmFnFZOC1tR/PpVRe+um2QVWIbD4ZGu1oikUNpx7q94h88hPBlruvCXoJlXLyYafFzldl8YuggoRO0zHZOzzbiIbQH4jE/EQhmOuM5+vh4o6mazafgAr9SHgxTPKHkP++vOHNeoxSl6Ys+WDUEZRIudeuOwtSMpmE8LflT+JDbO4nzesO/BkjrhkdLQLICymjzN1MyypNmKy/F0oQVxpKJZNWWm1Db1uAmMHwn/k4sE81h2DYW5RQXItrWNMYPR1/XL1pVAnGxKBr671a2poeydXa1KUQ9smQ7nI=
+  ALKS_ACCOUNT:
+    secure: Mhel90UXuwK77+0lRZCKm0Q88kdlCrMPpFAVRdEMxJI/v3rdi8tA6jnhTgF8X+n9q/MUUVF2ANJaQvg3ETq7ekLcnmyFZ2BrU57QjFfbwDyn6QN9IZpFZQV6u2rRPugLNA3V9/eTdwn+cD+ZEryfYoasHmVuT/EsYnr58DFiIZEIwftRULwGTLusFANdkT4SUUxWLiKDGs7tE4vy85XSa+FcAD1BMtgReUBCxjr3ykjVTkBGXvkhhDhb/ilse5Kuvu4WpAR+dLI2VwYynZiIiECbQh8O76PdZ1nrPpPjgNVs/WCaJ01xvUHByjbmYDI5F8GF7132YrAK7f3LOFj1zrM407FuzbMN0j0kehxxWf8D9UzZuqBCPp1RvReGy7Ire+/PoPW90J3kFrhOU+rPNi33RrBrN8rqLn8fjEtJS1adduxdNIyUlnw33pL2fksg5m0OhAGNDO6GQO57cFWb1wOIoFDKESHeOs4OC4mYX7RvlDy3rgoMDtY4MJbDam+gOAKq7uZVaUfkiJWByN21pH8xqC5HqB7Hu42cVWnHol9YArS5sEmwVhnP9zmzsz4jZEV1Y5fF9Hwb0vWkrlNHLtEfEhD4MqjTZ1mBLvMs/sDeq1gVpnrnMHQTNSMGeZ/stejtnAK0dYEnjjp7qXyYNdUcc0TjxL2owdqGFtvMl6o=
+  ALKS_ROLE:
+    secure: fvVqqrAbUAHhIc3oLyx3Phr0vvR//zWJCeXVmbgAhNTo4IvqzNUjaqrrarNlda4DXMEOjImfTqtJlN4JFcD2NVtHcZNKXPzyXiHrb37SrQVi61O3PlPT8UePESCpfCpb/ZoXu4L1rSaBPbLLFTNjcu6i5USBY8QI0R49ViejhXZhb6TNmT8PObZem0vCZIYBXTeiGRnd+jVMcwc+SY/xwN1v1OvSHKmD8HsxymZGx8NfNrD62E+v5SE+Pa0vM+v3dCjnPRjAZvPGsgdPjCElD73aPsL2oO9F5JuFCSGeiHSSEj8akvS45lsMdJ0cFdimvLgVJ+9zxhDERt6i+yOx9E/Hj578mSOc2SHPHfpDw1CixEN58SoqONxqcVnprfh+00gY+/t785SC4UomNvbChfy5CwuSzHqF1khtHW8M4UK+X4oFOsq9+O8Ds0WBOiNcBVU3BuACTZ8vxeeO2Mx43aB36yrwpWhtH2hN2k1LIJE9eU9T8l9ugRPpDqODGEWqW7h2qOYINpbu9Om07jWuANNbIWko3Gb+ZV3xv09QG4rO0rdfyxedYR7v2D/sMalbh3KKPrMsM2pnQBNwTUiJ+by36+MC0x1duTSUTXFtNsThW8FVrheyuu9xczqva5de3QRRAMHbDs1A+4KIpCjijKW6Rmq4nFk3T+Tq2uBmgTw=
+  ALKS_USERNAME:
+    secure: nKDVkID/47Rl6SKT0r3cxkrQAG4i3M6IZr05NuwwP/Bl1HvpeDqQLwnHXDWY7p6z/pMJKFp3R9AKYR+aj2Ns/dNOIeS0ODjDWyZd8EyMivNETIyH5eneo72Y/u9xlKDKAJw11mAG7O5vknEzcE/nB2ER03lXLsRs58GtxNYxiF96vLUa5nYYJrGO0BZR5/uqEFLMDpQNHlycXKlHBw7dRajBrDjCzMXRundvRR3aieApHX16NNx8dngMl0A8tn4fhsnsg0Neb28r+Ncdwap4d1PB1Akx978aqRBkBnNhbGWHU01PGozsz/a/yjllt9iTBhf3dZM9dAlH/QJk0ZEf5NxJ9YQc5SV5kJXTQYot3I5HElEYkGsx6YuO7wK/ElLpI5/KVpstYpDTVgnhttX25j9SYiL4buX4sNV6q60SlIrbQyHH1y3zZKwl0mdA/W4qQpchG3vCGCTcvtYl7Is/FejTFn3fFUoGaA5Cr+emzf9WM4v/pgpeRSbuJ52F6S/2zpPbhGVUDI+QBVS/YeQGpKf9zFDIFAMm5gAqj4LfqxqeMo8YQhSLpXRl7c2RaqLLj4CDfRQ+nvKpsv4Hly2bdI7O+SMFNhRjtYSnsqKgP/1DlsixoETBMihPcmePbqyK4LPHw1hbrzE8sv1YAl8Dmc6nsoTGgOL+k9LLWjAQWYY=
+  ALKS_PASSWORD:
+    secure: dmDNOaXs4Lw+Xv6R4WaIWjle0BBYl0gnLC89QPvUBHcBSmvoDhOlJxFU7N9E9SYCvmu1ftOCT9IWLNXTwtw/Dza+pwUNjabBKcIFPBjK8lydJtJLce58+7lRK2IGgyUmRfFti3lC3Q0vbfPUIpm/vkUM3n0wU6To+DunZlusDi/0YJzvR+lVLeasWolPrmoSk1HGEVX1GPZ4zXnQJLNmPKWkn7f7JCTr4wjBR51VWtzLx4f+nriWHQXquYlvz8hx72mqcNNhJrvyxacSHRNOMHEQitOYdQiU4/ny1SUAkAGrCl6+jZm+Wt7jH1DMPXhFE5sH/rBFf0a1l57Y72s6B3UUwrEns7QMjXmzEEPSIvgTF9jDmDOOLyM6jVKVnJ3qnwAbGy+k+1FKxedLWJPSNdrfGfHYeSbYQfnHWa4qy0gij3jz1p0MeDUpWIkCThAoylTPFW7x3HNEvzpiTrY6hH7iv3CT4y5QomPi6cVqYlSGUxnuDhlobVFhg5VWxnaaIebodoctIwYfB4NY/jWG7Z9ZW4EuG8bOKlc9cbqqrgG/d4cCNqfAOUulODE0VFrTVPUkTGRD0RVSTAmAG5F5ihE1RmORFsUcT66cpP14KuQht9C6Kr0WtWoiOUuDPKeabTS7akwzElCB94qqnbheEKFPS6dnlfyMiOM0aLwecS4=
+  TF_ACC:
+    secure: J4KDIN2lh9aRhVMNYQF7Zg/ffG2eu4bzdWkZbBSSBqQ6EYOLU7Sa0i7XDgLKDCo+2Jgy/vn22+c8tMKkLNd9kkME3wV5iAkEszBKbbwDhSjhWrFfYCIGa0U0kYRIQrt0Zt+bzXiDFSfBxXSq6hSw1hJBc4MMdGjXCFAahsp4SGEeNlxJTcbwLFotTLX+5v5tUpF7+0fAgo7S95hyEPVMZTLDI+CGqCSdsODUn8rWO7C5AolQkED1yVSZMC185EEmq69FaxFFlT8x4s+NUwdP45cXkMxWy8RWFmW7vLfY0La9teynTxyxDJzc1ioYkXbXrfJYGJkjQeH6VMy7psmoC5GiE7GzNOIftEWZLRBiqCHm3Ig/Sf0I+wJ0bQ9HejhDc7V9/oVajgvnTKc8hAXYLY/idYD4n+z7xK8F3+I0xoxZIVB18ezxq242fYtORQGSniwwCEfg5C5KQlk3IkFTNJQJH9FUiVT14j9jEXt1PcT0fEsQV2WMil4t/2Yvv4VgMRTJHE3eQ/fOw2WQO4GIHrHhQVCQEQ9w6JT6N8sd/ZD4LuMxdPafIFhSPE/gLBKC1ay2oYfalAd68FOc8RFPEAxpnHNQ69OFtdDO6i1jL7sphcxttEmYoKJ6UnSJqv1roSH+ZKgV+0GMHh/u4ua1D7bseXqXgpTTclEXk2RRXUQ=

@@ -19,7 +19,7 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 			resource.TestStep{
 				Config: testAccCheckAlksIamRoleConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlksIamRoleExists("alks_iamrole.foo", &resp),
+					testAccCheckAlksIamRoleExists("bar42", &resp),
 					testAccCheckAlksIamRoleAttributes(&resp),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "name", "bar42"),
