@@ -54,7 +54,7 @@ type CreateRoleResponse struct {
 }
 
 type GetRoleRequest struct {
-	RoleName string `json:roleName`
+	RoleName string `json:"roleName"`
 }
 
 type GetRoleResponse struct {
@@ -233,6 +233,8 @@ func (c *AlksClient) GetIamRole(arn string) (*GetRoleResponse, error) {
 }
 
 func (c *AlksClient) GetIamRoleByName(roleName string) (*GetRoleResponse, error) {
+	roleName = "/" + roleName // role name needs to be prefixed with /
+
 	log.Printf("[INFO] Getting IAM role: %s", roleName)
 	getRole := GetRoleRequest{roleName}
 

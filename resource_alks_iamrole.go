@@ -9,7 +9,8 @@ import (
 func resourceAlksIamRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlksIamRoleCreate,
-		Read:   resourceAlksIamRoleRead, // WHY ISNT THIS BEING CALLED?!
+		Read:   resourceAlksIamRoleRead,
+		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
 
 		Schema: map[string]*schema.Schema{
@@ -58,7 +59,7 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.SetId(resp.RoleArn)
+	d.SetId(resp.RoleName)
 	d.Set("arn", resp.RoleArn)
 	d.Set("ip_arn", resp.RoleIPArn)
 	d.Set("role_added_to_ip", resp.RoleAddedToIP)
@@ -74,6 +75,24 @@ func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
+func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
+	log.Printf("[INFO] ALKS IAM Role Exists")
+
+	client := meta.(*AlksClient)
+
+	foundrole, err := client.GetIamRoleByName(d.Get("name").(string))
+
+	if err != nil {
+		return false, err
+	}
+
+	if foundrole == nil {
+		return false, nil
+	}
+
+	return true, nil
+}
+
 func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Read")
 
@@ -85,15 +104,11 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	if foundrole == nil {
-		d.SetId("")
-		return nil
-	}
-
 	return populateResourceDataFromRole(foundrole, d)
 }
 
 func populateResourceDataFromRole(role *GetRoleResponse, d *schema.ResourceData) error {
+	d.SetId(role.RoleName)
 	d.Set("arn", role.RoleArn)
 	d.Set("ip_arn", role.RoleIPArn)
 
