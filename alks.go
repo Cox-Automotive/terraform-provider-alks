@@ -65,6 +65,16 @@ type GetRoleResponse struct {
 	Errors    []string `json:"errors"`
 }
 
+type DeleteRoleRequest struct {
+	RoleName string `json:"roleName"`
+}
+
+type DeleteRoleResponse struct {
+	RoleName string   `json:"roleName"`
+	Status   string   `json:"roleArn"`
+	Errors   []string `json:"errors"`
+}
+
 func NewAlksClient(url string, username string, password string, account string, role string) (*AlksClient, error) {
 	alksClient := AlksClient{
 		Account: AlksAccount{
@@ -216,23 +226,46 @@ func (c *AlksClient) CreateIamRole(roleName string, roleType string, includeDefa
 	return cr, nil
 }
 
-func DeleteIamRole(d *schema.ResourceData, meta interface{}) error {
-	// client := meta.(*AlksClient)
-
+func (c *AlksClient) DeleteIamRole(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] Deleting IAM role: %s", d.Id())
 
-	// TODO: IMPLEMENT
+	rmRole := DeleteRoleRequest{d.Id()}
+
+	b, err := json.Marshal(struct {
+		DeleteRoleRequest
+		AlksAccount
+	}{rmRole, c.Account})
+
+	if err != nil {
+		return fmt.Errorf("Error encoding IAM delete role JSON: %s", err)
+	}
+
+	req, err := c.NewRequest(b, "POST", "/deleteRole/")
+	if err != nil {
+		return err
+	}
+
+	resp, err := checkResp(c.Http.Do(req))
+	if err != nil {
+		return err
+	}
+
+	del := new(DeleteRoleResponse)
+	err = decodeBody(resp, &del)
+
+	if err != nil {
+		return fmt.Errorf("Error parsing DeleteRole response: %s", err)
+	}
+
+	// TODO you get an error if you delete an already deleted role, need to revist for checking fail/success
+	if len(del.Errors) > 0 {
+		return fmt.Errorf("Error deleting role: %s", strings.Join(del.Errors[:], ", "))
+	}
 
 	return nil
 }
 
-func (c *AlksClient) GetIamRole(arn string) (*GetRoleResponse, error) {
-	log.Printf("[INFO] Getting IAM role: %s", arn)
-	//  TODO: IMPLEMENT
-	return nil, nil
-}
-
-func (c *AlksClient) GetIamRoleByName(roleName string) (*GetRoleResponse, error) {
+func (c *AlksClient) GetIamRole(roleName string) (*GetRoleResponse, error) {
 	log.Printf("[INFO] Getting IAM role: %s", roleName)
 	getRole := GetRoleRequest{roleName}
 

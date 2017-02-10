@@ -72,6 +72,13 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Delete")
 
+	client := meta.(*AlksClient)
+	err := client.DeleteIamRole(d, meta)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -80,7 +87,7 @@ func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool
 
 	client := meta.(*AlksClient)
 
-	foundrole, err := client.GetIamRoleByName(d.Get("name").(string))
+	foundrole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
 		return false, err
@@ -98,7 +105,7 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*AlksClient)
 
-	foundrole, err := client.GetIamRoleByName(d.Get("name").(string))
+	foundrole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
 		return err

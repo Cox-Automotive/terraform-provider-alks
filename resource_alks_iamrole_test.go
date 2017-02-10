@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"testing"
-
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
+	"log"
+	"testing"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
@@ -14,15 +14,15 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
 		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAlksIamRoleDestroy,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccCheckAlksIamRoleConfig_basic,
 				Check: resource.ComposeTestCheckFunc(
-					testAccCheckAlksIamRoleExists("bar42", &resp),
+					testAccCheckAlksIamRoleExists("bar420", &resp),
 					testAccCheckAlksIamRoleAttributes(&resp),
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar42"),
+						"alks_iamrole.foo", "name", "bar420"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -33,22 +33,23 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckAlksIamRoleDestroy(s *terraform.State) error {
-	client := testAccProvider.Meta().(*AlksClient)
+func testAccCheckAlksIamRoleDestroy(role *CreateRoleResponse) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(*AlksClient)
 
-	for _, rs := range s.RootModule().Resources {
-		if rs.Type != "alks_iamrole" {
-			continue
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "alks_iamrole" {
+				continue
+			}
+
+			respz, err := client.GetIamRole(rs.Primary.ID)
+			if respz != nil {
+				return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
+			}
 		}
 
-		resp, err := client.GetIamRole(rs.Primary.ID)
-
-		if err == nil {
-			return fmt.Errorf("Role still exists: %#v", resp)
-		}
+		return nil
 	}
-
-	return nil
 }
 
 func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.TestCheckFunc {
@@ -65,7 +66,7 @@ func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.
 
 		client := testAccProvider.Meta().(*AlksClient)
 
-		foundRole, err := client.GetIamRoleByName(rs.Primary.Attributes["name"])
+		foundRole, err := client.GetIamRole(rs.Primary.ID)
 
 		if err != nil {
 			return err
@@ -81,8 +82,8 @@ func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.
 
 func testAccCheckAlksIamRoleAttributes(role *CreateRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-
-		if role.RoleName != "bar42" {
+		log.Printf("[INFO] its this %v", role)
+		if role.RoleName != "bar420" {
 			return fmt.Errorf("Bad name: %s", role.RoleName)
 		}
 		if role.RoleType != "Amazon EC2" {
@@ -95,7 +96,7 @@ func testAccCheckAlksIamRoleAttributes(role *CreateRoleResponse) resource.TestCh
 
 const testAccCheckAlksIamRoleConfig_basic = `
 resource "alks_iamrole" "foo" {
-    name = "bar42"
+    name = "bar420"
     type = "Amazon EC2"
     include_default_policies = false
 }
