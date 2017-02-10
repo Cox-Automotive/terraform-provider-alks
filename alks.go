@@ -233,8 +233,6 @@ func (c *AlksClient) GetIamRole(arn string) (*GetRoleResponse, error) {
 }
 
 func (c *AlksClient) GetIamRoleByName(roleName string) (*GetRoleResponse, error) {
-	roleName = "/" + roleName // role name needs to be prefixed with /
-
 	log.Printf("[INFO] Getting IAM role: %s", roleName)
 	getRole := GetRoleRequest{roleName}
 
@@ -247,7 +245,7 @@ func (c *AlksClient) GetIamRoleByName(roleName string) (*GetRoleResponse, error)
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
 	}
 
-	req, err := c.NewRequest(b, "POST", "/checkAWSAccountRoleExists/")
+	req, err := c.NewRequest(b, "POST", "/getAccountRole/")
 	if err != nil {
 		return nil, err
 	}

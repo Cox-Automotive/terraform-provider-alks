@@ -3,3 +3,5 @@ terraform-provider-alks
 
 *.backup
 release
+
+test.env
