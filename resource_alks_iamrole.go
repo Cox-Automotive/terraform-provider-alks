@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 
+	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/schema"
 )
 
@@ -52,7 +53,7 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
 
-	client := meta.(*AlksClient)
+	client := meta.(*alks.Client)
 	resp, err := client.CreateIamRole(roleName, roleType, incDefPol)
 
 	if err != nil {
@@ -72,8 +73,8 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Delete")
 
-	client := meta.(*AlksClient)
-	err := client.DeleteIamRole(d, meta)
+	client := meta.(*alks.Client)
+	err := client.DeleteIamRole(d.Id())
 
 	if err != nil {
 		return err
@@ -85,7 +86,7 @@ func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
 	log.Printf("[INFO] ALKS IAM Role Exists")
 
-	client := meta.(*AlksClient)
+	client := meta.(*alks.Client)
 
 	foundrole, err := client.GetIamRole(d.Id())
 
@@ -103,7 +104,7 @@ func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool
 func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Read")
 
-	client := meta.(*AlksClient)
+	client := meta.(*alks.Client)
 
 	foundrole, err := client.GetIamRole(d.Id())
 
@@ -114,7 +115,7 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	return populateResourceDataFromRole(foundrole, d)
 }
 
-func populateResourceDataFromRole(role *GetRoleResponse, d *schema.ResourceData) error {
+func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.ResourceData) error {
 	d.SetId(role.RoleName)
 	d.Set("arn", role.RoleArn)
 	d.Set("ip_arn", role.RoleIPArn)

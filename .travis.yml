@@ -6,6 +6,7 @@ go:
 before_install:
 - go get github.com/hashicorp/terraform
 - go get github.com/hashicorp/go-cleanhttp
+- go get github.com/Cox-Automotive/alks-go
 install:
 - make install
 script:

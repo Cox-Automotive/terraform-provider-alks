@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/Cox-Automotive/alks-go"
 	"log"
 )
 
@@ -12,8 +13,8 @@ type Config struct {
 	Role     string
 }
 
-func (c *Config) Client() (*AlksClient, error) {
-	client, err := NewAlksClient(c.Url, c.Username, c.Password, c.Account, c.Role)
+func (c *Config) Client() (*alks.Client, error) {
+	client, err := alks.NewClient(c.Url, c.Username, c.Password, c.Account, c.Role)
 
 	if err != nil {
 		return nil, err
