@@ -35,5 +35,5 @@ release:
 	GOOS=linux   GOARCH=386   go build -o release/terraform-provider-alks-linux-386 $(package)
 	GOOS=linux   GOARCH=amd64 go build -o release/terraform-provider-alks-linux-amd64 $(package)
 	GOOS=solaris GOARCH=amd64 go build -o release/terraform-provider-alks-solaris-amd64 $(package)
-	GOOS=windows GOARCH=386   go build -o release/terraform-provider-alks-windows-386 $(package)
-	GOOS=windows GOARCH=amd64 go build -o release/terraform-provider-alks-windows-amd64 $(package)
+	GOOS=windows GOARCH=386   go build -o release/terraform-provider-alks-windows-386.exe $(package)
+	GOOS=windows GOARCH=amd64 go build -o release/terraform-provider-alks-windows-amd64.exe $(package)
