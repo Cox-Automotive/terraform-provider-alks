@@ -25,8 +25,8 @@ deploy:
   - release/terraform-provider-alks-linux-386
   - release/terraform-provider-alks-linux-amd64
   - release/terraform-provider-alks-solaris-amd64
-  - release/terraform-provider-alks-windows-386
-  - release/terraform-provider-alks-windows-amd64
+  - release/terraform-provider-alks-windows-386.exe
+  - release/terraform-provider-alks-windows-amd64.exe
   skip_cleanup: true
   on:
     repo: Cox-Automotive/terraform-provider-alks
