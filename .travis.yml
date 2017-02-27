@@ -2,16 +2,14 @@ language: go
 sudo: false
 go:
 - 1.7
-- tip
-
-before_install:
-- make get-deps
-
-install:
-- make install
 
 script:
-- make test
+  - go get -u github.com/kardianos/govendor
+  - govendor init
+  - govendor fetch github.com/hashicorp/terraform/...@v0.8.7
+  - govendor fetch github.com/hashicorp/go-cleanhttp/...
+  - govendor fetch github.com/Cox-Automotive/alks-go/...
+  - make test
 
 before_deploy:
 - make release

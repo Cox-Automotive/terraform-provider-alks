@@ -13,8 +13,6 @@ test:
 plan:
 	@terraform plan
 
-.PHONY: install release test
-
 install:
 	go get -t -v ./...
 
