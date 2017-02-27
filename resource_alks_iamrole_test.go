@@ -2,14 +2,17 @@ package main
 
 import (
 	"fmt"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
 	"log"
 	"testing"
+
+	"github.com/hashicorp/terraform/helper/resource"
+	"github.com/hashicorp/terraform/terraform"
+
+	"github.com/Cox-Automotive/alks-go"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
-	var resp CreateRoleResponse
+	var resp alks.IamRoleResponse
 
 	resource.Test(t, resource.TestCase{
 		PreCheck:     func() { testAccPreCheck(t) },
@@ -33,9 +36,9 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 	})
 }
 
-func testAccCheckAlksIamRoleDestroy(role *CreateRoleResponse) resource.TestCheckFunc {
+func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*AlksClient)
+		client := testAccProvider.Meta().(*alks.Client)
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "alks_iamrole" {
@@ -52,7 +55,7 @@ func testAccCheckAlksIamRoleDestroy(role *CreateRoleResponse) resource.TestCheck
 	}
 }
 
-func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.TestCheckFunc {
+func testAccCheckAlksIamRoleExists(n string, role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		rs, ok := s.RootModule().Resources[n]
 
@@ -64,7 +67,7 @@ func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.
 			return fmt.Errorf("No role ID is set")
 		}
 
-		client := testAccProvider.Meta().(*AlksClient)
+		client := testAccProvider.Meta().(*alks.Client)
 
 		foundRole, err := client.GetIamRole(rs.Primary.ID)
 
@@ -80,7 +83,7 @@ func testAccCheckAlksIamRoleExists(n string, role *CreateRoleResponse) resource.
 	}
 }
 
-func testAccCheckAlksIamRoleAttributes(role *CreateRoleResponse) resource.TestCheckFunc {
+func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		log.Printf("[INFO] its this %v", role)
 		if role.RoleName != "bar420" {
