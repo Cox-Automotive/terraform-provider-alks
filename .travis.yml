@@ -3,16 +3,19 @@ sudo: false
 go:
 - 1.7
 - tip
+
 before_install:
-- go get github.com/hashicorp/terraform
-- go get github.com/hashicorp/go-cleanhttp
-- go get github.com/Cox-Automotive/alks-go
+- make get-deps
+
 install:
 - make install
+
 script:
 - make test
+
 before_deploy:
 - make release
+
 deploy:
   provider: releases
   api_key:
@@ -32,10 +35,12 @@ deploy:
     repo: Cox-Automotive/terraform-provider-alks
     tags: true
     all_branches: false
+
 notifications:
   email: false
   slack:
     secure: FbWAAe1dJvSEC5dhIozsPG94it3WusO149EMdp+tq2pP4VqAek1l6yKtfzuns5NJhdQHyYj4ERMd74l5u98vgZWHHHjUMr7d/4eFlAY3OpfyGNjFInqzmsAkccV0z8wB4Os15kOUM4hNYRJPbOm/17xvGi+eWQVj8XxVsowSe7goSazibNyjd4RQCaM0E4u6GDJlAqgKqw4sP07AsXEiWSI/A1KhifoNOXhK7mFIFvEJrhvahlUuHoQ0NrtHSx1IKo+efxip3usmREEmnNERTTUKRhmo0T7drV0j/IWvb1UNkq9MRsNOOyAgAC7hv7D3GXBFTXylzxB68OnU+f79XDGdivaq3qRAu4WukIrB78ygKdeBD/DeFZtB7DoYtGjSKkArjbRCNTSq1Jux68+mxxNmZ5L5vGRO2P7mciuFRfzx3VT6XsAfEpmEj1J834nkOWZa10Bdxfd0AIN9Ay3w7d6i60yp6F+jzCN7IxQSj9xHu3VV+rtgYdh8ablsmN1zGU4EqvXZtz5qUpw66ZCT8Z9xQq5R2aXtzd9v/xtdopMT6madwBrDPyqnwMluWLHO+y7XXJLzP0dd+6eEozs4uldjUgLbI8w+YCaePe1HXQCxxyNAIvOK5OA8uO32VUgK2VgTilZYquQUP1F9ncdNOknwwVMt1SaeBrr7a+k0fbk=
+
 matrix:
   fast_finish: true
   allow_failures:

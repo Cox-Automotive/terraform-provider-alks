@@ -1,7 +1,7 @@
+vendor/
 terraform-provider-alks
 *.tfstate
-
+test.env
 *.backup
 release
-
-test.env
+glide.lock

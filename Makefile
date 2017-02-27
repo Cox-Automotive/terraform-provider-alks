@@ -1,19 +1,11 @@
-package = github.com/Cox-Automotive/terraform-provider-alks
-
-get-deps:
-	go install github.com/hashicorp/terraform
-	go get github.com/hashicorp/terraform
-	go install github.com/hashicorp/go-cleanhttp
-	go get github.com/hashicorp/go-cleanhttp
-	go install github.com/Cox-Automotive/alks-go
-	go get github.com/Cox-Automotive/alks-go
+GOFMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
 format:
-	go fmt
+	gofmt -w $(GOFMT_FILES)
 
 build:
 	go fmt
-	go build -v -o terraform-provider-alks .
+	go build -v -o terraform-provider-alks
 
 test:
 	go test -v .

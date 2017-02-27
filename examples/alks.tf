@@ -6,14 +6,14 @@ provider "aws" {
 }
 
 provider "alks" {
-    url      = ""
-    account  = ""
+    url      = "https://alks.foobar.baz/rest"
+    account  = "2352352352/ALKSAdmin - awslabs"
     role     = "Admin"
 }
 
 # CREATE IAM ROLE
 resource "alks_iamrole" "test_role" {
-    name                     = "My_Test_Role8"
+    name                     = "My_Test_Role4444"
     type                     = "Amazon EC2"
     include_default_policies = false
 }
@@ -39,8 +39,8 @@ EOF
 }
 
 # CREATE SECURITY GROUP TO TEST NON-IAM
-resource "aws_security_group" "btest" {
-    name   = "btest2"
+resource "aws_security_group" "btest42" {
+    name   = "btest3"
 
     egress {
         from_port   = 0

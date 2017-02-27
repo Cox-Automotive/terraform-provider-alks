@@ -1,0 +1,6 @@
+package: github.com/Cox-Automotive/terraform-provider-alks
+import:
+- package: github.com/hashicorp/terraform
+  version: 0.8.7
+- package: github.com/hashicorp/go-cleanhttp
+- package: github.com/Cox-Automotive/alks-go
