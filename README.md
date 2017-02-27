@@ -7,17 +7,26 @@ This module is used for creating IAM Roles via the ALKS API.
 
 ## Pre-Requisites
 
-* This is intended to be used by user's with the `Admin` role, if you have an `IAMAdmin` role you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. Upgrading to `Admin` will remedy this.
-* You'll need to make sure you've [installed Terraform](https://www.terraform.io/) version 0.7 or newer.
+* An ALKS Admin or IAMAdmin role is needed. PowerUser access is not sufficient to create IAM roles.
+    * This tool is best used by users with the `Admin` role
+    * If you have an `IAMAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
+* Works with [Terraform](https://www.terraform.io/) version 0.7 or newer.
 
 ## Installation
 
-1. Download the correct binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases) and place it somewhere on your filesystem.
-2. Configure Terraform to find the plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
+* Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
 
-### Example Provider Config
+`wget https://releases.hashicorp.com/terraform/0.8.6/terraform_0.8.6_darwin_amd64.zip && unzip terraform*.zip`
 
-If you didn't add terraform-provider-alks to your path, you'll need to put the full path to the location of the plugin.
+* Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases) 
+
+`wget https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.1/terraform-provider-alks-darwin-amd64`
+
+* Set execute permissions on ALKS provider
+
+`chmod u+x terraform-provider-alks-darwin-amd64`
+
+* Configure Terraform to find this plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
 
 ```
 providers {
@@ -25,11 +34,18 @@ providers {
 }
 ```
 
+Note: Provide full path to the location of the plugin, unless terraform-provider-alks in in your path
+
+
 ## Usage
 
-First you'll need to export a valid ALKS session to your environment variables. Be sure to insert your own account, this will be used for attaching policies as well as creating all AWS resources. The alks provider is only responsible for creating the initial role.
+1. Export a valid ALKS session to your environment variables. Use the correct account, as this will be used for attaching policies as well as creating all AWS resources. This alks provider is only responsible for creating the initial role.
 
 `eval $(alks sessions open -i -a "######/ALKSAdmin - sdgsgasf" -r "Admin")`
+
+2. Edit your terraform scripts to configure the alks provider and create necessary alks_iamrole resources
+
+3. Run `terraform plan`, `terraform apply` or other commands, as needed and roles can be generated via TF.
 
 ### Provider Configuration
 
