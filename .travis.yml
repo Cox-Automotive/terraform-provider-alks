@@ -9,9 +9,7 @@ script:
   - govendor fetch github.com/hashicorp/terraform/...
   - govendor fetch github.com/hashicorp/go-cleanhttp/...
   - govendor fetch github.com/Cox-Automotive/alks-go/...
-  - cd $GOPATH/src/github.com/hashicorp/terraform
-  - git checkout v0.8.7
-  - cd $GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks
+  - cd $GOPATH/src/github.com/hashicorp/terraform && git checkout v0.8.7 && cd $GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks
   - make test
 
 before_deploy:
