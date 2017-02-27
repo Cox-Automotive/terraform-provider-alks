@@ -6,7 +6,7 @@ format:
 
 build:
 	go fmt
-	go build -v -o terraform-provider-alks .
+	go build -v -o examples/terraform-provider-alks .
 
 test:
 	go test -v .
@@ -19,7 +19,10 @@ install:
 
 release:
 	mkdir -p release
-	GOOS=darwin  GOARCH=386   go build -o release/terraform-provider-alks-darwin-386 $(package)
+	GOOS=darwin  GOARCH=386   go build -o release/terraform-provider-alks $(package)
+	chmod +x releases/terraform-provider-alks
+	tar -cvzf release/terraform-provider-alks-darwin-386.tar.gz releases/terraform-provider-alks
+
 	GOOS=darwin  GOARCH=amd64 go build -o release/terraform-provider-alks-darwin-amd64 $(package)
 	GOOS=freebsd GOARCH=386   go build -o release/terraform-provider-alks-freebsd-386 $(package)
 	GOOS=freebsd GOARCH=amd64 go build -o release/terraform-provider-alks-freebsd-amd64 $(package)
