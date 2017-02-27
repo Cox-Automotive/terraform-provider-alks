@@ -23,7 +23,8 @@ wget https://releases.hashicorp.com/terraform/0.8.6/terraform_0.8.6_darwin_amd64
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases) 
 
 ```
-curl https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.2/terraform-provider-alks-darwin-amd64 | tar xvz
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.2/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+
 ```
 
 * Configure Terraform to find this plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
