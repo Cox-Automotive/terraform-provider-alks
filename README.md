@@ -20,7 +20,7 @@ This module is used for creating IAM Roles via the ALKS API.
 
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases) 
 
-`wget https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.1/terraform-provider-alks-darwin-amd64`
+`wget https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.1/terraform-provider-alks-darwin-amd64.tar.gz`
 
 * Set execute permissions on ALKS provider
 
@@ -104,27 +104,15 @@ This example is meant to show how you would combine a typical AWS Terraform scri
 
 ## Building from Source
 
-- Install Dependencies: `make get-deps`
-- Build: `make build`
-- TF Plan: `make plan`
-- Test: `make test`
+If you wish to work on the ALKS provider, you'll first need [Go](http://www.golang.org/) installed on your machine (version 1.8+ is required).
 
-### Common Build Issues
+For local dev first make sure Go is properly installed, including setting up a [GOPATH](http://golang.org/doc/code.html#GOPATH). You will also need to add `$GOPATH/bin` to your `$PATH`.
 
-The following build issue can occur if you have an older version of the terraform executable installed.
+Next, using Git, clone this repository into `$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks`. All the necessary dependencies are either vendored or automatically installed (using [Godep](https://github.com/tools/godep)), so you just need to type `make build test`. This will compile the code and then run the tests. If this exits with exit status 0, then everything is working! Check your `examples` directory for a sample Terraform script and the generated binary.
 
 ```
-Error configuring: 1 error(s) occurred:
-* Incompatible API version with plugin. Plugin version: 3, Ours: 2
+cd "$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks"
+make built test
 ```
 
-To build the provider plugin against a specific terraform version, checkout the version in the `$GOPATH/src/github.com/hashicorp/terraform` source directory and rebuild.
-
-```
-$ terraform --version
-Terraform v0.8.6
-
-$ ( cd $GOPATH/src/github.com/hashicorp/terraform && git checkout v0.8.6 )
-```
-
-To revert back to building againt the latest source change the git checkout statement to `git checkout master`.
+If you add any additional depedencies to the project you'll need to run `godep save` to update `Godeps.json` and `/vendor`.

@@ -40,9 +40,9 @@ release:
 	chmod +x release/terraform-provider-alks
 	tar -cvzf release/terraform-provider-alks-linux-386.tar.gz -C release/ terraform-provider-alks
 
-	GOOS=amd64 GOARCH=386 go build -o release/terraform-provider-alks $(package)
+	GOOS=linux GOARCH=amd64 go build -o release/terraform-provider-alks $(package)
 	chmod +x release/terraform-provider-alks
-	tar -cvzf release/terraform-provider-alks-amd64-386.tar.gz -C release/ terraform-provider-alks
+	tar -cvzf release/terraform-provider-alks-linux-amd64.tar.gz -C release/ terraform-provider-alks
 
 	GOOS=solaris GOARCH=amd64 go build -o release/terraform-provider-alks $(package)
 	chmod +x release/terraform-provider-alks
