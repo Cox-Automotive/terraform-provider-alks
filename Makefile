@@ -1,3 +1,4 @@
+package=github.com/Cox-Automotive/terraform-provider-alks
 GOFMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
 format:
@@ -5,7 +6,7 @@ format:
 
 build:
 	go fmt
-	go build -v -o terraform-provider-alks
+	go build -v -o terraform-provider-alks .
 
 test:
 	go test -v .
