@@ -66,7 +66,9 @@ Provider Options:
 * `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
 * `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - **Should be provided via env vars and not stored in your TF files.**
 
-All of these options should match what you configured with the ALKS CLI. You should verify the account/role combination you're providing is valid by running: `alks sessions open -i -a "<acct>" -r "<role>"`. You can see these values when you run `alks sessions open -i`. The account string is to the left of `::` and the role is to the right.
+All of these options should match what you configured with the ALKS CLI. You should verify the account/role combination you're providing is valid by running: `alks sessions open -i -a "<acct>" -r "<role>"`.
+
+You can see all available accounts and roles by running: `alks developer accounts`.
 
 ### Resource Configuration
 
