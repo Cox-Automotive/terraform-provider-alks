@@ -62,11 +62,11 @@ provider "alks" {
 Provider Options:
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
-* `role` - (Required) The ALKS role to use. This should be `Admin` or `IAMAdmin` Also read from `ENV.ALKS_ROLE`
+* `role` - (Required) The ALKS role to use. This should be `Admin` or `IAMAdmin` Also read from `ENV.ALKS_ROLE`. 
 * `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
 * `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - **Should be provided via env vars and not stored in your TF files.**
 
-All of these options should match what you configured with the ALKS CLI.
+All of these options should match what you configured with the ALKS CLI. You should verify the account/role combination you're providing is valid by running: `alks sessions open -i -a "<acct>" -r "<role>"`. You can see these values when you run `alks sessions open -i`. The account string is to the left of `::` and the role is to the right.
 
 ### Resource Configuration
 
