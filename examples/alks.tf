@@ -1,19 +1,29 @@
 #
 # PROVIDERS
 #
-provider "aws" {
-    region = "us-east-1"
+provider "alks" {
+    url      = "https://alks.coxautoinc.com/rest"
+    account  = "120678615247/ALKSAdmin - awsaepnp"
+    role     = "Admin"
 }
 
-provider "alks" {
-    url      = "https://alks.foobar.baz/rest"
-    account  = "2352352352/ALKSAdmin - awslabs"
-    role     = "Admin"
+# SETUP ALKS SESSION FOR AWS PROVIDER
+resource "alks_session" "session" {
+  name = "my_session"
+  use_iam = false
+}
+
+
+provider "aws" {
+    region     = "us-east-1"
+    access_key = "${alks_session.session.access_key}"
+    secret_key = "${alks_session.session.secret_key}"
+    token      = "${alks_session.session.session_token}"
 }
 
 # CREATE IAM ROLE
 resource "alks_iamrole" "test_role" {
-    name                     = "My_Test_Role4444"
+    name                     = "My_Test_Role44444"
     type                     = "Amazon EC2"
     include_default_policies = false
 }
@@ -40,7 +50,7 @@ EOF
 
 # CREATE SECURITY GROUP TO TEST NON-IAM
 resource "aws_security_group" "btest42" {
-    name   = "btest3"
+    name   = "btest34"
 
     egress {
         from_port   = 0
