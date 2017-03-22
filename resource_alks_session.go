@@ -11,19 +11,13 @@ func resourceAlksSession() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlksSessionCreate,
 		Read:   resourceAlksSessionRead,
-		Exists: nil,
+		Update: resourceAlksSessionUpdate,
 		Delete: resourceAlksSessionDelete,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
 			"use_iam": &schema.Schema{
 				Type:     schema.TypeBool,
 				Required: true,
-				ForceNew: true,
 			},
 			"access_key": &schema.Schema{
 				Type:     schema.TypeString,
@@ -41,8 +35,13 @@ func resourceAlksSession() *schema.Resource {
 	}
 }
 
+// No-op: ALKS Session is currently read-only
 func resourceAlksSessionCreate(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[INFO] ALKS Session Create")
+	return resourceAlksSessionRead(d, meta)
+}
+
+func resourceAlksSessionRead(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[INFO] ALKS Session Read")
 
 	var useIam = d.Get("use_iam").(bool)
 	var name = d.Get("name").(string)
@@ -68,14 +67,13 @@ func resourceAlksSessionCreate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAlksSessionRead(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[INFO] ALKS Session Read")
-
-	return nil
+// No-op: ALKS Session is currently read-only
+func resourceAlksSessionUpdate(d *schema.ResourceData, meta interface{}) error {
+	return resourceAlksSessionRead(d, meta)
 }
 
+// No-op: ALKS Session is currently read-only
 func resourceAlksSessionDelete(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[INFO] ALKS Session Delete")
-
+	d.SetId("")
 	return nil
 }
