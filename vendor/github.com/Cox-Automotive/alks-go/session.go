@@ -76,7 +76,7 @@ func (c *Client) GetAccounts() (*AccountsResponse, error) {
 // CreateSession will create a new STS session on AWS. If no error is
 // returned then you will receive a SessionResponse object representing
 // your STS session.
-func (c *Client) CreateSession(sessionDuration int) (*SessionResponse, error) {
+func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionResponse, error) {
 	log.Printf("[INFO] Creating %v hr session", sessionDuration)
 
 	var found bool = false
@@ -101,7 +101,11 @@ func (c *Client) CreateSession(sessionDuration int) (*SessionResponse, error) {
 		return nil, fmt.Errorf("Error encoding session create JSON: %s", err)
 	}
 
-	req, err := c.NewRequest(b, "POST", "/getKeys/")
+	var endpoint string = "/getKeys/"
+	if useIAM {
+		endpoint = "/getIAMKeys/"
+	}
+	req, err := c.NewRequest(b, "POST", endpoint)
 	if err != nil {
 		return nil, err
 	}

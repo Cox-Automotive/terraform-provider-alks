@@ -109,5 +109,5 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 
 // Durations will provide the valid session durations
 func (c *Client) Durations() []int {
-	return []int{2, 6, 12, 18}
+	return []int{1, 2, 6, 12, 18}
 }
