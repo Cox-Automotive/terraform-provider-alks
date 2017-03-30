@@ -10,20 +10,20 @@ This module is used for creating IAM Roles via the ALKS API.
 * An ALKS Admin or IAMAdmin role is needed. PowerUser access is not sufficient to create IAM roles.
     * This tool is best used by users with the `Admin` role
     * If you have an `IAMAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
-* Works with [Terraform](https://www.terraform.io/) version 0.7 or newer.
+* Works with [Terraform](https://www.terraform.io/) version 0.8 or newer.
 
 ## Installation
 
 * Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
 
 ```
-wget https://releases.hashicorp.com/terraform/0.8.6/terraform_0.8.6_darwin_amd64.zip && unzip terraform*.zip
+wget https://releases.hashicorp.com/terraform/0.9.0/terraform_0.9.0_darwin_amd64.zip && unzip terraform*.zip
 ```
 
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.2/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.9.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
 * Configure Terraform to find this plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
