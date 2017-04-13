@@ -1,13 +1,14 @@
 package main
 
 import (
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/keybase/go-keychain"
 	"log"
 	"runtime"
+
+	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/keybase/go-keychain"
 )
 
-func passwordRetrievalFunc(env_var string, dv interface{}) schema.SchemaDefaultFunc {
+func passwordRetrievalFunc(envVar string, dv interface{}) schema.SchemaDefaultFunc {
 	return func() (interface{}, error) {
 		if runtime.GOOS == "darwin" {
 			log.Println("[INFO] On macOS so trying the keychain")
@@ -26,6 +27,6 @@ func passwordRetrievalFunc(env_var string, dv interface{}) schema.SchemaDefaultF
 			}
 		}
 
-		return schema.EnvDefaultFunc(env_var, dv)()
+		return schema.EnvDefaultFunc(envVar, dv)()
 	}
 }
