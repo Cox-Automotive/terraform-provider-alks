@@ -27,7 +27,7 @@ func Provider() terraform.ResourceProvider {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "Password used to login to ALKS",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_PASSWORD", nil),
+				DefaultFunc: passwordRetrievalFunc("ALKS_PASSWORD", nil),
 			},
 			"account": &schema.Schema{
 				Type:        schema.TypeString,
