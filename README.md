@@ -9,7 +9,7 @@ This module is used for creating IAM Roles via the ALKS API.
 
 * An ALKS Admin or IAMAdmin role is needed. PowerUser access is not sufficient to create IAM roles.
     * This tool is best used by users with the `Admin` role
-    * If you have an `IAMAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
+    * If you have an `IAMAdmin/LabAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
 * Works with [Terraform](https://www.terraform.io/) version 0.8 or newer.
 
 ## Installation
@@ -62,7 +62,7 @@ provider "alks" {
 Provider Options:
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
-* `role` - (Required) The ALKS role to use. This should be `Admin` or `IAMAdmin` Also read from `ENV.ALKS_ROLE`. 
+* `role` - (Required) The ALKS role to use. This should be one of `Admin`/`IAMAdmin`/`LabAdmin`.  Also read from `ENV.ALKS_ROLE`. 
 * `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
 * `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - **Should be provided via env vars and not stored in your TF files.**
 
