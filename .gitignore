@@ -8,5 +8,3 @@ glide.lock
 # IntelliJ
 .idea/
 *.iml
-
-vendor
