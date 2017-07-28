@@ -15,7 +15,7 @@ plan:
 	@terraform plan
 
 install:
-	go get -t -v ./...
+	dep ensure
 
 release:
 	mkdir -p release
