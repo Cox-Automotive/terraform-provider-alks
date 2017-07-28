@@ -64,11 +64,16 @@ Provider Options:
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
 * `role` - (Required) The ALKS role to use. This should be one of `Admin`/`IAMAdmin`/`LabAdmin`.  Also read from `ENV.ALKS_ROLE`. 
 * `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
-* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - **Should be provided via env vars and not stored in your TF files.**
+* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` or the macOS keychain when available - **Should be provided via env vars and not stored in your TF files.**
 
 All of these options should match what you configured with the ALKS CLI. You should verify the account/role combination you're providing is valid by running: `alks sessions open -i -a "<acct>" -r "<role>"`.
 
 You can see all available accounts and roles by running: `alks developer accounts`.
+
+##### macOS Keychain Support
+
+The password field supports pulling from the keychain when run on a macOS system that has had the ALKS CLI configured on
+it. Meaning you have run `alks developer configure` at some point on your macOS system.
 
 ### Resource Configuration
 
