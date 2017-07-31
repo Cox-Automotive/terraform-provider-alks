@@ -2,23 +2,13 @@
 # PROVIDERS
 #
 provider "alks" {
-    url      = "https://alks.coxautoinc.com/rest"
-    account  = "120678615247/ALKSAdmin - awsaepnp"
+    url      = "https://alks.foobarbaz.com/rest"
+    account  = "1234567/ALKSAdmin - awsaefoo"
     role     = "Admin"
 }
 
-# SETUP ALKS SESSION FOR AWS PROVIDER
-resource "alks_session" "session" {
-  name = "my_session"
-  use_iam = false
-}
-
-
 provider "aws" {
     region     = "us-east-1"
-    access_key = "${alks_session.session.access_key}"
-    secret_key = "${alks_session.session.secret_key}"
-    token      = "${alks_session.session.session_token}"
 }
 
 # CREATE IAM ROLE

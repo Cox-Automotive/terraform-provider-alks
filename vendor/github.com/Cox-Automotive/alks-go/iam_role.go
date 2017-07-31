@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"regexp"
 	"strings"
 )
 
@@ -174,7 +175,20 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 	}
 
 	if !cr.Exists {
-		return nil, nil
+		return nil, fmt.Errorf("Role does not exist.")
+	}
+
+	// This is here because ALKS returns a string representation of a Java array
+	// with the only entry being the instance profile ARN (ie: "[\"ARN\"]")
+	// A simple regex fixes the formatting issue and using existing instance
+	// profiles works again. Every IAM role doesn't return an instance profile,
+	// so we have to make sure the string isn't empty.
+	if len(cr.RoleIPArn) > 0 {
+		re := regexp.MustCompile("^\\[\\\"(.+)\\\"\\]$")
+		matches := re.FindStringSubmatch(cr.RoleIPArn)
+		if len(matches) > 1 {
+			cr.RoleIPArn = matches[1]
+		}
 	}
 
 	return cr, nil

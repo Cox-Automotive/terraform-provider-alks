@@ -30,7 +30,8 @@ type AccountRole struct {
 
 // AccountsResponseInt is used internally to represent a collection of ALKS accounts
 type AccountsResponseInt struct {
-	Accounts map[string][]AccountRole `json:"accountListRole"`
+	Accounts      map[string][]AccountRole `json:"accountListRole"`
+	StatusMessage string                   `json:"statusMessage"`
 }
 
 // AccountsResponse is used to represent a collection of ALKS accounts
@@ -62,6 +63,10 @@ func (c *Client) GetAccounts() (*AccountsResponse, error) {
 
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing session create response: %s", err)
+	}
+
+	if _accts.StatusMessage != "Success" {
+		return nil, fmt.Errorf(_accts.StatusMessage)
 	}
 
 	accts := new(AccountsResponse)
@@ -110,8 +115,8 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 		return nil, err
 	}
 
-	resp, err := checkResp(c.Http.Do(req))
-	if err != nil {
+	resp, httpErr := checkResp(c.Http.Do(req))
+	if httpErr != nil {
 		return nil, err
 	}
 
@@ -120,6 +125,11 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 
 	if err != nil {
 		return nil, fmt.Errorf("Error parsing session create response: %s", err)
+	}
+
+	// Most API responses that are 401 include a JSON body with error messages. getKeys & getIAMKeys do not
+	if len(sr.AccessKey) == 0 {
+		return nil, fmt.Errorf("Please validate username/password and account/role.")
 	}
 
 	sr.Expires = time.Now().Local().Add(time.Hour * time.Duration(sessionDuration))

@@ -28,7 +28,7 @@ log.Printf("Session: %v ~~ %v ~~ %v", resp.AccessKey, resp.SecretKey, resp.Sessi
 
 Some API methods don't require an account and role to be provided.
 ```go
-client, err := alks.NewClient("http://my.alks.url/rest", "username", "password", nil, nil)
+client, err := alks.NewClient("http://my.alks.url/rest", "username", "password", "", "")
 
 // list all available account/roles
 resp, err := client.GetAccounts()

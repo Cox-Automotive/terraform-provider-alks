@@ -34,8 +34,8 @@ func NewClient(url string, username string, password string, account string, rol
 		Account: AlksAccount{
 			Username: username,
 			Password: password,
-			Account:  account,
-			Role:     role,
+			Account: account,
+			Role: role,
 		},
 		BaseURL: url,
 		Http:    cleanhttp.DefaultClient(),
@@ -96,14 +96,14 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 		return resp, nil
 	case i == 400:
 		return nil, fmt.Errorf("API Error 400: %s", resp.Status)
-	case i == 401:
-		return nil, fmt.Errorf("API Error 401: %s", resp.Status)
+	case i == 401: // access denied will still return json
+		return resp, nil
 	case i == 402:
 		return nil, fmt.Errorf("API Error 402: %s", resp.Status)
 	case i == 422:
 		return nil, fmt.Errorf("API Error 422: %s", resp.Status)
 	default:
-		return nil, fmt.Errorf("API Error: %s", resp.Status)
+		return nil, fmt.Errorf("API Error: Please validate your username/password and account/role.")
 	}
 }
 
