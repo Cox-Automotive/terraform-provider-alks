@@ -20,10 +20,6 @@ install:
 release:
 	mkdir -p release
 
-	GOOS=darwin GOARCH=386 go build -o release/terraform-provider-alks $(package)
-	chmod +x release/terraform-provider-alks
-	tar -cvzf release/terraform-provider-alks-darwin-386.tar.gz -C release/ terraform-provider-alks
-
 	GOOS=darwin GOARCH=amd64 go build -o release/terraform-provider-alks $(package)
 	chmod +x release/terraform-provider-alks
 	tar -cvzf release/terraform-provider-alks-darwin-amd64.tar.gz -C release/ terraform-provider-alks
