@@ -45,4 +45,5 @@ release:
 	tar -cvzf release/terraform-provider-alks-solaris-amd64.tar.gz -C release/ terraform-provider-alks
 
 	GOOS=windows GOARCH=386   go build -o release/terraform-provider-alks-windows-386.exe $(package)
+
 	GOOS=windows GOARCH=amd64 go build -o release/terraform-provider-alks-windows-amd64.exe $(package)
