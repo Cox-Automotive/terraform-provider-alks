@@ -21,14 +21,14 @@ access different parts of the ALKS API. For example:
 client, err := alks.NewClient("http://my.alks.url/rest", "username", "password", "my-acct", "my-role")
 
 // create new STS
-resp, err := client.CreateSession(2)
+resp, err := client.CreateSession(2, false)
 
 log.Printf("Session: %v ~~ %v ~~ %v", resp.AccessKey, resp.SecretKey, resp.SessionToken)
 ```
 
 Some API methods don't require an account and role to be provided.
 ```go
-client, err := alks.NewClient("http://my.alks.url/rest", "username", "password", nil, nil)
+client, err := alks.NewClient("http://my.alks.url/rest", "username", "password", "", "")
 
 // list all available account/roles
 resp, err := client.GetAccounts()

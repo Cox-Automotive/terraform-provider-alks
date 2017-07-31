@@ -1,19 +1,19 @@
 #
 # PROVIDERS
 #
-provider "aws" {
-    region = "us-east-1"
+provider "alks" {
+    url      = "https://alks.foobarbaz.com/rest"
+    account  = "1234567/ALKSAdmin - awsaefoo"
+    role     = "Admin"
 }
 
-provider "alks" {
-    url      = "https://alks.foobar.baz/rest"
-    account  = "2352352352/ALKSAdmin - awslabs"
-    role     = "Admin"
+provider "aws" {
+    region     = "us-east-1"
 }
 
 # CREATE IAM ROLE
 resource "alks_iamrole" "test_role" {
-    name                     = "My_Test_Role4444"
+    name                     = "My_Test_Role44444"
     type                     = "Amazon EC2"
     include_default_policies = false
 }
@@ -47,7 +47,7 @@ resource "aws_iam_role_policy_attachment" "sr-attach" {
 
 # CREATE SECURITY GROUP TO TEST NON-IAM
 resource "aws_security_group" "btest42" {
-    name   = "btest3"
+    name   = "btest34"
 
     egress {
         from_port   = 0
