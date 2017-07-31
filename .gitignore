@@ -4,3 +4,7 @@ test.env
 *.backup
 release
 glide.lock
+
+# IntelliJ
+.idea/
+*.iml

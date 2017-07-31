@@ -48,6 +48,13 @@ resource "aws_iam_role_policy" "test_policy" {
 EOF
 }
 
+# ATTACH MANAGED POLICY
+resource "aws_iam_role_policy_attachment" "sr-attach" {
+    role       = "${alks_iamrole.test_role.name}"
+    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
+}
+
+
 # CREATE SECURITY GROUP TO TEST NON-IAM
 resource "aws_security_group" "btest42" {
     name   = "btest34"

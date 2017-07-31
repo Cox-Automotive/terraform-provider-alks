@@ -9,21 +9,21 @@ This module is used for creating IAM Roles via the ALKS API.
 
 * An ALKS Admin or IAMAdmin role is needed. PowerUser access is not sufficient to create IAM roles.
     * This tool is best used by users with the `Admin` role
-    * If you have an `IAMAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
-* Works with [Terraform](https://www.terraform.io/) version 0.7 or newer.
+    * If you have an `IAMAdmin/LabAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
+* Works with [Terraform](https://www.terraform.io/) version 0.8 or newer.
 
 ## Installation
 
 * Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
 
 ```
-wget https://releases.hashicorp.com/terraform/0.8.6/terraform_0.8.6_darwin_amd64.zip && unzip terraform*.zip
+wget https://releases.hashicorp.com/terraform/0.9.0/terraform_0.9.0_darwin_amd64.zip && unzip terraform*.zip
 ```
 
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.0.2/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.9.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
 * Configure Terraform to find this plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
@@ -62,11 +62,18 @@ provider "alks" {
 Provider Options:
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
-* `role` - (Required) The ALKS role to use. This should be `Admin` or `IAMAdmin` Also read from `ENV.ALKS_ROLE`
+* `role` - (Required) The ALKS role to use. This should be one of `Admin`/`IAMAdmin`/`LabAdmin`.  Also read from `ENV.ALKS_ROLE`. 
 * `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
-* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` - **Should be provided via env vars and not stored in your TF files.**
+* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` or the macOS keychain when available - **Should be provided via env vars and not stored in your TF files.**
 
-All of these options should match what you configured with the ALKS CLI.
+All of these options should match what you configured with the ALKS CLI. You should verify the account/role combination you're providing is valid by running: `alks sessions open -i -a "<acct>" -r "<role>"`.
+
+You can see all available accounts and roles by running: `alks developer accounts`.
+
+##### macOS Keychain Support
+
+The password field supports pulling from the keychain when run on a macOS system that has had the ALKS CLI configured on
+it. Meaning you have run `alks developer configure` at some point on your macOS system.
 
 ### Resource Configuration
 
