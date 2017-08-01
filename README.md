@@ -98,7 +98,7 @@ Value                             | Type     | Forces New | Value Type | Descrip
 
 ## Example
 
-Check out [alks.tf](example/alks.tf) for an very basic Terraform script which:
+Check out [alks.tf](blob/master/examples/alks.tf) for an very basic Terraform script which:
 
 1. Creates an AWS provider and ALKS provider
 2. Creates an IAM Role via the ALKS provider
