@@ -22,7 +22,7 @@ type IamSessionResponse struct {
 // then you will received a IamSessionResponse object containing your session
 // keys.
 func (c *Client) CreateIamSession() (*IamSessionResponse, error) {
-	log.Printf("[INFO] Creating IAM session")
+	log.Println("[INFO] Creating IAM session")
 
 	iam := IamSessionRequest{1}
 	b, err := json.Marshal(struct {

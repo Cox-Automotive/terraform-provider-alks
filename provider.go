@@ -14,32 +14,32 @@ func Provider() terraform.ResourceProvider {
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Base URL to ALKS service",
+				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
 			},
-			"username": &schema.Schema{
+			"access_key": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Username used to login to ALKS",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_USERNAME", nil),
+				Description: "This is the AWS access key. It must be provided, but it can also be sourced from the ALKS_ACCESS_KEY_ID environment variable.",
+				DefaultFunc: schema.EnvDefaultFunc("ALKS_ACCESS_KEY_ID", nil),
 			},
-			"password": &schema.Schema{
+			"secret_key": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Password used to login to ALKS",
-				DefaultFunc: passwordRetrievalFunc("ALKS_PASSWORD", nil),
+				Description: "This is the AWS secret key. It must be provided, but it can also be sourced from the ALKS_SECRET_ACCESS_KEY environment variable",
+				DefaultFunc: schema.EnvDefaultFunc("ALKS_SECRET_ACCESS_KEY", nil),
+			},
+			"token": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "This is the AWS session token. It must be provided, but it can also be sourced from the ALKS_SESSION_TOKEN environment variable",
+				DefaultFunc: schema.EnvDefaultFunc("ALKS_SESSION_TOKEN", nil),
 			},
 			"account": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "ALKS Account to use",
+				Description: "This is the ALKS Account to use. It must be provided, but it can also be sourced from the ALKS_ACCOUNT environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_ACCOUNT", nil),
-			},
-			"role": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ALKS role to use",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_ROLE", nil),
 			},
 		},
 
@@ -54,11 +54,11 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		Url:      d.Get("url").(string),
-		Username: d.Get("username").(string),
-		Password: d.Get("password").(string),
-		Account:  d.Get("account").(string),
-		Role:     d.Get("role").(string),
+		Url:       d.Get("url").(string),
+		AccessKey: d.Get("access_key").(string),
+		SecretKey: d.Get("secret_key").(string),
+		Token:     d.Get("token").(string),
+		Account:   d.Get("account").(string),
 	}
 
 	log.Println("[INFO] Initializing ALKS client")

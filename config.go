@@ -3,53 +3,50 @@ package main
 import (
 	"fmt"
 	"github.com/Cox-Automotive/alks-go"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"log"
 )
 
 type Config struct {
-	Url      string
-	Username string
-	Password string
-	Account  string
-	Role     string
+	Url       string
+	AccessKey string
+	SecretKey string
+	Token     string
+	Account   string
 }
 
 func (c *Config) Client() (*alks.Client, error) {
+	log.Println("[DEBUG] Validting STS credentials")
 
-	testClient, testErr := alks.NewClient(c.Url, c.Username, c.Password, "", "")
-
-	if testErr != nil {
-		return nil, testErr
-	}
-
-	// retreive list of accounts the user has access to
-	resp, err := testClient.GetAccounts()
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-1"),
+		Credentials: credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token),
+	})
 
 	if err != nil {
-		// this error check will catch invalid user credentials
-		return nil, err
-	} else {
-		// this check will catch incorrect accounts/role
-		var validAccountRole = false
-		for _, acct := range resp.Accounts {
-			if acct.Account == c.Account && acct.Role == c.Role {
-				validAccountRole = true
-			}
-		}
-
-		if !validAccountRole {
-			return nil, fmt.Errorf("The specified account (%v) and role (%v) are not available in your ALKS account. Please verify your permissions and try again.", c.Account, c.Role)
-		}
+		return nil, fmt.Errorf("Error creating session from STS. (%v)", err)
 	}
 
-	// now we know we have a valid user credentials and account/role so create the client
-	client, err := alks.NewClient(c.Url, c.Username, c.Password, c.Account, c.Role)
+	stsconn := sts.New(sess)
+	_, err = stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 
 	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] ALKS Client configured")
+	// TODO: validate account matches?
+
+	// now we know we have a valid STS
+	client, err := alks.NewSTSClient(c.Url, c.AccessKey, c.SecretKey, c.Token, c.Account)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println("[INFO] ALKS Client configured")
 
 	return client, nil
 }
