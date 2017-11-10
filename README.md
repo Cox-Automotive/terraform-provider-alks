@@ -39,11 +39,11 @@ Note: Provide full path to the location of the plugin, unless terraform-provider
 
 ## Usage
 
-1. Export a valid ALKS session to your environment variables. Use the correct account, as this will be used for attaching policies as well as creating all AWS resources. This alks provider is only responsible for creating the initial role. `eval $(alks sessions open -i -a "######/ALKSAdmin - sdgsgasf" -r "Admin")`
+1. Export a valid ALKS IAM session to your environment variables - be sure to use either `Admin` or `IAMAdmin` role. This alks provider is only responsible for creating the initial role. `eval $(alks sessions open -i -a "######/ALKSAdmin - sdgsgasf" -r "Admin")`. If you create a session using `Admin` the STS credentials can be shared between the AWS and ALKS providers. If you use an `IAMAdmin` role then you will need to create a `PowerUser` session for the ALKS provider as `IAMAdmin` is limited to IAM-only resources.
 
-2. Edit your terraform scripts to configure the alks provider and create necessary alks_iamrole resources
+2. Edit your terraform scripts to configure the alks provider and create necessary ALKS resources.
 
-3. Run `terraform plan`, `terraform apply` or other commands, as needed and roles can be generated via TF.
+3. Run `terraform plan`, `terraform apply` or other commands, as needed and roles can be generated via Terraform.
 
 ### Provider Configuration
 
@@ -51,11 +51,11 @@ Note: Provide full path to the location of the plugin, unless terraform-provider
 
 ```
 provider "alks" {
-    url      = "<ALKS_URL>"
-    account  = "<ALKS_ACCOUNT>"
+    url        = "<ALKS_URL>"
+    account    = "<ALKS_ACCOUNT>"
     access_key = "<ALKS_ACCESS_KEY_ID>"
     secret_key = "<ALKS_SECRET_ACCESS_KEY>"
-    token = "<ALKS_SESSION_TOKEN>""
+    token      = "<ALKS_SESSION_TOKEN>""
 }
 ```
 
