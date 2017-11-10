@@ -8,6 +8,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"log"
+	"strings"
 )
 
 type Config struct {
@@ -16,6 +17,15 @@ type Config struct {
 	SecretKey string
 	Token     string
 	Account   string
+}
+
+func parseAccountInfoFromArn(arn string) (string, string, error) {
+	parts := strings.Split(arn, ":")
+	if len(parts) < 5 {
+		return "", "", fmt.Errorf("Unable to parse ID from invalid ARN: %v", arn)
+	}
+
+	return parts[1], parts[4], nil
 }
 
 func (c *Config) Client() (*alks.Client, error) {
@@ -31,13 +41,21 @@ func (c *Config) Client() (*alks.Client, error) {
 	}
 
 	stsconn := sts.New(sess)
-	_, err = stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	outCallerIdentity, err := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 
 	if err != nil {
 		return nil, err
 	}
 
-	// TODO: validate account matches?
+	_, accountId, err := parseAccountInfoFromArn(*outCallerIdentity.Arn)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if !strings.HasPrefix(c.Account, accountId) {
+		return nil, fmt.Errorf("The provided STS token is not valid for the provided account (%v). It's for %v.", c.Account, accountId)
+	}
 
 	// now we know we have a valid STS
 	client, err := alks.NewSTSClient(c.Url, c.AccessKey, c.SecretKey, c.Token, c.Account)

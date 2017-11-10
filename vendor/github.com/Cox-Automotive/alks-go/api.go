@@ -56,7 +56,6 @@ func NewClient(url string, username string, password string, account string, rol
 }
 
 // NewSTSClient will create a new instance of the ALKS Client using STS tokens.
-// pass them as nil and then invoke GetAccounts().
 func NewSTSClient(url string, accessKey string, secretKey string, token string, account string) (*Client, error) {
 	client := Client{
 		Account: AlksAccount{},
@@ -65,7 +64,7 @@ func NewSTSClient(url string, accessKey string, secretKey string, token string, 
 			SecretKey: secretKey,
 			Token:     token,
 			Account:   account,
-			Role:      "Admin",
+			Role:      "Admin", // TEMPORARY: FIXME: TODO: Should be removed once the API req goes away
 		},
 		BaseURL: url,
 		Http:    cleanhttp.DefaultClient(),
