@@ -318,10 +318,6 @@
 			"Rev": "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d"
 		},
 		{
-			"ImportPath": "github.com/keybase/go-keychain",
-			"Rev": "76e0eac7b951b38a9998ec144891eb431dd85a71"
-		},
-		{
 			"ImportPath": "github.com/mitchellh/copystructure",
 			"Rev": "f81071c9d77b7931f78c90b416a074ecdc50e959"
 		},

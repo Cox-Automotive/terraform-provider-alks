@@ -12,11 +12,13 @@ import (
 )
 
 type Config struct {
-	Url       string
-	AccessKey string
-	SecretKey string
-	Token     string
-	Account   string
+	Url           string
+	AccessKey     string
+	SecretKey     string
+	Token         string
+	CredsFilename string
+	Profile       string
+	Account       string
 }
 
 func parseAccountInfoFromArn(arn string) (string, string, error) {
@@ -28,12 +30,44 @@ func parseAccountInfoFromArn(arn string) (string, string, error) {
 	return parts[1], parts[4], nil
 }
 
+func getCredentials(c *Config) (*credentials.Credentials, error) {
+	providers := []credentials.Provider{
+		&credentials.StaticProvider{Value: credentials.Value{
+			AccessKeyID:     c.AccessKey,
+			SecretAccessKey: c.SecretKey,
+			SessionToken:    c.Token,
+		}},
+		&credentials.EnvProvider{},
+		&credentials.SharedCredentialsProvider{
+			Filename: c.CredsFilename,
+			Profile:  c.Profile,
+		},
+	}
+
+	return credentials.NewChainCredentials(providers), nil
+}
+
 func (c *Config) Client() (*alks.Client, error) {
 	log.Println("[DEBUG] Validting STS credentials")
 
+	creds, cErr := getCredentials(c)
+
+	if cErr != nil {
+		return nil, cErr
+	}
+
+	cp, cpErr := creds.Get()
+
+	if cpErr != nil {
+		return nil, cpErr
+	}
+
+	log.Println("Creds")
+	log.Printf("Creds: %v", cp)
+
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-east-1"),
-		Credentials: credentials.NewStaticCredentials(c.AccessKey, c.SecretKey, c.Token),
+		Credentials: creds,
 	})
 
 	if err != nil {
@@ -58,7 +92,7 @@ func (c *Config) Client() (*alks.Client, error) {
 	}
 
 	// now we know we have a valid STS
-	client, err := alks.NewSTSClient(c.Url, c.AccessKey, c.SecretKey, c.Token, c.Account)
+	client, err := alks.NewSTSClient(c.Url, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken, c.Account)
 
 	if err != nil {
 		return nil, err
