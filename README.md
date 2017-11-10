@@ -7,9 +7,9 @@ This module is used for creating IAM Roles via the ALKS API.
 
 ## Pre-Requisites
 
-* An ALKS Admin or IAMAdmin role is needed. PowerUser access is not sufficient to create IAM roles.
+* An ALKS Admin or IAMAdmin STS session is needed. PowerUser access is not sufficient to create IAM roles.
     * This tool is best used by users with the `Admin` role
-    * If you have an `IAMAdmin/LabAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure. 
+    * If you have an `IAMAdmin/LabAdmin` role, you'll be able to create roles and attach policies, but you won't be able to create other infrastructure.
 * Works with [Terraform](https://www.terraform.io/) version 0.8 or newer.
 
 ## Installation
@@ -53,27 +53,20 @@ Note: Provide full path to the location of the plugin, unless terraform-provider
 provider "alks" {
     url      = "<ALKS_URL>"
     account  = "<ALKS_ACCOUNT>"
-    role     = "<ALKS_ROLE>"
-    username = "<ALKS_USERNAME>"
-    password = "<ALKS_PASSWORD>"
+    access_key = "<ALKS_ACCESS_KEY_ID>"
+    secret_key = "<ALKS_SECRET_ACCESS_KEY>"
+    token = "<ALKS_SESSION_TOKEN>""
 }
 ```
 
 Provider Options:
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
-* `role` - (Required) The ALKS role to use. This should be one of `Admin`/`IAMAdmin`/`LabAdmin`.  Also read from `ENV.ALKS_ROLE`. 
-* `username` - (Required) The username you use to login to ALKS. Read from `ENV.ALKS_USERNAME` - **Should be provided via env vars and not stored in your TF files.**
-* `password` - (Required) The password you use to login to ALKS. Also read from `ENV.ALKS_PASSWORD` or the macOS keychain when available - **Should be provided via env vars and not stored in your TF files.**
+* `access_key` - (Required) The access key from a valid STS session.  Also read from `ENV.ALKS_ACCESS_KEY_ID`.
+* `secret_key` - (Required) The secret key from a valid STS session.  Also read from `ENV.ALKS_SECRET_ACCESS_KEY`.
+* `token` - (Required) The session token from a valid STS session.  Also read from `ENV.ALKS_SESSION_TOKEN`.
 
-All of these options should match what you configured with the ALKS CLI. You should verify the account/role combination you're providing is valid by running: `alks sessions open -i -a "<acct>" -r "<role>"`.
-
-You can see all available accounts and roles by running: `alks developer accounts`.
-
-##### macOS Keychain Support
-
-The password field supports pulling from the keychain when run on a macOS system that has had the ALKS CLI configured on
-it. Meaning you have run `alks developer configure` at some point on your macOS system.
+You can see all available accounts by running: `alks developer accounts`.
 
 ### Resource Configuration
 
@@ -103,7 +96,6 @@ Check out `test.tf` for an very basic Terraform script which:
 1. Creates an AWS provider and ALKS provider
 2. Creates an IAM Role via the ALKS provider
 3. Attaches a policy to the created role using the AWS provider
-4. Creates a security group using the AWS provider
 
 This example is meant to show how you would combine a typical AWS Terraform script with our custom provider in order to automate the creation of IAM roles.
 
