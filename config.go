@@ -62,9 +62,6 @@ func (c *Config) Client() (*alks.Client, error) {
 		return nil, cpErr
 	}
 
-	log.Println("Creds")
-	log.Printf("Creds: %v", cp)
-
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-east-1"),
 		Credentials: creds,

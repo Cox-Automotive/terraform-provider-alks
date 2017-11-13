@@ -39,34 +39,68 @@ Note: Provide full path to the location of the plugin, unless terraform-provider
 
 ## Usage
 
-1. Export a valid ALKS IAM session to your environment variables - be sure to use either `Admin` or `IAMAdmin` role. The ALKS provider is only responsible for creating the initial role. If you create a session using the `Admin` role the STS credentials can be shared between the AWS and ALKS providers. If you use an `IAMAdmin` role then you will need to create a `PowerUser` session for the ALKS provider as `IAMAdmin` is limited to IAM-only resources.
+### Authentication
 
-2. Edit your terraform scripts to configure the alks provider and create necessary ALKS resources.
+The ALKS provider offers a flexible means of providing credentials for authentication. Credentials must be created via ALKS, as an IAM session, with a role type of `Admin`, `IAMAdmin`, or `LabAdmin`. The following methods are supported, in this order, and explained below:
 
-3. Run `terraform plan`, `terraform apply` or other commands, as needed and roles can be generated via Terraform.
+#### Static Credentials
 
-### Provider Configuration
-
-#### `alks`
+Static credentials can be provided by adding an `access_key`, `secret_key` and `token` in-line in the ALKS provider block:
 
 ```
 provider "alks" {
-    url        = "<ALKS_URL>"
-    account    = "<ALKS_ACCOUNT>"
-    access_key = "<ALKS_ACCESS_KEY_ID>"
-    secret_key = "<ALKS_SECRET_ACCESS_KEY>"
-    token      = "<ALKS_SESSION_TOKEN>""
+    url        = "https://alks.foo.com/rest"
+    account    = "##########/ALKSAdmin - awsaccount42"
+    access_key = "accesskey"
+    secret_key = "secretkey"
+    token      = "sessiontoken"
 }
 ```
 
+#### Environment variables
+
+You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables. Alternatively, if you need to pass multiple AWS credentials (when using a combination like `PowerUser` and `IAMAdmin`) you can use the `ALKS_` prefix in place of `AWS_` (ex: `ALKS_ACCESS_KEY_ID`) as they are prioritized over the `AWS_` prefixed environment varaibles.
+
+```
+provider "alks" {
+    url     = "https://alks.foo.com/rest"
+    account = "##########/ALKSAdmin - awsaccount42"
+}
+```
+
+```
+$ export AWS_ACCESS_KEY_ID="accesskey"
+$ export AWS_SECRET_ACCESS_KEY="secretkey"
+$ export AWS_SESSION_TOKEN=asessiontoken"
+$ terraform plan
+```
+
+#### Shared Credentials file
+
+You can use an AWS credentials file to specify your credentials. The default location is `$HOME/.aws/credentials` on Linux and OSX, or `"%USERPROFILE%\.aws\credentials"` for Windows users. If we fail to detect credentials inline, or in the environment, Terraform will check this location. You can optionally specify a different location in the configuration by providing the `shared_credentials_file` attribute, or in the environment with the `AWS_SHARED_CREDENTIALS_FILE` variable. This method also supports a profile configuration and matching `AWS_PROFILE` environment variable.
+
+```
+provider "alks" {
+    url                     = "https://alks.foo.com/rest"
+    account                 = "##########/ALKSAdmin - awsaccount42"
+    shared_credentials_file = "/Users/brianantonelli/.aws/credentials"
+    profile                 = "foo"
+}
+```
+
+### Provider Configuration
+
 Provider Options:
+
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
 * `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
-* `access_key` - (Required) The access key from a valid STS session.  Also read from `ENV.ALKS_ACCESS_KEY_ID`.
-* `secret_key` - (Required) The secret key from a valid STS session.  Also read from `ENV.ALKS_SECRET_ACCESS_KEY`.
-* `token` - (Required) The session token from a valid STS session.  Also read from `ENV.ALKS_SESSION_TOKEN`.
+* `access_key` - (Optional) The access key from a valid STS session.  Also read from `ENV.ALKS_ACCESS_KEY_ID` and `ENV.AWS_ACCESS_KEY_ID`.
+* `secret_key` - (Optional) The secret key from a valid STS session.  Also read from `ENV.ALKS_SECRET_ACCESS_KEY` and `ENV.AWS_SECRET_ACCESS_KEY`.
+* `token` - (Optional) The session token from a valid STS session.  Also read from `ENV.ALKS_SESSION_TOKEN` and `ENV.AWS_SESSION_TOKEN`.
+* `shared_credentials_file ` - (Optional) The the path to the shared credentials file. Also read from `ENV.AWS_SHARED_CREDENTIALS_FILE `.
+* `profile` - (Optional) This is the AWS profile name as set in the shared credentials file. Also read from `ENV.AWS_PROFILE`.
 
-You can see all available accounts by running: `alks developer accounts`.
+_Hint_: You can see all available accounts by running: `alks developer accounts`.
 
 ### Resource Configuration
 

@@ -18,6 +18,12 @@ func Provider() terraform.ResourceProvider {
 				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
 			},
+			"account": &schema.Schema{
+				Type:        schema.TypeString,
+				Required:    true,
+				Description: "This is the ALKS Account to use. It must be provided, but it can also be sourced from the ALKS_ACCOUNT environment variable.",
+				DefaultFunc: schema.EnvDefaultFunc("ALKS_ACCOUNT", nil),
+			},
 			"access_key": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -50,18 +56,15 @@ func Provider() terraform.ResourceProvider {
 				Optional:    true,
 				Default:     "",
 				Description: "The profile for API operations. Used in place of STS tokens.",
+				DefaultFunc: schema.EnvDefaultFunc("AWS_PROFILE", nil),
 			},
 			"shared_credentials_file": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Default:     "",
 				Description: "The path to the shared credentials file. If not set this defaults to ~/.aws/credentials.",
-			},
-			"account": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "This is the ALKS Account to use. It must be provided, but it can also be sourced from the ALKS_ACCOUNT environment variable.",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_ACCOUNT", nil),
+				DefaultFunc: schema.EnvDefaultFunc("AWS_SHARED_CREDENTIALS_FILE", nil),
+
 			},
 		},
 
