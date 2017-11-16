@@ -50,7 +50,6 @@ Static credentials can be provided via an `access_key`, `secret_key` and `token`
 ```
 provider "alks" {
     url        = "https://alks.foo.com/rest"
-    account    = "##########/ALKSAdmin - awsaccount42"
     access_key = "accesskey"
     secret_key = "secretkey"
     token      = "sessiontoken"
@@ -64,7 +63,6 @@ You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS
 ```
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    account = "##########/ALKSAdmin - awsaccount42"
 }
 ```
 
@@ -83,7 +81,6 @@ You can use an AWS credentials file to specify your credentials. The default loc
 ```
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
-    account                 = "##########/ALKSAdmin - awsaccount42"
     shared_credentials_file = "/Users/brianantonelli/.aws/credentials"
     profile                 = "foo"
 }
@@ -94,14 +91,11 @@ provider "alks" {
 Provider Options:
 
 * `url` - (Required) The URL to your ALKS server. Also read from `ENV.ALKS_URL`
-* `account` - (Required) The ALKS account to use. Also read from `ENV.ALKS_ACCOUNT`
 * `access_key` - (Optional) The access key from a valid STS session.  Also read from `ENV.ALKS_ACCESS_KEY_ID` and `ENV.AWS_ACCESS_KEY_ID`.
 * `secret_key` - (Optional) The secret key from a valid STS session.  Also read from `ENV.ALKS_SECRET_ACCESS_KEY` and `ENV.AWS_SECRET_ACCESS_KEY`.
 * `token` - (Optional) The session token from a valid STS session.  Also read from `ENV.ALKS_SESSION_TOKEN` and `ENV.AWS_SESSION_TOKEN`.
 * `shared_credentials_file ` - (Optional) The the path to the shared credentials file. Also read from `ENV.AWS_SHARED_CREDENTIALS_FILE `.
 * `profile` - (Optional) This is the AWS profile name as set in the shared credentials file. Also read from `ENV.AWS_PROFILE`.
-
-_Hint_: See all your available accounts by running: `alks developer accounts`.
 
 ### Resource Configuration
 

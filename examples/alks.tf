@@ -3,7 +3,6 @@
 #
 provider "alks" {
     url      = "https://alks.foo.com/rest"
-    account  = "124124124124124/ALKSAdmin - awsfoo420labs"
 }
 
 provider "aws" {

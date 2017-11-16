@@ -18,12 +18,6 @@ func Provider() terraform.ResourceProvider {
 				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
 			},
-			"account": &schema.Schema{
-				Type:        schema.TypeString,
-				Required:    true,
-				Description: "This is the ALKS Account to use. It must be provided, but it can also be sourced from the ALKS_ACCOUNT environment variable.",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_ACCOUNT", nil),
-			},
 			"access_key": &schema.Schema{
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -82,7 +76,6 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		SecretKey: d.Get("secret_key").(string),
 		Token:     d.Get("token").(string),
 		Profile:   d.Get("profile").(string),
-		Account:   d.Get("account").(string),
 	}
 
 	// Set CredsFilename, expanding home directory

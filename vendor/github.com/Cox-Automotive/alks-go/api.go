@@ -24,8 +24,6 @@ type AlksSTS struct {
 	AccessKey string `json:"accessKey"`
 	SecretKey string `json:"secretKey"`
 	Token     string `json:"sessionToken"`
-	Account   string `json:"account"`
-	Role      string `json:"role"`
 }
 
 // Client represents an ALKS client and contains the account info and base url.
@@ -56,15 +54,13 @@ func NewClient(url string, username string, password string, account string, rol
 }
 
 // NewSTSClient will create a new instance of the ALKS Client using STS tokens.
-func NewSTSClient(url string, accessKey string, secretKey string, token string, account string) (*Client, error) {
+func NewSTSClient(url string, accessKey string, secretKey string, token string) (*Client, error) {
 	client := Client{
 		Account: AlksAccount{},
 		STS: AlksSTS{
 			AccessKey: accessKey,
 			SecretKey: secretKey,
 			Token:     token,
-			Account:   account,
-			Role:      "Admin", // TEMPORARY: FIXME: TODO: Should be removed once the API req goes away
 		},
 		BaseURL: url,
 		Http:    cleanhttp.DefaultClient(),

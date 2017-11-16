@@ -9,7 +9,6 @@ import (
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 	"log"
-	"strings"
 )
 
 type Config struct {
@@ -19,16 +18,6 @@ type Config struct {
 	Token         string
 	CredsFilename string
 	Profile       string
-	Account       string
-}
-
-func parseAccountInfoFromArn(arn string) (string, string, error) {
-	parts := strings.Split(arn, ":")
-	if len(parts) < 5 {
-		return "", "", fmt.Errorf("Unable to parse ID from invalid ARN: %v", arn)
-	}
-
-	return parts[1], parts[4], nil
 }
 
 func getCredentials(c *Config) *credentials.Credentials {
@@ -51,44 +40,39 @@ func getCredentials(c *Config) *credentials.Credentials {
 func (c *Config) Client() (*alks.Client, error) {
 	log.Println("[DEBUG] Validting STS credentials")
 
+	// lookup credentials
 	creds := getCredentials(c)
-
 	cp, cpErr := creds.Get()
 
+	// validate we have credentials
 	if cpErr != nil {
 		return nil, errors.New(`No valid credential sources found for ALKS Provider.
 Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
 providing credentials for the ALKS Provider`)
 	}
 
+	// create a new session to test credentails
 	sess, err := session.NewSession(&aws.Config{
 		Region:      aws.String("us-east-1"),
 		Credentials: creds,
 	})
 
+	// validate session
 	if err != nil {
 		return nil, fmt.Errorf("Error creating session from STS. (%v)", err)
 	}
 
+	// make a basic api call to test creds are valid
 	stsconn := sts.New(sess)
-	outCallerIdentity, err := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	_, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 
-	if err != nil {
-		return nil, err
+	// check for valid creds
+	if serr != nil {
+		return nil, serr
 	}
 
-	_, accountId, err := parseAccountInfoFromArn(*outCallerIdentity.Arn)
-
-	if err != nil {
-		return nil, err
-	}
-
-	if !strings.HasPrefix(c.Account, accountId) {
-		return nil, fmt.Errorf("The provided STS token is not valid for the provided account (%v). It's for %v.", c.Account, accountId)
-	}
-
-	// now we know we have a valid STS
-	client, err := alks.NewSTSClient(c.Url, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken, c.Account)
+	// got good creds, create alks sts client
+	client, err := alks.NewSTSClient(c.Url, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
 	if err != nil {
 		return nil, err
