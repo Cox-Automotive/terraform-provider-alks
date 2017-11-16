@@ -62,10 +62,19 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 		include,
 	}
 
-	b, err := json.Marshal(struct {
-		IamRoleRequest
-		AlksAccount
-	}{iam, c.Account})
+	var b []byte
+	var err error
+	if len(strings.TrimSpace(c.Account.Account)) > 0 {
+		b, err = json.Marshal(struct {
+			IamRoleRequest
+			AlksAccount
+		}{iam, c.Account})
+	} else {
+		b, err = json.Marshal(struct {
+			IamRoleRequest
+			AlksSTS
+		}{iam, c.STS})
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
@@ -102,10 +111,19 @@ func (c *Client) DeleteIamRole(id string) error {
 
 	rmRole := DeleteRoleRequest{id}
 
-	b, err := json.Marshal(struct {
-		DeleteRoleRequest
-		AlksAccount
-	}{rmRole, c.Account})
+	var b []byte
+	var err error
+	if len(strings.TrimSpace(c.Account.Account)) > 0 {
+		b, err = json.Marshal(struct {
+			DeleteRoleRequest
+			AlksAccount
+		}{rmRole, c.Account})
+	} else {
+		b, err = json.Marshal(struct {
+			DeleteRoleRequest
+			AlksSTS
+		}{rmRole, c.STS})
+	}
 
 	if err != nil {
 		return fmt.Errorf("Error encoding IAM delete role JSON: %s", err)
@@ -144,10 +162,19 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 	log.Printf("[INFO] Getting IAM role: %s", roleName)
 	getRole := GetRoleRequest{roleName}
 
-	b, err := json.Marshal(struct {
-		GetRoleRequest
-		AlksAccount
-	}{getRole, c.Account})
+	var b []byte
+	var err error
+	if len(strings.TrimSpace(c.Account.Account)) > 0 {
+		b, err = json.Marshal(struct {
+			GetRoleRequest
+			AlksAccount
+		}{getRole, c.Account})
+	} else {
+		b, err = json.Marshal(struct {
+			GetRoleRequest
+			AlksSTS
+		}{getRole, c.STS})
+	}
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)

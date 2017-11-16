@@ -4,11 +4,12 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"net/url"
-
 	"github.com/hashicorp/go-cleanhttp"
+	"io/ioutil"
+	"log"
+	"net/http"
+	"net/http/httputil"
+	"net/url"
 )
 
 // AlksAccount is used to represent the configuration for the ALKS client
@@ -19,9 +20,16 @@ type AlksAccount struct {
 	Role     string `json:"role"`
 }
 
+type AlksSTS struct {
+	AccessKey string `json:"accessKey"`
+	SecretKey string `json:"secretKey"`
+	Token     string `json:"sessionToken"`
+}
+
 // Client represents an ALKS client and contains the account info and base url.
 type Client struct {
 	Account AlksAccount
+	STS     AlksSTS
 	BaseURL string
 
 	Http *http.Client
@@ -34,8 +42,25 @@ func NewClient(url string, username string, password string, account string, rol
 		Account: AlksAccount{
 			Username: username,
 			Password: password,
-			Account: account,
-			Role: role,
+			Account:  account,
+			Role:     role,
+		},
+		STS:     AlksSTS{},
+		BaseURL: url,
+		Http:    cleanhttp.DefaultClient(),
+	}
+
+	return &client, nil
+}
+
+// NewSTSClient will create a new instance of the ALKS Client using STS tokens.
+func NewSTSClient(url string, accessKey string, secretKey string, token string) (*Client, error) {
+	client := Client{
+		Account: AlksAccount{},
+		STS: AlksSTS{
+			AccessKey: accessKey,
+			SecretKey: secretKey,
+			Token:     token,
 		},
 		BaseURL: url,
 		Http:    cleanhttp.DefaultClient(),
@@ -61,6 +86,14 @@ func (c *Client) NewRequest(json []byte, method string, endpoint string) (*http.
 	req.Header.Set("Content-Type", "application/json")
 	req.Header.Set("User-Agent", "alks-go")
 
+	log.Println("------- ALKS HTTP Request -------")
+	requestDump, err := httputil.DumpRequest(req, true)
+	if err != nil {
+		log.Println(err)
+	}
+	log.Println(string(requestDump))
+	log.Println("-------- !!!!!!!!!! ---------")
+
 	return req, nil
 }
 
@@ -71,6 +104,11 @@ func decodeBody(resp *http.Response, out interface{}) error {
 	if err != nil {
 		return err
 	}
+
+	log.Println("------- ALKS HTTP Response -------")
+	log.Printf("Status code: %v", resp.StatusCode)
+	log.Println(string(body))
+	log.Println("-------- !!!!!!!!!! ---------")
 
 	if err = json.Unmarshal(body, &out); err != nil {
 		return err

@@ -15,8 +15,9 @@ import "github.com/Cox-Automotive/alks-go"
 ```
 
 Construct a new ALKS client, then use the various services on the client to
-access different parts of the ALKS API. For example:
+access different parts of the ALKS API. Please note that session creation requires username and password. IAM role CRUD operations can work with either username and password or an STS session. 
 
+*Username/Password Authentication*
 ```go
 client, err := alks.NewClient("http://my.alks.url/rest", "username", "password", "my-acct", "my-role")
 
@@ -24,6 +25,16 @@ client, err := alks.NewClient("http://my.alks.url/rest", "username", "password",
 resp, err := client.CreateSession(2, false)
 
 log.Printf("Session: %v ~~ %v ~~ %v", resp.AccessKey, resp.SecretKey, resp.SessionToken)
+```
+
+*STS Authentication* - Currently only used for IAM role CRUD
+```go
+client, err := alks.NewSTSClient("http://my.alks.url/rest", "accessKey", "secretKey", "sessionToken", "account")
+
+// create new role
+resp, err := client.CreateIamRole("myRole", "Amazon EC2", false)
+
+log.Printf("Role ARN: %v ~~ Role IP ARN: %v", resp.roleArn, resp.roleIPArn)
 ```
 
 Some API methods don't require an account and role to be provided.

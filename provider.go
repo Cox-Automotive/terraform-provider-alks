@@ -5,6 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Provider returns a terraform.ResourceProvider.
@@ -14,38 +15,54 @@ func Provider() terraform.ResourceProvider {
 			"url": &schema.Schema{
 				Type:        schema.TypeString,
 				Required:    true,
-				Description: "Base URL to ALKS service",
+				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
 			},
-			"username": &schema.Schema{
+			"access_key": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Username used to login to ALKS",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_USERNAME", nil),
+				Optional:    true,
+				Description: "This is the AWS access key. It must be provided, but it can also be sourced from the ALKS_ACCESS_KEY_ID or AWS_ACCESS_KEY_ID environment variable.",
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"ALKS_ACCESS_KEY_ID",
+					"AWS_ACCESS_KEY_ID",
+				}, nil),
 			},
-			"password": &schema.Schema{
+			"secret_key": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "Password used to login to ALKS",
-				DefaultFunc: passwordRetrievalFunc("ALKS_PASSWORD", nil),
+				Optional:    true,
+				Description: "This is the AWS secret key. It must be provided, but it can also be sourced from the ALKS_SECRET_ACCESS_KEY or AWS_SECRET_ACCESS_KEY environment variable",
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"ALKS_SECRET_ACCESS_KEY",
+					"AWS_SECRET_ACCESS_KEY",
+				}, nil),
 			},
-			"account": &schema.Schema{
+			"token": &schema.Schema{
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ALKS Account to use",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_ACCOUNT", nil),
+				Optional:    true,
+				Description: "This is the AWS session token. It must be provided, but it can also be sourced from the ALKS_SESSION_TOKEN or AWS_SESSION_TOKEN environment variable",
+				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
+					"ALKS_SESSION_TOKEN",
+					"AWS_SESSION_TOKEN",
+				}, nil),
 			},
-			"role": &schema.Schema{
+			"profile": {
 				Type:        schema.TypeString,
-				Required:    true,
-				Description: "ALKS role to use",
-				DefaultFunc: schema.EnvDefaultFunc("ALKS_ROLE", nil),
+				Optional:    true,
+				Default:     "",
+				Description: "The profile for API operations. Used in place of STS tokens.",
+				DefaultFunc: schema.EnvDefaultFunc("AWS_PROFILE", nil),
+			},
+			"shared_credentials_file": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Default:     "",
+				Description: "The path to the shared credentials file. If not set this defaults to ~/.aws/credentials.",
+				DefaultFunc: schema.EnvDefaultFunc("AWS_SHARED_CREDENTIALS_FILE", nil),
 			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
 			"alks_iamrole": resourceAlksIamRole(),
-			"alks_session": resourceAlksSession(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -54,12 +71,19 @@ func Provider() terraform.ResourceProvider {
 
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		Url:      d.Get("url").(string),
-		Username: d.Get("username").(string),
-		Password: d.Get("password").(string),
-		Account:  d.Get("account").(string),
-		Role:     d.Get("role").(string),
+		Url:       d.Get("url").(string),
+		AccessKey: d.Get("access_key").(string),
+		SecretKey: d.Get("secret_key").(string),
+		Token:     d.Get("token").(string),
+		Profile:   d.Get("profile").(string),
 	}
+
+	// Set CredsFilename, expanding home directory
+	credsPath, err := homedir.Expand(d.Get("shared_credentials_file").(string))
+	if err != nil {
+		return nil, err
+	}
+	config.CredsFilename = credsPath
 
 	log.Println("[INFO] Initializing ALKS client")
 	return config.Client()

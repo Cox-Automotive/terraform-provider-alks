@@ -1,55 +1,84 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Cox-Automotive/alks-go"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/sts"
 	"log"
 )
 
 type Config struct {
-	Url      string
-	Username string
-	Password string
-	Account  string
-	Role     string
+	Url           string
+	AccessKey     string
+	SecretKey     string
+	Token         string
+	CredsFilename string
+	Profile       string
+}
+
+func getCredentials(c *Config) *credentials.Credentials {
+	providers := []credentials.Provider{
+		&credentials.StaticProvider{Value: credentials.Value{
+			AccessKeyID:     c.AccessKey,
+			SecretAccessKey: c.SecretKey,
+			SessionToken:    c.Token,
+		}},
+		&credentials.EnvProvider{},
+		&credentials.SharedCredentialsProvider{
+			Filename: c.CredsFilename,
+			Profile:  c.Profile,
+		},
+	}
+
+	return credentials.NewChainCredentials(providers)
 }
 
 func (c *Config) Client() (*alks.Client, error) {
+	log.Println("[DEBUG] Validting STS credentials")
 
-	testClient, testErr := alks.NewClient(c.Url, c.Username, c.Password, "", "")
+	// lookup credentials
+	creds := getCredentials(c)
+	cp, cpErr := creds.Get()
 
-	if testErr != nil {
-		return nil, testErr
+	// validate we have credentials
+	if cpErr != nil {
+		return nil, errors.New(`No valid credential sources found for ALKS Provider.
+Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
+providing credentials for the ALKS Provider`)
 	}
 
-	// retreive list of accounts the user has access to
-	resp, err := testClient.GetAccounts()
+	// create a new session to test credentails
+	sess, err := session.NewSession(&aws.Config{
+		Region:      aws.String("us-east-1"),
+		Credentials: creds,
+	})
+
+	// validate session
+	if err != nil {
+		return nil, fmt.Errorf("Error creating session from STS. (%v)", err)
+	}
+
+	// make a basic api call to test creds are valid
+	stsconn := sts.New(sess)
+	_, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+
+	// check for valid creds
+	if serr != nil {
+		return nil, serr
+	}
+
+	// got good creds, create alks sts client
+	client, err := alks.NewSTSClient(c.Url, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
 	if err != nil {
-		// this error check will catch invalid user credentials
-		return nil, err
-	} else {
-		// this check will catch incorrect accounts/role
-		var validAccountRole = false
-		for _, acct := range resp.Accounts {
-			if acct.Account == c.Account && acct.Role == c.Role {
-				validAccountRole = true
-			}
-		}
-
-		if !validAccountRole {
-			return nil, fmt.Errorf("The specified account (%v) and role (%v) are not available in your ALKS account. Please verify your permissions and try again.", c.Account, c.Role)
-		}
-	}
-
-	// now we know we have a valid user credentials and account/role so create the client
-	client, err := alks.NewClient(c.Url, c.Username, c.Password, c.Account, c.Role)
-
-	if err != nil {
 		return nil, err
 	}
 
-	log.Printf("[INFO] ALKS Client configured")
+	log.Println("[INFO] ALKS Client configured")
 
 	return client, nil
 }
