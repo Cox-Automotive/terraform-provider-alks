@@ -2,8 +2,8 @@
 # PROVIDERS
 #
 provider "alks" {
-    url      = "https://dev.alks.coxautoinc.com/rest"
-    account  = "805619180788/ALKSAdmin - awscoxautolabs95"
+    url      = "https://alks.foo.com/rest"
+    account  = "124124124124124/ALKSAdmin - awsfoo420labs"
 }
 
 provider "aws" {
@@ -12,7 +12,7 @@ provider "aws" {
 
 # CREATE IAM ROLE
 resource "alks_iamrole" "test_role" {
-    name                     = "ba-test-123456"
+    name                     = "aba-test-123456"
     type                     = "Amazon EC2"
     include_default_policies = false
 }

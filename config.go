@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
@@ -30,7 +31,7 @@ func parseAccountInfoFromArn(arn string) (string, string, error) {
 	return parts[1], parts[4], nil
 }
 
-func getCredentials(c *Config) (*credentials.Credentials, error) {
+func getCredentials(c *Config) *credentials.Credentials {
 	providers := []credentials.Provider{
 		&credentials.StaticProvider{Value: credentials.Value{
 			AccessKeyID:     c.AccessKey,
@@ -44,22 +45,20 @@ func getCredentials(c *Config) (*credentials.Credentials, error) {
 		},
 	}
 
-	return credentials.NewChainCredentials(providers), nil
+	return credentials.NewChainCredentials(providers)
 }
 
 func (c *Config) Client() (*alks.Client, error) {
 	log.Println("[DEBUG] Validting STS credentials")
 
-	creds, cErr := getCredentials(c)
-
-	if cErr != nil {
-		return nil, cErr
-	}
+	creds := getCredentials(c)
 
 	cp, cpErr := creds.Get()
 
 	if cpErr != nil {
-		return nil, cpErr
+		return nil, errors.New(`No valid credential sources found for ALKS Provider.
+Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
+providing credentials for the ALKS Provider`)
 	}
 
 	sess, err := session.NewSession(&aws.Config{

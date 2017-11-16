@@ -64,13 +64,11 @@ func Provider() terraform.ResourceProvider {
 				Default:     "",
 				Description: "The path to the shared credentials file. If not set this defaults to ~/.aws/credentials.",
 				DefaultFunc: schema.EnvDefaultFunc("AWS_SHARED_CREDENTIALS_FILE", nil),
-
 			},
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
 			"alks_iamrole": resourceAlksIamRole(),
-			"alks_session": resourceAlksSession(),
 		},
 
 		ConfigureFunc: providerConfigure,
