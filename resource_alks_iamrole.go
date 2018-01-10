@@ -119,6 +119,7 @@ func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.Resource
 	d.SetId(role.RoleName)
 	d.Set("arn", role.RoleArn)
 	d.Set("ip_arn", role.RoleIPArn)
+	d.Set("type", role.RoleType)
 
 	return nil
 }
