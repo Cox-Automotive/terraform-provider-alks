@@ -119,7 +119,9 @@ func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.Resource
 	d.SetId(role.RoleName)
 	d.Set("arn", role.RoleArn)
 	d.Set("ip_arn", role.RoleIPArn)
-	d.Set("type", role.RoleType)
+    // role type isnt returned by alks api so this will always false report on a remote state change
+	// for more info see issue #125 on ALKS repo
+	// d.Set("type", role.RoleType)
 
 	return nil
 }
