@@ -8,3 +8,6 @@ glide.lock
 # IntelliJ
 .idea/
 *.iml
+
+# VSCode
+.vscode
