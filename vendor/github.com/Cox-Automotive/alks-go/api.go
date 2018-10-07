@@ -141,7 +141,7 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 	case i == 422:
 		return nil, fmt.Errorf("API Error 422: %s", resp.Status)
 	default:
-		return nil, fmt.Errorf("API Error: Please validate your username/password and account/role.")
+		return nil, fmt.Errorf("API Error %d: %s", resp.StatusCode, resp.Status)
 	}
 }
 
