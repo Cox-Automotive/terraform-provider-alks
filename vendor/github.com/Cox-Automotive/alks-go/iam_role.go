@@ -8,11 +8,18 @@ import (
 	"strings"
 )
 
-// IamRoleRequqest is used to represent a new IAM Role request.
+// IamRoleRequest is used to represent a new IAM Role request.
 type IamRoleRequest struct {
 	RoleName   string `json:"roleName"`
 	RoleType   string `json:"roleType"`
 	IncDefPols int    `json:"includeDefaultPolicy"`
+}
+
+// IamTrustRoleRequest is used to represent a new IAM Trust Role request.
+type IamTrustRoleRequest struct {
+	RoleName string `json:"roleName"`
+	RoleType string `json:"roleType"`
+	TrustArn string `json:"trustArn"`
 }
 
 // IamRoleResponse is used to represent a a IAM Role.
@@ -32,7 +39,7 @@ type GetRoleRequest struct {
 	RoleName string `json:"roleName"`
 }
 
-// DeketeRoleRequest is sued to represent a request for deleting an
+// DeleteRoleRequest is sued to represent a request for deleting an
 // existing IAM role based on the role's name.
 type DeleteRoleRequest struct {
 	RoleName string `json:"roleName"`
@@ -99,6 +106,59 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 
 	if len(cr.Errors) > 0 {
 		return nil, fmt.Errorf("Error creating role: %s", strings.Join(cr.Errors[:], ", "))
+	}
+
+	return cr, nil
+}
+
+// CreateIamTrustRole will create a new IAM trust role on AWS. If no error is returned
+// then you will receive a IamRoleResponse object representing the new role.
+func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn string) (*IamRoleResponse, error) {
+	log.Printf("[INFO] Creating IAM trust role: %s", roleName)
+
+	iam := IamTrustRoleRequest{
+		roleName,
+		roleType,
+		trustArn,
+	}
+
+	var b []byte
+	var err error
+	if len(strings.TrimSpace(c.Account.Account)) > 0 {
+		b, err = json.Marshal(struct {
+			IamTrustRoleRequest
+			AlksAccount
+		}{iam, c.Account})
+	} else {
+		b, err = json.Marshal(struct {
+			IamTrustRoleRequest
+			AlksSTS
+		}{iam, c.STS})
+	}
+
+	if err != nil {
+		return nil, fmt.Errorf("Error encoding IAM create trust role JSON: %s", err)
+	}
+
+	req, err := c.NewRequest(b, "POST", "/createNonServiceRole/")
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := checkResp(c.Http.Do(req))
+	if err != nil {
+		return nil, err
+	}
+
+	cr := new(IamRoleResponse)
+	err = decodeBody(resp, &cr)
+
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing CreateTrustRole response: %s", err)
+	}
+
+	if len(cr.Errors) > 0 {
+		return nil, fmt.Errorf("Error creating trust role: %s", strings.Join(cr.Errors[:], ", "))
 	}
 
 	return cr, nil

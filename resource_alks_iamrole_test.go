@@ -36,12 +36,33 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamTrustRole_Basic(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccCheckAlksIamTrustRoleConfig_basic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "name", "bar"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "type", "Inner Account"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*alks.Client)
 
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "alks_iamrole" {
+			if rs.Type != "alks_iamrole" && rs.Type != "alks_iamtrustrole" {
 				continue
 			}
 
@@ -102,5 +123,19 @@ resource "alks_iamrole" "foo" {
     name = "bar420"
     type = "Amazon EC2"
     include_default_policies = false
+}
+`
+
+const testAccCheckAlksIamTrustRoleConfig_basic = `
+resource "alks_iamrole" "foo" {
+	name = "foo"
+	type = "Amazon EC2"
+	include_default_policies = false
+}
+
+resource "alks_iamtrustrole" "bar" {
+    name = "bar"
+    type = "Inner Account"
+    trust_arn = "${alks_iamrole.foo.arn}"
 }
 `

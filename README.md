@@ -10,32 +10,21 @@ This module is used for creating IAM Roles via the ALKS API.
 * An ALKS Admin or IAMAdmin STS [assume-role](http://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) session is needed. PowerUser access is not sufficient to create IAM roles.
     * This tool is best suited for users with an `Admin` role
     * With an `IAMAdmin|LabAdmin` role, you can create roles and attach policies, but you can't create other infrastructure.
-* Works with [Terraform](https://www.terraform.io/) version 0.8 or newer.
+* Works with [Terraform](https://www.terraform.io/) version `0.10.0` or newer.
 
 ## Installation
 
 * Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
 
-```
-wget https://releases.hashicorp.com/terraform/0.9.0/terraform_0.9.0_darwin_amd64.zip && unzip terraform*.zip
-```
-
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.9.11.1/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.0.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
-* Configure Terraform to find this plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
+* Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
 
-```
-providers {
-    alks = "/path/to/terraform-provider-alks"
-}
-```
-
-Note: Provide full path to the location of the plugin, unless terraform-provider-alks is in your path
-
+* Note: If you've used a previous version of the ALKS provider and created a `.terraformrc` file in your home directory you'll want to remove it prior to updating.
 
 ## Usage
 
@@ -114,6 +103,26 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `name`                           | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
 `type`                           | Required | yes        | string     | The role type to use. [Available Roles](https://gist.github.com/brianantonelli/5769deff6fd8f3ff30e40b844f0b1fb4)
 `include_default_policies`                           | Required | yes        | bool     | Whether or not the default managed policies should be attached to the role.
+`role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
+`arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
+`ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+
+#### `alks_iamtrustrole`
+
+```
+resource "alks_iamtrustrole" "test_trust_role" {
+    name                     = "My_Cross_Test_Role"
+    type                     = "Cross Account"
+    # type                   = "Inner Account"
+    trust_arn                = "arn:aws:iam::123456789123:role/acct-managed/TestTrustRole"
+}
+```
+
+Value                             | Type     | Forces New | Value Type | Description
+--------------------------------- | -------- | ---------- | ---------- | -----------
+`name`                           | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
+`type`                           | Required | yes        | string     | The role type to use `Cross Account` or `Inner Account`.
+`trust_arn`                           | Required | yes        | string     | account role arn to trust.
 `role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
