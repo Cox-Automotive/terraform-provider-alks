@@ -16,25 +16,13 @@ This module is used for creating IAM Roles via the ALKS API.
 
 * Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
 
-```
-wget https://releases.hashicorp.com/terraform/0.9.0/terraform_0.9.0_darwin_amd64.zip && unzip terraform*.zip
-```
-
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/0.9.11.1/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.0.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
-* Configure Terraform to find this plugin by creating `~/.terraformrc` on *nix and `%APPDATA%/terraform.rc` for Windows.
-
-```
-providers {
-    alks = "/path/to/terraform-provider-alks"
-}
-```
-
-Note: Provide full path to the location of the plugin, unless terraform-provider-alks is in your path
+* Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
 
 
 ## Usage
