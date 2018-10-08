@@ -52,3 +52,4 @@ release:
 
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG)
+	
