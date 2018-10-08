@@ -118,6 +118,26 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
 
+#### `alks_iamtrustrole`
+
+```
+resource "alks_iamtrustrole" "test_trust_role" {
+    name                     = "My_Cross_Test_Role"
+    type                     = "Cross Account"
+    # type                   = "Inner Account"
+    trust_arn                = "arn:aws:iam::123456789123:role/acct-managed/TestTrustRole"
+}
+```
+
+Value                             | Type     | Forces New | Value Type | Description
+--------------------------------- | -------- | ---------- | ---------- | -----------
+`name`                           | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
+`type`                           | Required | yes        | string     | The role type to use `Cross Account` or `Inner Account`.
+`trust_arn`                           | Required | yes        | string     | account role arn to trust.
+`role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
+`arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
+`ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+
 ## Example
 
 See [this example](examples/alks.tf) for a basic Terraform script which:

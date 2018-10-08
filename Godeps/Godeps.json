@@ -1,11 +1,11 @@
 {
 	"ImportPath": "github.com/Cox-Automotive/terraform-provider-alks",
 	"GoVersion": "go1.8",
-	"GodepVersion": "v79",
+	"GodepVersion": "v80",
 	"Deps": [
 		{
 			"ImportPath": "github.com/Cox-Automotive/alks-go",
-			"Rev": "7f01df81f0c39acd4faf7824de4f1b020196ef97"
+			"Rev": "4a87d235c4553dba29ddd235db623425c68aa851"
 		},
 		{
 			"ImportPath": "github.com/apparentlymart/go-cidr/cidr",
