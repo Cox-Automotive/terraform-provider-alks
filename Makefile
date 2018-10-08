@@ -45,10 +45,10 @@ release:
 	tar -cvzf release/terraform-provider-alks-solaris-amd64.tar.gz -C release/ terraform-provider-alks_v$(TRAVIS_TAG)
 
 	GOOS=windows GOARCH=386 go build -o release/terraform-provider-alks_v$(TRAVIS_TAG).exe $(package)
-	zip terraform-provider-alks-windows-386.zip release/terraform-provider-alks_v$(TRAVIS_TAG).exe
+	zip release/terraform-provider-alks-windows-386.zip release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 	
 	GOOS=windows GOARCH=amd64 go build -o release/terraform-provider-alks_v$(TRAVIS_TAG).exe $(package)
-	zip terraform-provider-alks-windows-amd64.zip release/terraform-provider-alks_v$(TRAVIS_TAG).exe
+	zip release/terraform-provider-alks-windows-amd64.zip release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG)
