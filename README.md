@@ -24,6 +24,7 @@ curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/downl
 
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
 
+* Note: If you've used a previous version of the ALKS provider and created a `.terraformrc` file in your home directory you'll want to remove it prior to updating.
 
 ## Usage
 
