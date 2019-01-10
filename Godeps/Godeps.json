@@ -5,7 +5,7 @@
 	"Deps": [
 		{
 			"ImportPath": "github.com/Cox-Automotive/alks-go",
-			"Rev": "4a87d235c4553dba29ddd235db623425c68aa851"
+			"Rev": "b8d8670a4cf3cefd352e73dc532f22880085dede"
 		},
 		{
 			"ImportPath": "github.com/apparentlymart/go-cidr/cidr",
