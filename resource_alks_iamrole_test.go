@@ -19,7 +19,7 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckAlksIamRoleConfig_basic,
+				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					// testAccCheckAlksIamRoleExists("bar420", &resp),
 					// testAccCheckAlksIamRoleAttributes(&resp),
@@ -44,7 +44,7 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckAlksIamTrustRoleConfig_basic,
+				Config: testAccCheckAlksIamTrustRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"alks_iamtrustrole.bar", "name", "bar"),
