@@ -13,8 +13,9 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
+// Config stores ALKS configuration and credentials
 type Config struct {
-	Url           string
+	URL           string
 	AccessKey     string
 	SecretKey     string
 	Token         string
@@ -43,6 +44,7 @@ func getCredentials(c *Config) *credentials.Credentials {
 	return credentials.NewChainCredentials(providers)
 }
 
+// Client returns a properly configured ALKS client or an appropriate error if initialization fails
 func (c *Config) Client() (*alks.Client, error) {
 	log.Println("[DEBUG] Validting STS credentials")
 
@@ -78,7 +80,7 @@ providing credentials for the ALKS Provider`)
 	}
 
 	// got good creds, create alks sts client
-	client, err := alks.NewSTSClient(c.Url, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
+	client, err := alks.NewSTSClient(c.URL, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
 	if err != nil {
 		return nil, err

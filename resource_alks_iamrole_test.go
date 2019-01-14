@@ -5,10 +5,9 @@ import (
 	"log"
 	"testing"
 
+	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/terraform"
-
-	"github.com/Cox-Automotive/alks-go"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
@@ -118,7 +117,7 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 	}
 }
 
-const testAccCheckAlksIamRoleConfig_basic = `
+const testAccCheckAlksIamRoleConfigBasic = `
 resource "alks_iamrole" "foo" {
     name = "bar420"
     type = "Amazon EC2"
@@ -126,7 +125,7 @@ resource "alks_iamrole" "foo" {
 }
 `
 
-const testAccCheckAlksIamTrustRoleConfig_basic = `
+const testAccCheckAlksIamTrustRoleConfigBasic = `
 resource "alks_iamrole" "foo" {
 	name = "foo"
 	type = "Amazon EC2"
