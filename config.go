@@ -3,12 +3,14 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/Cox-Automotive/alks-go"
+	"log"
+
+	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"log"
 )
 
 type Config struct {
@@ -21,6 +23,9 @@ type Config struct {
 }
 
 func getCredentials(c *Config) *credentials.Credentials {
+	// Follow the  same priority as the AWS Terraform Provider
+	// https://www.terraform.io/docs/providers/aws/#authentication
+
 	providers := []credentials.Provider{
 		&credentials.StaticProvider{Value: credentials.Value{
 			AccessKeyID:     c.AccessKey,
@@ -32,6 +37,7 @@ func getCredentials(c *Config) *credentials.Credentials {
 			Filename: c.CredsFilename,
 			Profile:  c.Profile,
 		},
+		&ec2rolecreds.EC2RoleProvider{},
 	}
 
 	return credentials.NewChainCredentials(providers)
