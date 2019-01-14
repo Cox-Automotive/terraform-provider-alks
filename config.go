@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+
 	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -21,6 +23,14 @@ type Config struct {
 	Token         string
 	CredsFilename string
 	Profile       string
+	AssumeRole    assumeRoleDetails
+}
+
+type assumeRoleDetails struct {
+	RoleARN     string
+	SessionName string
+	ExternalID  string
+	Policy      string
 }
 
 func getCredentials(c *Config) *credentials.Credentials {
@@ -70,8 +80,37 @@ providing credentials for the ALKS Provider`)
 		return nil, fmt.Errorf("Error creating session from STS. (%v)", err)
 	}
 
+	var stsconn *sts.STS
+	// we need to assume another role before creating an ALKS client
+	if c.AssumeRole.RoleARN != "" {
+		arCreds := stscreds.NewCredentials(sess, c.AssumeRole.RoleARN, func(p *stscreds.AssumeRoleProvider) {
+			if c.AssumeRole.SessionName != "" {
+				p.RoleSessionName = c.AssumeRole.SessionName
+			}
+
+			if c.AssumeRole.ExternalID != "" {
+				p.ExternalID = &c.AssumeRole.ExternalID
+			}
+
+			if c.AssumeRole.Policy != "" {
+				p.Policy = &c.AssumeRole.Policy
+			}
+		})
+
+		cp, cpErr = arCreds.Get()
+		if cpErr != nil {
+			return nil, fmt.Errorf("The role %q cannot be assumed. Please verify the role ARN and your base AWS credentials", c.AssumeRole.RoleARN)
+		}
+
+		stsconn = sts.New(sess, &aws.Config{
+			Region:      aws.String("us-east-1"),
+			Credentials: arCreds,
+		})
+	} else {
+		stsconn = sts.New(sess)
+	}
+
 	// make a basic api call to test creds are valid
-	stsconn := sts.New(sess)
 	_, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 
 	// check for valid creds
