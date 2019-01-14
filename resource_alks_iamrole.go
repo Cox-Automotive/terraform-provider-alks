@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Cox-Automotive/alks-go"
+	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )
@@ -95,7 +95,7 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	var incDefPol = d.Get("include_default_policies").(bool)
 
 	client := meta.(*alks.Client)
-	resp, err := client.CreateIamRole(roleName, roleType, incDefPol)
+	resp, err := client.CreateIamRole(roleName, roleType, incDefPol, false)
 
 	if err != nil {
 		return err
@@ -123,7 +123,7 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	var resp *alks.IamRoleResponse
 	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		var err error
-		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn)
+		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, false)
 		if err != nil {
 			return resource.RetryableError(err)
 		}

@@ -13,13 +13,15 @@ type IamRoleRequest struct {
 	RoleName   string `json:"roleName"`
 	RoleType   string `json:"roleType"`
 	IncDefPols int    `json:"includeDefaultPolicy"`
+	AlksAccess bool   `json:"enableAlksAccess"`
 }
 
 // IamTrustRoleRequest is used to represent a new IAM Trust Role request.
 type IamTrustRoleRequest struct {
-	RoleName string `json:"roleName"`
-	RoleType string `json:"roleType"`
-	TrustArn string `json:"trustArn"`
+	RoleName   string `json:"roleName"`
+	RoleType   string `json:"roleType"`
+	TrustArn   string `json:"trustArn"`
+	AlksAccess bool   `json:"enableAlksAccess"`
 }
 
 // IamRoleResponse is used to represent a a IAM Role.
@@ -55,10 +57,10 @@ type DeleteRoleResponse struct {
 
 // CreateIamRole will create a new IAM role on AWS. If no error is returned
 // then you will receive a IamRoleResponse object representing the new role.
-func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultPolicies bool) (*IamRoleResponse, error) {
+func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultPolicies, enableAlksAccess bool) (*IamRoleResponse, error) {
 	log.Printf("[INFO] Creating IAM role: %s", roleName)
 
-	var include int = 0
+	var include int
 	if includeDefaultPolicies {
 		include = 1
 	}
@@ -67,6 +69,7 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 		roleName,
 		roleType,
 		include,
+		enableAlksAccess,
 	}
 
 	var b []byte
@@ -113,13 +116,14 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 
 // CreateIamTrustRole will create a new IAM trust role on AWS. If no error is returned
 // then you will receive a IamRoleResponse object representing the new role.
-func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn string) (*IamRoleResponse, error) {
+func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn string, enableAlksAccess bool) (*IamRoleResponse, error) {
 	log.Printf("[INFO] Creating IAM trust role: %s", roleName)
 
 	iam := IamTrustRoleRequest{
 		roleName,
 		roleType,
 		trustArn,
+		enableAlksAccess,
 	}
 
 	var b []byte
