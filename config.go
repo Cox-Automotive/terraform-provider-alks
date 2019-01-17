@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+
 	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
@@ -27,6 +29,9 @@ func getCredentials(c *Config) *credentials.Credentials {
 	// Follow the  same priority as the AWS Terraform Provider
 	// https://www.terraform.io/docs/providers/aws/#authentication
 
+	// needed for the EC2MetaData service
+	sess := session.Must(session.NewSession())
+
 	providers := []credentials.Provider{
 		&credentials.StaticProvider{Value: credentials.Value{
 			AccessKeyID:     c.AccessKey,
@@ -38,7 +43,9 @@ func getCredentials(c *Config) *credentials.Credentials {
 			Filename: c.CredsFilename,
 			Profile:  c.Profile,
 		},
-		&ec2rolecreds.EC2RoleProvider{},
+		&ec2rolecreds.EC2RoleProvider{
+			Client: ec2metadata.New(sess),
+		},
 	}
 
 	return credentials.NewChainCredentials(providers)
