@@ -31,3 +31,11 @@
 
 [[constraint]]
   name = "github.com/aws/aws-sdk-go"
+  
+[[constraint]]
+  branch = "master"
+  name = "github.com/Cox-Automotive/alks-go"
+
+[prune]
+  go-tests = true
+  unused-packages = true

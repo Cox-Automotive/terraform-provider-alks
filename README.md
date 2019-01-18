@@ -147,7 +147,7 @@ Clone this repository into `$GOPATH/src/github.com/Cox-Automotive/terraform-prov
 
 ```
 cd "$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks"
-make built test
+make build test
 ```
 
 If you add any additional depedencies to the project you'll need to run `godep save` to update `Godeps.json` and `/vendor`.
