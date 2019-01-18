@@ -44,6 +44,12 @@ func resourceAlksIamRole() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enable_alks_access": &schema.Schema{
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -83,6 +89,12 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
+			"enable_alks_access": &schema.Schema{
+				Type:     schema.TypeBool,
+				Default:  false,
+				Optional: true,
+				ForceNew: true,
+			},
 		},
 	}
 }
@@ -93,9 +105,14 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	var roleName = d.Get("name").(string)
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
+	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 
 	client := meta.(*alks.Client)
+<<<<<<< HEAD
 	resp, err := client.CreateIamRole(roleName, roleType, incDefPol, false)
+=======
+	resp, err := client.CreateIamRole(roleName, roleType, incDefPol, enableAlksAccess)
+>>>>>>> master
 
 	if err != nil {
 		return err
@@ -117,13 +134,18 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	var roleName = d.Get("name").(string)
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
+	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 
 	client := meta.(*alks.Client)
 
 	var resp *alks.IamRoleResponse
 	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
 		var err error
+<<<<<<< HEAD
 		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, false)
+=======
+		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
+>>>>>>> master
 		if err != nil {
 			return resource.RetryableError(err)
 		}
