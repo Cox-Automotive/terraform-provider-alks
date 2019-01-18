@@ -99,7 +99,7 @@ providing credentials for the ALKS Provider`)
 
 		cp, cpErr = arCreds.Get()
 		if cpErr != nil {
-			return nil, fmt.Errorf("The role %q cannot be assumed. Please verify the role ARN and your base AWS credentials", c.AssumeRole.RoleARN)
+			return nil, fmt.Errorf("The role %q cannot be assumed. Please verify the role ARN, role policies and your base AWS credentials", c.AssumeRole.RoleARN)
 		}
 
 		stsconn = sts.New(sess, &aws.Config{
