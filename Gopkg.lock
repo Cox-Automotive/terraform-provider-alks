@@ -2,11 +2,12 @@
 
 
 [[projects]]
-  digest = "1:222804d5fb195251b4c21f704e39672590154664475bc69381c545a9ecfc39b2"
+  branch = "master"
+  digest = "1:a12cb904f8fb247c1e8ffb36a57607d286319acd3d734a5b1d59370883a19117"
   name = "github.com/Cox-Automotive/alks-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "4a87d235c4553dba29ddd235db623425c68aa851"
+  revision = "b8d8670a4cf3cefd352e73dc532f22880085dede"
 
 [[projects]]
   digest = "1:672133929e2786ef49ada5ea7476fa154e251d04da8fa79ae0be0694562ef94e"
