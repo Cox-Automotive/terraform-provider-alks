@@ -25,6 +25,13 @@
 #   unused-packages = true
 
 
+[prune]
+  go-tests = true
+  unused-packages = true
+
+[[constraint]]
+  name = "github.com/aws/aws-sdk-go"
+
 [[constraint]]
   branch = "master"
   name = "github.com/Cox-Automotive/alks-go"

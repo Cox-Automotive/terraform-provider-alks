@@ -4,7 +4,7 @@ import (
 	"log"
 	"time"
 
-	"github.com/Cox-Automotive/alks-go"
+	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
 )

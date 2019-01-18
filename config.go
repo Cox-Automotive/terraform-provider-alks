@@ -3,16 +3,21 @@ package main
 import (
 	"errors"
 	"fmt"
-	"github.com/Cox-Automotive/alks-go"
+	"log"
+
+	"github.com/aws/aws-sdk-go/aws/ec2metadata"
+
+	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
+	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
-	"log"
 )
 
+// Config stores ALKS configuration and credentials
 type Config struct {
-	Url           string
+	URL           string
 	AccessKey     string
 	SecretKey     string
 	Token         string
@@ -21,6 +26,12 @@ type Config struct {
 }
 
 func getCredentials(c *Config) *credentials.Credentials {
+	// Follow the  same priority as the AWS Terraform Provider
+	// https://www.terraform.io/docs/providers/aws/#authentication
+
+	// needed for the EC2MetaData service
+	sess := session.Must(session.NewSession())
+
 	providers := []credentials.Provider{
 		&credentials.StaticProvider{Value: credentials.Value{
 			AccessKeyID:     c.AccessKey,
@@ -32,11 +43,15 @@ func getCredentials(c *Config) *credentials.Credentials {
 			Filename: c.CredsFilename,
 			Profile:  c.Profile,
 		},
+		&ec2rolecreds.EC2RoleProvider{
+			Client: ec2metadata.New(sess),
+		},
 	}
 
 	return credentials.NewChainCredentials(providers)
 }
 
+// Client returns a properly configured ALKS client or an appropriate error if initialization fails
 func (c *Config) Client() (*alks.Client, error) {
 	log.Println("[DEBUG] Validting STS credentials")
 
@@ -72,7 +87,7 @@ providing credentials for the ALKS Provider`)
 	}
 
 	// got good creds, create alks sts client
-	client, err := alks.NewSTSClient(c.Url, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
+	client, err := alks.NewSTSClient(c.URL, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
 	if err != nil {
 		return nil, err
