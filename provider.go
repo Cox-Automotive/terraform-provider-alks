@@ -5,7 +5,7 @@ import (
 
 	"github.com/hashicorp/terraform/helper/schema"
 	"github.com/hashicorp/terraform/terraform"
-	"github.com/mitchellh/go-homedir"
+	homedir "github.com/mitchellh/go-homedir"
 )
 
 // Provider returns a terraform.ResourceProvider.
@@ -59,6 +59,7 @@ func Provider() terraform.ResourceProvider {
 				Description: "The path to the shared credentials file. If not set this defaults to ~/.aws/credentials.",
 				DefaultFunc: schema.EnvDefaultFunc("AWS_SHARED_CREDENTIALS_FILE", nil),
 			},
+			"assume_role": assumeRoleSchema(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -70,13 +71,54 @@ func Provider() terraform.ResourceProvider {
 	}
 }
 
+func assumeRoleSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeSet,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"role_arn": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "(Required) Role ARN to assume before calling ALKS",
+				},
+				"session_name": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "(Optional) Session name to use when making the AssumeRole call.  See AWS SDK for more details.",
+				},
+				"external_id": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "(Optional) The external ID to use when making the AssumeRole call. See AWS SDK for more details.",
+				},
+				"policy": {
+					Type:        schema.TypeString,
+					Optional:    true,
+					Description: "(Optional) Additional policy restrictions to apply to the result STS session.  See AWS SDK for more details.",
+				},
+			},
+		},
+	}
+}
+
 func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	config := Config{
-		Url:       d.Get("url").(string),
+		URL:       d.Get("url").(string),
 		AccessKey: d.Get("access_key").(string),
 		SecretKey: d.Get("secret_key").(string),
 		Token:     d.Get("token").(string),
 		Profile:   d.Get("profile").(string),
+	}
+
+	assumeRoleList := d.Get("assume_role").(*schema.Set).List()
+	if len(assumeRoleList) == 1 {
+		assumeRole := assumeRoleList[0].(map[string]interface{})
+		config.AssumeRole.RoleARN = assumeRole["role_arn"].(string)
+		config.AssumeRole.SessionName = assumeRole["session_name"].(string)
+		config.AssumeRole.ExternalID = assumeRole["external_id"].(string)
+		config.AssumeRole.Policy = assumeRole["policy"].(string)
 	}
 
 	// Set CredsFilename, expanding home directory
