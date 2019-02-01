@@ -7,6 +7,7 @@ import (
 	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 func resourceAlksIamRole() *schema.Resource {
@@ -15,6 +16,9 @@ func resourceAlksIamRole() *schema.Resource {
 		Read:   resourceAlksIamRoleRead,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+
+		SchemaVersion: 1,
+		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -60,6 +64,9 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		Read:   resourceAlksIamRoleRead,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+
+		SchemaVersion: 1,
+		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -214,4 +221,13 @@ func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.Resource
 	// d.Set("type", role.RoleType)
 
 	return nil
+}
+
+func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+	if version == 0 {
+		state.Attributes["enable_alks_access"] = "false"
+		return state, nil
+	}
+
+	return state, nil
 }
