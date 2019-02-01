@@ -196,11 +196,12 @@
   revision = "64130c7a86d732268a38cb04cfbaf0cc987fda98"
 
 [[projects]]
-  digest = "1:826df03282c5a336f1d23a07ce0ec0a26c7230e1a5d5a79a8ea4b68c0c8462b3"
+  digest = "1:950caca7dfcf796419232ba996c9c3539d09f26af27ba848c4508e604c13efbb"
   name = "github.com/hashicorp/go-version"
   packages = ["."]
   pruneopts = "UT"
-  revision = "03c5bf6be031b6dd45afec16b1cf94fc8938bc77"
+  revision = "d40cf49b3a77bba84a7afdbd7f1dc295d114efb1"
+  version = "v1.1.0"
 
 [[projects]]
   digest = "1:2f7a294353f5e7ff51ae26df3a844cb699c7ed3585ff9208a29ab28de960efcd"
