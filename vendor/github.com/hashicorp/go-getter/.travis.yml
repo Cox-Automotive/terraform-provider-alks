@@ -10,7 +10,10 @@ addons:
 language: go
 
 go:
-  - 1.5
+  - "1.11.x"
+
+before_script:
+  - go build ./cmd/go-getter
 
 branches:
   only:

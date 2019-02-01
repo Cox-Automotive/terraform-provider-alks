@@ -148,14 +148,15 @@
   revision = "3573b8b52aa7b37b9358d966a898feb387f62437"
 
 [[projects]]
-  digest = "1:a1648e42765e943bb08464a126ad141413ac423a00f827b4273b2fa6b29274a0"
+  digest = "1:5d340a1c3c266cf5966659d348f9a5a3d15559866b4c824d619e13d3ae2be23f"
   name = "github.com/hashicorp/go-getter"
   packages = [
     ".",
     "helper/url",
   ]
   pruneopts = "UT"
-  revision = "c3d66e76678dce180a7b452653472f949aedfbcd"
+  revision = "dde89f93975670ed3a449be055954c139e36810f"
+  version = "v1.0.1"
 
 [[projects]]
   branch = "master"
@@ -178,6 +179,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "f72692aebca2008343a9deb06ddb4b17f7051c15"
+
+[[projects]]
+  digest = "1:605c47454db9040e30b20dc1b29e3e9d42d6ee742545729cdef74afb1b898ad0"
+  name = "github.com/hashicorp/go-safetemp"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "c9a55de4fe06c920a71964b53cfe3dd293a3c743"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:b8edba99399cf7b4140dd74c9b942ab65155f02f08cccf2cf8246eb692bc5d4b"
@@ -332,6 +341,14 @@
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
 
 [[projects]]
+  digest = "1:42eb1f52b84a06820cedc9baec2e710bfbda3ee6dac6cdb97f8b9a5066134ec6"
+  name = "github.com/mitchellh/go-testing-interface"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6d0b8010fcc857872e42fc6c931227569016843c"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:abf08734a6527df70ed361d7c369fb580e6840d8f7a6012e5f609fdfd93b4e48"
   name = "github.com/mitchellh/go-wordwrap"
   packages = ["."]
@@ -372,6 +389,19 @@
   pruneopts = "UT"
   revision = "3ef9b31a6a0613ae832e7ecf208374027c3b2343"
   version = "v1.2.1"
+
+[[projects]]
+  digest = "1:db345c377984d0907323c09a9b17f11d995a59649fd38f909727df358b5f9020"
+  name = "github.com/ulikunitz/xz"
+  packages = [
+    ".",
+    "internal/hash",
+    "internal/xlog",
+    "lzma",
+  ]
+  pruneopts = "UT"
+  revision = "590df8077fbcb06ad62d7714da06c00e5dd2316d"
+  version = "v0.5.5"
 
 [[projects]]
   branch = "master"
