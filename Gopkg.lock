@@ -10,11 +10,35 @@
   revision = "b8d8670a4cf3cefd352e73dc532f22880085dede"
 
 [[projects]]
+  digest = "1:dc2ba13235a4c8f80a40599575a3f10acb4736cb372f1a68b88333c06564471d"
+  name = "github.com/agext/levenshtein"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5f10fee965225ac1eecdc234c09daf5cd9e7f7b6"
+  version = "v1.2.1"
+
+[[projects]]
   digest = "1:672133929e2786ef49ada5ea7476fa154e251d04da8fa79ae0be0694562ef94e"
   name = "github.com/apparentlymart/go-cidr"
   packages = ["cidr"]
   pruneopts = "UT"
   revision = "a3ebdb999b831ecb6ab8a226e31b07b2b9061c47"
+
+[[projects]]
+  digest = "1:2bf7da77216264bb61bd8cb5f3380a03ab509e8a826fe359008d4a6ba0789b13"
+  name = "github.com/apparentlymart/go-textseg"
+  packages = ["textseg"]
+  pruneopts = "UT"
+  revision = "fb01f485ebef760e5ee06d55e1b07534dda2d295"
+  version = "v1.0.0"
+
+[[projects]]
+  digest = "1:c47f4964978e211c6e566596ec6246c329912ea92e9bb99c00798bb4564c5b09"
+  name = "github.com/armon/go-radix"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "1a2de0c21c94309923825da3df33a4381872c795"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:bfb184a6bdc497cb8889dc7102f73bc3cec03180e81bc32680d941a9460f547b"
@@ -58,6 +82,22 @@
   revision = "9fd32a8b3d3d3f9d43c341bfe098430e07609480"
 
 [[projects]]
+  digest = "1:1343a2963481a305ca4d051e84bc2abd16b601ee22ed324f8d605de1adb291b0"
+  name = "github.com/bgentry/speakeasy"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4aabc24848ce5fd31929f7d1e4ea74d3709c14cd"
+  version = "v0.1.0"
+
+[[projects]]
+  digest = "1:705c40022f5c03bf96ffeb6477858d88565064485a513abcd0f11a0911546cb6"
+  name = "github.com/blang/semver"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "2ee87856327ba09384cabd113bc6b5d174e9ec0f"
+  version = "v3.5.1"
+
+[[projects]]
   digest = "1:a2c1d0e43bd3baaa071d1b9ed72c27d78169b2b269f71c105ac4ba34b1be4a39"
   name = "github.com/davecgh/go-spew"
   packages = ["spew"]
@@ -66,11 +106,32 @@
   version = "v1.1.0"
 
 [[projects]]
+  digest = "1:865079840386857c809b72ce300be7580cb50d3d3129ce11bf9aa6ca2bc1934a"
+  name = "github.com/fatih/color"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "5b77d2a35fb0ede96d138fc9a99f5c9b6aef11b4"
+  version = "v1.7.0"
+
+[[projects]]
   digest = "1:ad82949cfd8b0675ca2966a2a0167b4d13885c792cdf097b69557bfbc0559013"
   name = "github.com/go-ini/ini"
   packages = ["."]
   pruneopts = "UT"
   revision = "c437d20015c2ab6454b7a66a13109ff0fb99e17a"
+
+[[projects]]
+  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "UT"
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
 
 [[projects]]
   digest = "1:07671f8997086ed115824d1974507d2b147d1e0463675ea5dbf3be89b1c2c563"
@@ -95,6 +156,14 @@
   ]
   pruneopts = "UT"
   revision = "c3d66e76678dce180a7b452653472f949aedfbcd"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0876aeb6edb07e20b6b0ce1d346655cb63dbe0a26ccfb47b68a9b7697709777b"
+  name = "github.com/hashicorp/go-hclog"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "4783caec6f2e5cdd47fab8b2bb47ce2ce5c546b7"
 
 [[projects]]
   digest = "1:70058d557ddb53af1a35dd41b748ae8032901e407c7c60f6ff3638c8145be5fb"
@@ -142,6 +211,22 @@
   revision = "630949a3c5fa3c613328e1b8256052cbc2327c9b"
 
 [[projects]]
+  branch = "master"
+  digest = "1:b7e3152253b2e28b6d7d2d201fd47d22b399e98092c383477b27a7e00001017b"
+  name = "github.com/hashicorp/hcl2"
+  packages = [
+    "gohcl",
+    "hcl",
+    "hcl/hclsyntax",
+    "hcl/json",
+    "hcldec",
+    "hclparse",
+    "hclwrite",
+  ]
+  pruneopts = "UT"
+  revision = "89dbc5eb3d9ed3b44b5a60bda31dc68c52f496bb"
+
+[[projects]]
   digest = "1:73ee4fb45f1d87037acaa1e62e362c8a52cb53a60d0a3f77df2a682790abea71"
   name = "github.com/hashicorp/hil"
   packages = [
@@ -161,26 +246,38 @@
   revision = "0dc08b1671f34c4250ce212759ebd880f743d883"
 
 [[projects]]
-  digest = "1:60d08342587693f51cf3a682dfebf5cba16323560e471937ce5ffb576aca661e"
+  digest = "1:197bc726b83189de8595f7bae0eb8ff6f75d5b4f49a127a18694559c8704b05e"
   name = "github.com/hashicorp/terraform"
   packages = [
     "config",
+    "config/configschema",
+    "config/hcl2shim",
     "config/module",
     "dag",
     "flatmap",
     "helper/config",
-    "helper/experiment",
     "helper/hashcode",
     "helper/hilmapstructure",
     "helper/logging",
     "helper/resource",
     "helper/schema",
-    "helper/shadow",
+    "httpclient",
+    "moduledeps",
     "plugin",
+    "plugin/discovery",
+    "registry",
+    "registry/regsrc",
+    "registry/response",
+    "svchost",
+    "svchost/auth",
+    "svchost/disco",
     "terraform",
+    "tfdiags",
+    "version",
   ]
   pruneopts = "UT"
-  revision = "99c8c5302b5fd49f20e906ce26c5d50f88e600a6"
+  revision = "ac4fff416318bf0915a0ab80e062a99ef3724334"
+  version = "v0.11.11"
 
 [[projects]]
   digest = "1:f70324149a251e89d03333d2b627cb87bf360d1c576b218d8e8649c925316fe8"
@@ -197,6 +294,30 @@
   revision = "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d"
 
 [[projects]]
+  digest = "1:c658e84ad3916da105a761660dcaeb01e63416c8ec7bc62256a9b411a05fcd67"
+  name = "github.com/mattn/go-colorable"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "167de6bfdfba052fa6b2d3664c8f5272e23c9072"
+  version = "v0.0.9"
+
+[[projects]]
+  digest = "1:0981502f9816113c9c8c4ac301583841855c8cf4da8c72f696b3ebedf6d0e4e5"
+  name = "github.com/mattn/go-isatty"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "6ca4dbf54d38eea1a992b3c722a76a5d1c4cb25c"
+  version = "v0.0.4"
+
+[[projects]]
+  digest = "1:dac0667a3fcdd4102a5da07abeddc89eb2f125b1e91af1ea9544c80eaff19c9a"
+  name = "github.com/mitchellh/cli"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "3d22a244be8aa6fb16ac24af0e195c08b7d973aa"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:fa20c5befe61ffcce412048bbb2251d236cd847610e2d37162c234ff2fe00ff2"
   name = "github.com/mitchellh/copystructure"
   packages = ["."]
@@ -209,6 +330,14 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "b8bc1bf767474819792c23f32d8286a45736f1c6"
+
+[[projects]]
+  digest = "1:abf08734a6527df70ed361d7c369fb580e6840d8f7a6012e5f609fdfd93b4e48"
+  name = "github.com/mitchellh/go-wordwrap"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "9e67c67572bc5dd02aef930e2b0ae3c02a4b5a5c"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:3b6bb6060d008e84abb4d3d2dd2c50df391c4479056d66e2b4a22e5b0c83255c"
@@ -232,11 +361,94 @@
   revision = "417edcfd99a4d472c262e58f22b4bfe97580f03e"
 
 [[projects]]
-  digest = "1:34bf609f0bc576cd648a993bd711fb9b25f13dcd4ec1d1f5b4137b9d3ed0ff2f"
-  name = "github.com/satori/go.uuid"
-  packages = ["."]
+  digest = "1:57e168c6dfcc02c1c53bdf1589afbef59694d819cac65bfd3a855de2256d4950"
+  name = "github.com/posener/complete"
+  packages = [
+    ".",
+    "cmd",
+    "cmd/install",
+    "match",
+  ]
   pruneopts = "UT"
-  revision = "b061729afc07e77a8aa4fad0a2fd840958f1942a"
+  revision = "3ef9b31a6a0613ae832e7ecf208374027c3b2343"
+  version = "v1.2.1"
+
+[[projects]]
+  branch = "master"
+  digest = "1:0754ae52c92ef39ed041ad80e92a2fed57039539a94d0a3f286e5eb081b70b90"
+  name = "github.com/zclconf/go-cty"
+  packages = [
+    "cty",
+    "cty/convert",
+    "cty/function",
+    "cty/function/stdlib",
+    "cty/gocty",
+    "cty/json",
+    "cty/set",
+  ]
+  pruneopts = "UT"
+  revision = "d7fe3fa0020f4224d2b68a8b52189dbdf30f75f8"
+
+[[projects]]
+  branch = "master"
+  digest = "1:b7b8858de4aba997e54312603676a8f76cedf82e161bf24ada19965d0460dae9"
+  name = "golang.org/x/crypto"
+  packages = [
+    "bcrypt",
+    "blowfish",
+    "cast5",
+    "openpgp",
+    "openpgp/armor",
+    "openpgp/elgamal",
+    "openpgp/errors",
+    "openpgp/packet",
+    "openpgp/s2k",
+  ]
+  pruneopts = "UT"
+  revision = "b8fe1690c61389d7d2a8074a507d1d40c5d30448"
+
+[[projects]]
+  branch = "master"
+  digest = "1:07efe14773da232318db756649c6edcf4df8321c7731e6b56eb2e169cd50b2d0"
+  name = "golang.org/x/net"
+  packages = [
+    "html",
+    "html/atom",
+    "idna",
+  ]
+  pruneopts = "UT"
+  revision = "d26f9f9a57f3fab6a695bec0d84433c2c50f8bbf"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e148a4a19f62c442c03fbab1c8810780d739bcc3e9e6b818971035e1c4946582"
+  name = "golang.org/x/sys"
+  packages = ["unix"]
+  pruneopts = "UT"
+  revision = "afcc84fd7533758f95a6e93ae710aa945a0b7e73"
+
+[[projects]]
+  digest = "1:a2ab62866c75542dd18d2b069fec854577a20211d7c0ea6ae746072a1dccdd18"
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable",
+  ]
+  pruneopts = "UT"
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
 
 [solve-meta]
   analyzer-name = "dep"
