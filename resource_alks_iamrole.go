@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
@@ -224,10 +225,11 @@ func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.Resource
 }
 
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
-	if version == 0 {
+	switch version {
+	case 0:
 		state.Attributes["enable_alks_access"] = "false"
 		return state, nil
+	default:
+		return state, fmt.Errorf("Unrecognized version '%q' in schema for instance of ALKS IAM role", version)
 	}
-
-	return state, nil
 }
