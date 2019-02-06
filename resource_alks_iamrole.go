@@ -1,12 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"time"
 
 	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/resource"
 	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/hashicorp/terraform/terraform"
 )
 
 func resourceAlksIamRole() *schema.Resource {
@@ -15,6 +17,9 @@ func resourceAlksIamRole() *schema.Resource {
 		Read:   resourceAlksIamRoleRead,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+
+		SchemaVersion: 1,
+		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -60,6 +65,9 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		Read:   resourceAlksIamRoleRead,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+
+		SchemaVersion: 1,
+		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
 			"name": &schema.Schema{
@@ -214,4 +222,29 @@ func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.Resource
 	// d.Set("type", role.RoleType)
 
 	return nil
+}
+
+func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
+	switch version {
+	case 0:
+		log.Println("[INFO] Found Instance State v0, migrating to v1")
+		return migrateV0toV1(state)
+	default:
+		return state, fmt.Errorf("Unrecognized version '%d' in schema for instance of ALKS IAM role '%s'", version, state.Attributes["name"])
+	}
+}
+
+func migrateV0toV1(state *terraform.InstanceState) (*terraform.InstanceState, error) {
+	if state.Empty() {
+		log.Println("[DEBUG] Empty InstanceState, nothing to migrate")
+		return state, nil
+	}
+
+	if _, ok := state.Attributes["enable_alks_access"]; !ok {
+		log.Printf("[DEBUG] Attributes before migration: %#v", state.Attributes)
+		state.Attributes["enable_alks_access"] = "false"
+		log.Printf("[DEBUG] Attributes after migration: %#v", state.Attributes)
+	}
+
+	return state, nil
 }
