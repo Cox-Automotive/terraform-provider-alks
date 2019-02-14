@@ -85,7 +85,12 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 	log.Printf("[INFO] Creating %v hr session", sessionDuration)
 
 	var found bool = false
-	for _, v := range c.Durations() {
+	durations, err := c.Durations()
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching allowable durations from ALKS: %s", err)
+	}
+
+	for _, v := range durations {
 		if sessionDuration == v {
 			found = true
 		}

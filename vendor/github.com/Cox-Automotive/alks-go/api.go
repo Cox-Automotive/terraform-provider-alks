@@ -10,6 +10,7 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"net/url"
+	"strings"
 )
 
 // AlksAccount is used to represent the configuration for the ALKS client
@@ -33,6 +34,22 @@ type Client struct {
 	BaseURL string
 
 	Http *http.Client
+}
+
+// Represents the response from ALKS containing information about a login role
+type LoginRoleResponse struct {
+	Errors        []string  `json:"errors"`
+	StatusMessage string    `json:"statusMessage"`
+	RequestId     string    `json:"requestId"`
+	LoginRole     LoginRole `json:"loginRole"`
+}
+
+// Represents information about a login role
+type LoginRole struct {
+	Account        string `json:"account"`
+	IamKeyActive   bool   `json:"iamKeyActive"`
+	MaxKeyDuration int    `json:"maxKeyDuration"`
+	Role           string `json:"role"`
 }
 
 // NewClient will create a new instance of the ALKS Client. If you don't yet know the account/role
@@ -146,6 +163,42 @@ func checkResp(resp *http.Response, err error) (*http.Response, error) {
 }
 
 // Durations will provide the valid session durations
-func (c *Client) Durations() []int {
-	return []int{1, 2, 6, 12, 18}
+func (c *Client) Durations() ([]int, error) {
+	log.Printf("[INFO] Requesting allowed durations from ALKS")
+
+	// Use .../me endpoint for getting durations if using STS credentials
+	var path string
+	if len(strings.TrimSpace(c.Account.Account)) > 0 {
+		accountId := c.Account.Account[0:12]
+		path = fmt.Sprintf("/loginRoles/id/%v/%v", accountId, c.Account.Role)
+	} else {
+		path = "/loginRoles/id/me"
+	}
+
+	req, err := c.NewRequest(nil, "GET", path)
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := checkResp(c.Http.Do(req))
+	if err != nil {
+		return nil, err
+	}
+
+	lrr := new(LoginRoleResponse)
+	err = decodeBody(resp, &lrr)
+	if err != nil {
+		return nil, fmt.Errorf("Error parsing LoginRole response: %s", err)
+	}
+
+	if len(lrr.Errors) > 0 {
+		return nil, fmt.Errorf("Error fetching role information: %s", strings.Join(lrr.Errors[:], ", "))
+	}
+
+	maxDuration := lrr.LoginRole.MaxKeyDuration
+	durations := make([]int, maxDuration)
+	for i := 0; i < maxDuration; i++ {
+		durations[i] = i + 1
+	}
+	return durations, nil
 }
