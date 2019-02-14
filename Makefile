@@ -1,3 +1,4 @@
+GO111MODULE=on
 package=github.com/Cox-Automotive/terraform-provider-alks
 GOFMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
 
