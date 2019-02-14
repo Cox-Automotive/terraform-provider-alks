@@ -10,7 +10,7 @@ require (
 	github.com/apparentlymart/go-cidr v1.0.0 // indirect
 	github.com/apparentlymart/go-dump v0.0.0-20190214190832-042adf3cf4a0 // indirect
 	github.com/armon/go-radix v1.0.0 // indirect
-	github.com/aws/aws-sdk-go v1.16.34
+	github.com/aws/aws-sdk-go v1.16.35
 	github.com/blang/semver v3.5.1+incompatible // indirect
 	github.com/cheggaaa/pb v2.0.6+incompatible // indirect
 	github.com/coreos/go-systemd v0.0.0-20190212144455-93d5ec2c7f76 // indirect
@@ -75,7 +75,7 @@ require (
 	golang.org/x/oauth2 v0.0.0-20190212230446-3e8b2be13635 // indirect
 	golang.org/x/perf v0.0.0-20190124201629-844a5f5b46f4 // indirect
 	golang.org/x/sys v0.0.0-20190213121743-983097b1a8a3 // indirect
-	golang.org/x/tools v0.0.0-20190214185518-4ea155ddbdde // indirect
+	golang.org/x/tools v0.0.0-20190214192712-12f59dd68bb9 // indirect
 	google.golang.org/grpc v1.18.0 // indirect
 	honnef.co/go/tools v0.0.0-20190128043916-71123fcbb8fe // indirect
 	sourcegraph.com/sqs/pbtypes v1.0.0 // indirect
