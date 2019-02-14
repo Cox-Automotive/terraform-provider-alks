@@ -7,7 +7,7 @@ format:
 	gofmt -w $(GOFMT_FILES)
 
 clean:
-	go clean
+	go clean -modcache
 	rm -rf $(RELEASE_DIR)
 
 deps:
