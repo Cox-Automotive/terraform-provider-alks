@@ -6,7 +6,16 @@ RELEASE_DIR=release
 format:
 	gofmt -w $(GOFMT_FILES)
 
-build:
+clean:
+	go clean
+	rm -rf $(RELEASE_DIR)
+
+deps:
+	go mod tidy
+	go get -u
+	go mod vendor
+
+build: clean deps
 	go fmt
 	go build -v -o examples/terraform-provider-alks .
 
@@ -19,7 +28,7 @@ plan:
 install:
 	go get -t -v ./...
 
-release:
+release: clean deps
 	mkdir -p $(RELEASE_DIR)
 
 	GOOS=darwin GOARCH=amd64 go build -o $(RELEASE_DIR)/terraform-provider-alks_v$(TRAVIS_TAG) $(package)
