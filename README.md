@@ -143,7 +143,7 @@ To build the ALKS provider, install [Go](http://www.golang.org/) (version 1.8+ i
 
 Set up a [GOPATH](http://golang.org/doc/code.html#GOPATH) and add `$GOPATH/bin` to your `$PATH`.
 
-Clone this repository into `$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks`. All the necessary dependencies are either vendored or automatically installed (using [Godep](https://github.com/tools/godep)), so type `make build test`. This will compile the code and then run the tests. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
+Clone this repository into `$GOPATH/src/github.com/Cox-Automotive`. All the necessary dependencies are either vendored or automatically installed (using [Godep](https://github.com/tools/godep)), so type `make build test`. This will compile the code and then run the tests. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
 
 ```
 cd "$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks"
