@@ -81,8 +81,15 @@ You can use a role created with ALKS with the `enable_alks_access` flag set to `
 
 In order to do this, ALKS must be called from within AWS using STS credentials from an instance profile associated with the role with `enable_alks_access` set.  This also works from Lambda functions in the same way.
 
-There is nothing special you have to do to use Machine Identities, aside from ensuring that the role you're using has the `enable_alks_access` flag set to `true`.
+The STS credentials are used and provided in the same way that the AWS CLI uses the credentials, so there is nothing special you have to do to use Machine Identities.
 
+Your ALKS provider block can look just like this:
+
+```
+provider "alks" {
+    url     = "https://alks.foo.com/rest"
+}
+```
 
 ### Provider Configuration
 
