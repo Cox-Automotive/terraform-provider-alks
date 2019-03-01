@@ -75,6 +75,22 @@ provider "alks" {
 }
 ```
 
+#### Machine Identities
+
+You can use a role created with ALKS with the `enable_alks_access` flag set to `true` to authenticate requests against ALKS.
+
+In order to do this, ALKS must be called from within AWS using STS credentials from an instance profile associated with the role with `enable_alks_access` set.  This also works from Lambda functions in the same way.
+
+The STS credentials are used and provided in the same way that the AWS CLI uses the credentials, so there is nothing special you have to do to use Machine Identities.
+
+Your ALKS provider block can look just like this:
+
+```
+provider "alks" {
+    url     = "https://alks.foo.com/rest"
+}
+```
+
 ### Provider Configuration
 
 Provider Options:
@@ -95,6 +111,7 @@ resource "alks_iamrole" "test_role" {
     name                     = "My_Test_Role"
     type                     = "Amazon EC2"
     include_default_policies = false
+    enable_alks_access       = false
 }
 ```
 
@@ -106,6 +123,7 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+`enable_alks_access` | Optional | yes | bool | If true, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
 
 #### `alks_iamtrustrole`
 
@@ -115,6 +133,7 @@ resource "alks_iamtrustrole" "test_trust_role" {
     type                     = "Cross Account"
     # type                   = "Inner Account"
     trust_arn                = "arn:aws:iam::123456789123:role/acct-managed/TestTrustRole"
+    enable_alks_access       = false
 }
 ```
 
@@ -126,6 +145,7 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+`enable_alks_access`        | Optional | yes | bool | If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
 
 ## Example
 
