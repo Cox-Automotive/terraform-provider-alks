@@ -17,7 +17,8 @@
   revision = "a3ebdb999b831ecb6ab8a226e31b07b2b9061c47"
 
 [[projects]]
-  digest = "1:bfb184a6bdc497cb8889dc7102f73bc3cec03180e81bc32680d941a9460f547b"
+  branch = "master"
+  digest = "1:203122739f3ab74a3114981c977c23f052d41c1355ae95bea2ff0837bd1e27f6"
   name = "github.com/aws/aws-sdk-go"
   packages = [
     "aws",
@@ -29,25 +30,34 @@
     "aws/credentials",
     "aws/credentials/ec2rolecreds",
     "aws/credentials/endpointcreds",
+    "aws/credentials/processcreds",
     "aws/credentials/stscreds",
+    "aws/csm",
     "aws/defaults",
     "aws/ec2metadata",
     "aws/endpoints",
     "aws/request",
     "aws/session",
     "aws/signer/v4",
+    "internal/ini",
+    "internal/s3err",
+    "internal/sdkio",
+    "internal/sdkrand",
+    "internal/sdkuri",
+    "internal/shareddefaults",
     "private/protocol",
+    "private/protocol/eventstream",
+    "private/protocol/eventstream/eventstreamapi",
     "private/protocol/query",
     "private/protocol/query/queryutil",
     "private/protocol/rest",
     "private/protocol/restxml",
     "private/protocol/xml/xmlutil",
-    "private/waiter",
     "service/s3",
     "service/sts",
   ]
   pruneopts = "UT"
-  revision = "504f3aed90b8db295a45a9d900f11f1327841c81"
+  revision = "951ad7ef064805f1c666d02dee8dfe9363e0f014"
 
 [[projects]]
   branch = "master"
@@ -64,13 +74,6 @@
   pruneopts = "UT"
   revision = "346938d642f2ec3594ed81d874461961cd0faa76"
   version = "v1.1.0"
-
-[[projects]]
-  digest = "1:ad82949cfd8b0675ca2966a2a0167b4d13885c792cdf097b69557bfbc0559013"
-  name = "github.com/go-ini/ini"
-  packages = ["."]
-  pruneopts = "UT"
-  revision = "c437d20015c2ab6454b7a66a13109ff0fb99e17a"
 
 [[projects]]
   digest = "1:07671f8997086ed115824d1974507d2b147d1e0463675ea5dbf3be89b1c2c563"
@@ -190,11 +193,11 @@
   revision = "d1caa6c97c9fc1cc9e83bbe34d0603f9ff0ce8bd"
 
 [[projects]]
-  digest = "1:777a19f55da89883fe86477b3ffcaaebece9a20efa6e9d161c08beb4b3bd83be"
+  digest = "1:bb81097a5b62634f3e9fec1014657855610c82d19b9a40c17612e32651e35dca"
   name = "github.com/jmespath/go-jmespath"
   packages = ["."]
   pruneopts = "UT"
-  revision = "bd40a432e4c76585ef6b72d3fd96fb9b6dc7b68d"
+  revision = "c2b33e84"
 
 [[projects]]
   digest = "1:fa20c5befe61ffcce412048bbb2251d236cd847610e2d37162c234ff2fe00ff2"
@@ -247,9 +250,11 @@
     "github.com/aws/aws-sdk-go/aws/credentials",
     "github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds",
     "github.com/aws/aws-sdk-go/aws/credentials/stscreds",
+    "github.com/aws/aws-sdk-go/aws/defaults",
     "github.com/aws/aws-sdk-go/aws/ec2metadata",
     "github.com/aws/aws-sdk-go/aws/session",
     "github.com/aws/aws-sdk-go/service/sts",
+    "github.com/hashicorp/go-cleanhttp",
     "github.com/hashicorp/terraform/helper/resource",
     "github.com/hashicorp/terraform/helper/schema",
     "github.com/hashicorp/terraform/plugin",
