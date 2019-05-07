@@ -4,8 +4,13 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"os"
+	"time"
+
+	"github.com/hashicorp/go-cleanhttp"
 
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
+	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 
 	alks "github.com/Cox-Automotive/alks-go"
@@ -55,6 +60,18 @@ func getCredentials(c *Config) *credentials.Credentials {
 		&ec2rolecreds.EC2RoleProvider{
 			Client: ec2metadata.New(sess),
 		},
+	}
+
+	// Check for ECS container, for more details see:
+	// https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
+	if uri := os.Getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"); len(uri) > 0 {
+		client := cleanhttp.DefaultClient()
+		client.Timeout = 100 * time.Millisecond
+		cfg := &aws.Config{
+			HTTPClient: client,
+		}
+
+		providers = append(providers, defaults.RemoteCredProvider(*cfg, defaults.Handlers()))
 	}
 
 	return credentials.NewChainCredentials(providers)
