@@ -19,7 +19,7 @@ This module is used for creating IAM Roles via the ALKS API.
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.0.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.2.1/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
@@ -51,7 +51,7 @@ You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS
 
 ```
 provider "alks" {
-    url     = "https://alks.foo.com/rest"
+    url = "https://alks.foo.com/rest"
 }
 ```
 
@@ -75,6 +75,33 @@ provider "alks" {
 }
 ```
 
+#### Machine Identities
+
+You can use a role created with ALKS with the `enable_alks_access` flag set to `true` to authenticate requests against ALKS.
+
+In order to do this, ALKS must be called from within AWS using STS credentials from an instance profile associated with the role with `enable_alks_access` set.  This also works from Lambda functions in the same way.
+
+The STS credentials are used and provided in the same way that the AWS CLI uses the credentials, so there is nothing special you have to do to use Machine Identities.
+
+Your ALKS provider block can look just like this:
+
+```
+provider "alks" {
+    url = "https://alks.foo.com/rest"
+}
+```
+
+Since Machine Identities work with Instance Profile Metadata directly, it can be helpful to assume another role or cross account trust.  For example:
+
+```
+provider "alks" {
+   url = "https://alks.foo.com/rest"
+   assume_role {
+      role_arn = "arn:aws:iam::112233445566:role/acct-managed/JenkinsPRODAccountTrust"
+   }
+}
+```
+
 ### Provider Configuration
 
 Provider Options:
@@ -85,7 +112,12 @@ Provider Options:
 * `token` - (Optional) The session token from a valid STS session.  Also read from `ENV.ALKS_SESSION_TOKEN` and `ENV.AWS_SESSION_TOKEN`.
 * `shared_credentials_file ` - (Optional) The the path to the shared credentials file. Also read from `ENV.AWS_SHARED_CREDENTIALS_FILE `.
 * `profile` - (Optional) This is the AWS profile name as set in the shared credentials file. Also read from `ENV.AWS_PROFILE`.
-
+* `assume_role` - (Optional) This is the role information to assume before making calling ALKS.  This feature works the same as the `assume_role` feature of the [AWS Terraform Provider](https://www.terraform.io/docs/providers/aws/#assume-role).
+    * `role_arn` - (Required) The Role ARN to assume for calling the ALKS API.
+    * `session_name` - (Optional) The session name to provide to AWS when creating STS credentials.  Please see the AWS SDK documentation for more information.
+    * `external_id` - (Optional) The external identifier to provide to AWS when creating STS credentials.  Please see the AWS SDK documentation for more information.
+    * `policy` - (Optional) This specifies additional policy restrictions to apply to the resulting STS credentials beyond any existing inline or managed policies.  Please see the AWS SDK documentation for more information.
+    
 ### Resource Configuration
 
 #### `alks_iamrole`
@@ -95,6 +127,7 @@ resource "alks_iamrole" "test_role" {
     name                     = "My_Test_Role"
     type                     = "Amazon EC2"
     include_default_policies = false
+    enable_alks_access       = false
 }
 ```
 
@@ -106,6 +139,7 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+`enable_alks_access` | Optional | yes | bool | If true, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
 
 #### `alks_iamtrustrole`
 
@@ -115,6 +149,7 @@ resource "alks_iamtrustrole" "test_trust_role" {
     type                     = "Cross Account"
     # type                   = "Inner Account"
     trust_arn                = "arn:aws:iam::123456789123:role/acct-managed/TestTrustRole"
+    enable_alks_access       = false
 }
 ```
 
@@ -126,6 +161,7 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
 `arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
+`enable_alks_access`        | Optional | yes | bool | If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
 
 ## Example
 
