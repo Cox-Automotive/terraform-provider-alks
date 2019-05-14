@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"strings"
 	"time"
 
 	alks "github.com/Cox-Automotive/alks-go"
@@ -147,6 +148,10 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 		var err error
 		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
 		if err != nil {
+			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
+				return resource.NonRetryableError(err)
+			}
+
 			return resource.RetryableError(err)
 		}
 		return resource.NonRetryableError(err)
@@ -189,6 +194,11 @@ func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool
 	foundrole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
+		// TODO: Clean-up this logic, likely by improving the error responses from `alks-go`
+		if strings.Contains(err.Error(), "Role not found") {
+			return false, nil
+		}
+
 		return false, err
 	}
 
