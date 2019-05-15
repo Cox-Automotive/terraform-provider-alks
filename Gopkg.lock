@@ -3,11 +3,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:a12cb904f8fb247c1e8ffb36a57607d286319acd3d734a5b1d59370883a19117"
+  digest = "1:f8c7430dfc65f510e2d9403d567bf80b6090c1c1e477a6f43f2e0becb223d073"
   name = "github.com/Cox-Automotive/alks-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "b8d8670a4cf3cefd352e73dc532f22880085dede"
+  revision = "cc48190b6e3bc76f719e383dca904fabf963aeed"
 
 [[projects]]
   digest = "1:672133929e2786ef49ada5ea7476fa154e251d04da8fa79ae0be0694562ef94e"
@@ -83,11 +83,12 @@
   revision = "7554cd9344cec97297fa6649b055a8c98c2a1e55"
 
 [[projects]]
-  digest = "1:ae263e6b149fb7aadfc0f2284a8891cc3b9d2700e58b9a613fecf70fcc6e495d"
+  digest = "1:af105c7c5dc0b4ae41991f122cae860b9600f7d226072c2a83127048c991660c"
   name = "github.com/hashicorp/go-cleanhttp"
   packages = ["."]
   pruneopts = "UT"
-  revision = "3573b8b52aa7b37b9358d966a898feb387f62437"
+  revision = "eda1e5db218aad1db63ca4642c8906b26bcf2744"
+  version = "v0.5.1"
 
 [[projects]]
   digest = "1:a1648e42765e943bb08464a126ad141413ac423a00f827b4273b2fa6b29274a0"
