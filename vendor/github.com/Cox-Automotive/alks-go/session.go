@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"strings"
 	"time"
 )
 
@@ -14,6 +15,7 @@ type SessionRequest struct {
 
 // SessionResponse is used to represent a new STS session.
 type SessionResponse struct {
+	BaseResponse
 	AccessKey       string    `json:"accessKey"`
 	SecretKey       string    `json:"secretKey"`
 	SessionToken    string    `json:"sessionToken"`
@@ -30,8 +32,8 @@ type AccountRole struct {
 
 // AccountsResponseInt is used internally to represent a collection of ALKS accounts
 type AccountsResponseInt struct {
-	Accounts      map[string][]AccountRole `json:"accountListRole"`
-	StatusMessage string                   `json:"statusMessage"`
+	BaseResponse
+	Accounts map[string][]AccountRole `json:"accountListRole"`
 }
 
 // AccountsResponse is used to represent a collection of ALKS accounts
@@ -39,10 +41,11 @@ type AccountsResponse struct {
 	Accounts []AccountRole `json:"accountListRole"`
 }
 
+// GetAccounts return a list of AccountRoles for an AWS account
 func (c *Client) GetAccounts() (*AccountsResponse, error) {
 	log.Printf("[INFO] Requesting available accounts from ALKS")
 
-	b, err := json.Marshal(c.Account)
+	b, err := json.Marshal(c.Credentials)
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding account request JSON: %s", err)
@@ -53,7 +56,7 @@ func (c *Client) GetAccounts() (*AccountsResponse, error) {
 		return nil, err
 	}
 
-	resp, err := checkResp(c.Http.Do(req))
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -62,11 +65,15 @@ func (c *Client) GetAccounts() (*AccountsResponse, error) {
 	err = decodeBody(resp, &_accts)
 
 	if err != nil {
-		return nil, fmt.Errorf("Error parsing session create response: %s", err)
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing get accounts response: [%s] %s", reqID, err)
+		}
+
+		return nil, fmt.Errorf("Error parsing get accounts response: %s", err)
 	}
 
-	if _accts.StatusMessage != "Success" {
-		return nil, fmt.Errorf(_accts.StatusMessage)
+	if _accts.RequestFailed() {
+		return nil, fmt.Errorf("Error getting accounts : [%s] %s", _accts.BaseResponse.RequestID, strings.Join(_accts.GetErrors(), ", "))
 	}
 
 	accts := new(AccountsResponse)
@@ -84,8 +91,13 @@ func (c *Client) GetAccounts() (*AccountsResponse, error) {
 func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionResponse, error) {
 	log.Printf("[INFO] Creating %v hr session", sessionDuration)
 
-	var found bool = false
-	for _, v := range c.Durations() {
+	var found = false
+	durations, err := c.Durations()
+	if err != nil {
+		return nil, fmt.Errorf("Error fetching allowable durations from ALKS: %s", err)
+	}
+
+	for _, v := range durations {
 		if sessionDuration == v {
 			found = true
 		}
@@ -99,14 +111,14 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 
 	b, err := json.Marshal(struct {
 		SessionRequest
-		AlksAccount
-	}{session, c.Account})
+		AccountDetails
+	}{session, c.AccountDetails})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding session create JSON: %s", err)
 	}
 
-	var endpoint string = "/getKeys/"
+	var endpoint = "/getKeys/"
 	if useIAM {
 		endpoint = "/getIAMKeys/"
 	}
@@ -115,7 +127,7 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 		return nil, err
 	}
 
-	resp, httpErr := checkResp(c.Http.Do(req))
+	resp, httpErr := c.http.Do(req)
 	if httpErr != nil {
 		return nil, err
 	}
@@ -124,12 +136,15 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 	err = decodeBody(resp, &sr)
 
 	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing session create response: [%s] %s", reqID, err)
+		}
+
 		return nil, fmt.Errorf("Error parsing session create response: %s", err)
 	}
 
-	// Most API responses that are 401 include a JSON body with error messages. getKeys & getIAMKeys do not
-	if len(sr.AccessKey) == 0 {
-		return nil, fmt.Errorf("Please validate username/password and account/role.")
+	if sr.RequestFailed() {
+		return nil, fmt.Errorf("Error creating session: [%s] %s", sr.BaseResponse.RequestID, strings.Join(sr.GetErrors(), ", "))
 	}
 
 	sr.Expires = time.Now().Local().Add(time.Hour * time.Duration(sessionDuration))

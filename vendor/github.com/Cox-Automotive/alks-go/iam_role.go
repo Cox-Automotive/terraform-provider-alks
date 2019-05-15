@@ -26,13 +26,13 @@ type IamTrustRoleRequest struct {
 
 // IamRoleResponse is used to represent a a IAM Role.
 type IamRoleResponse struct {
-	RoleName      string   `json:"roleName"`
-	RoleType      string   `json:"roleType"`
-	RoleArn       string   `json:"roleArn"`
-	RoleIPArn     string   `json:"instanceProfileArn"`
-	RoleAddedToIP bool     `json:"addedRoleToInstanceProfile"`
-	Errors        []string `json:"errors"`
-	Exists        bool     `json:"roleExists"`
+	BaseResponse
+	RoleName      string `json:"roleName"`
+	RoleType      string `json:"roleType"`
+	RoleArn       string `json:"roleArn"`
+	RoleIPArn     string `json:"instanceProfileArn"`
+	RoleAddedToIP bool   `json:"addedRoleToInstanceProfile"`
+	Exists        bool   `json:"roleExists"`
 }
 
 // GetRoleRequest is used to represent a request for details about
@@ -50,9 +50,9 @@ type DeleteRoleRequest struct {
 // DeleteRoleResponse is used to represent the results of a IAM role
 // deletion request.
 type DeleteRoleResponse struct {
-	RoleName string   `json:"roleName"`
-	Status   string   `json:"roleArn"`
-	Errors   []string `json:"errors"`
+	BaseResponse
+	RoleName string `json:"roleName"`
+	Status   string `json:"roleArn"`
 }
 
 // CreateIamRole will create a new IAM role on AWS. If no error is returned
@@ -72,19 +72,10 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 		enableAlksAccess,
 	}
 
-	var b []byte
-	var err error
-	if len(strings.TrimSpace(c.Account.Account)) > 0 {
-		b, err = json.Marshal(struct {
-			IamRoleRequest
-			AlksAccount
-		}{iam, c.Account})
-	} else {
-		b, err = json.Marshal(struct {
-			IamRoleRequest
-			AlksSTS
-		}{iam, c.STS})
-	}
+	b, err := json.Marshal(struct {
+		IamRoleRequest
+		AccountDetails
+	}{iam, c.AccountDetails})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
@@ -95,7 +86,7 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 		return nil, err
 	}
 
-	resp, err := checkResp(c.Http.Do(req))
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -104,11 +95,15 @@ func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultP
 	err = decodeBody(resp, &cr)
 
 	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing CreateRole response: [%s] %s", reqID, err)
+		}
+
 		return nil, fmt.Errorf("Error parsing CreateRole response: %s", err)
 	}
 
-	if len(cr.Errors) > 0 {
-		return nil, fmt.Errorf("Error creating role: %s", strings.Join(cr.Errors[:], ", "))
+	if cr.RequestFailed() {
+		return nil, fmt.Errorf("Error creating role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
 	}
 
 	return cr, nil
@@ -126,19 +121,10 @@ func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn s
 		enableAlksAccess,
 	}
 
-	var b []byte
-	var err error
-	if len(strings.TrimSpace(c.Account.Account)) > 0 {
-		b, err = json.Marshal(struct {
-			IamTrustRoleRequest
-			AlksAccount
-		}{iam, c.Account})
-	} else {
-		b, err = json.Marshal(struct {
-			IamTrustRoleRequest
-			AlksSTS
-		}{iam, c.STS})
-	}
+	b, err := json.Marshal(struct {
+		IamTrustRoleRequest
+		AccountDetails
+	}{iam, c.AccountDetails})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create trust role JSON: %s", err)
@@ -149,7 +135,7 @@ func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn s
 		return nil, err
 	}
 
-	resp, err := checkResp(c.Http.Do(req))
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -158,11 +144,15 @@ func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn s
 	err = decodeBody(resp, &cr)
 
 	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing CreateTrustRole response: [%s] %s", reqID, err)
+		}
+
 		return nil, fmt.Errorf("Error parsing CreateTrustRole response: %s", err)
 	}
 
-	if len(cr.Errors) > 0 {
-		return nil, fmt.Errorf("Error creating trust role: %s", strings.Join(cr.Errors[:], ", "))
+	if cr.RequestFailed() {
+		return nil, fmt.Errorf("Error creating trust role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
 	}
 
 	return cr, nil
@@ -175,19 +165,10 @@ func (c *Client) DeleteIamRole(id string) error {
 
 	rmRole := DeleteRoleRequest{id}
 
-	var b []byte
-	var err error
-	if len(strings.TrimSpace(c.Account.Account)) > 0 {
-		b, err = json.Marshal(struct {
-			DeleteRoleRequest
-			AlksAccount
-		}{rmRole, c.Account})
-	} else {
-		b, err = json.Marshal(struct {
-			DeleteRoleRequest
-			AlksSTS
-		}{rmRole, c.STS})
-	}
+	b, err := json.Marshal(struct {
+		DeleteRoleRequest
+		AccountDetails
+	}{rmRole, c.AccountDetails})
 
 	if err != nil {
 		return fmt.Errorf("Error encoding IAM delete role JSON: %s", err)
@@ -198,7 +179,7 @@ func (c *Client) DeleteIamRole(id string) error {
 		return err
 	}
 
-	resp, err := checkResp(c.Http.Do(req))
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
 	}
@@ -207,12 +188,16 @@ func (c *Client) DeleteIamRole(id string) error {
 	err = decodeBody(resp, &del)
 
 	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return fmt.Errorf("Error parsing DeleteRole response: [%s] %s", reqID, err)
+		}
+
 		return fmt.Errorf("Error parsing DeleteRole response: %s", err)
 	}
 
 	// TODO you get an error if you delete an already deleted role, need to revist for checking fail/success
-	if len(del.Errors) > 0 {
-		return fmt.Errorf("Error deleting role: %s", strings.Join(del.Errors[:], ", "))
+	if del.RequestFailed() {
+		return fmt.Errorf("Error deleting role: [%s] %s", del.BaseResponse.RequestID, strings.Join(del.GetErrors(), ", "))
 	}
 
 	return nil
@@ -226,19 +211,10 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 	log.Printf("[INFO] Getting IAM role: %s", roleName)
 	getRole := GetRoleRequest{roleName}
 
-	var b []byte
-	var err error
-	if len(strings.TrimSpace(c.Account.Account)) > 0 {
-		b, err = json.Marshal(struct {
-			GetRoleRequest
-			AlksAccount
-		}{getRole, c.Account})
-	} else {
-		b, err = json.Marshal(struct {
-			GetRoleRequest
-			AlksSTS
-		}{getRole, c.STS})
-	}
+	b, err := json.Marshal(struct {
+		GetRoleRequest
+		AccountDetails
+	}{getRole, c.AccountDetails})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
@@ -249,7 +225,7 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 		return nil, err
 	}
 
-	resp, err := checkResp(c.Http.Do(req))
+	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
 	}
@@ -258,15 +234,19 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 	err = decodeBody(resp, &cr)
 
 	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing GetRole response: [%s] %s", reqID, err)
+		}
+
 		return nil, fmt.Errorf("Error parsing GetRole response: %s", err)
 	}
 
-	if len(cr.Errors) > 0 {
-		return nil, fmt.Errorf("Error getting role: %s", strings.Join(cr.Errors[:], ", "))
+	if cr.RequestFailed() {
+		return nil, fmt.Errorf("Error getting role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
 	}
 
 	if !cr.Exists {
-		return nil, fmt.Errorf("Role does not exist.")
+		return nil, fmt.Errorf("[%s] Role does not exist", cr.BaseResponse.RequestID)
 	}
 
 	// This is here because ALKS returns a string representation of a Java array
