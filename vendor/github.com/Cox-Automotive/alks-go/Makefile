@@ -8,10 +8,7 @@ test:
 	go test -v .
 
 get-deps:
-	go get github.com/hashicorp/go-cleanhttp
-	go install github.com/hashicorp/go-cleanhttp
-	go get github.com/motain/gocheck
-	go install github.com/motain/gocheck
+	dep ensure
 
 format:
 	go fmt
