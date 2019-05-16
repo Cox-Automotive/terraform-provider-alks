@@ -21,6 +21,10 @@ import (
 	"github.com/aws/aws-sdk-go/service/sts"
 )
 
+// Version number, to be injected at link time
+// to set, add `-ldflags "-X main.versionNumber=1.2.3"` to the go build command
+var versionNumber string
+
 // Config stores ALKS configuration and credentials
 type Config struct {
 	URL           string
@@ -148,7 +152,17 @@ providing credentials for the ALKS Provider`)
 		return nil, err
 	}
 
+	client.SetUserAgent(fmt.Sprintf("alks-terraform-provider-%s", getPluginVersion()))
+
 	log.Println("[INFO] ALKS Client configured")
 
 	return client, nil
+}
+
+func getPluginVersion() string {
+	if versionNumber != "" {
+		return versionNumber
+	}
+
+	return "unknown"
 }
