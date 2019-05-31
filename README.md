@@ -19,7 +19,7 @@ This module is used for creating IAM Roles via the ALKS API.
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.2.1/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.2.2/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
@@ -39,6 +39,7 @@ Static credentials can be provided via an `access_key`, `secret_key` and `token`
 ```
 provider "alks" {
     url        = "https://alks.foo.com/rest"
+    version    = "~> 1.2.2"
     access_key = "accesskey"
     secret_key = "secretkey"
     token      = "sessiontoken"
@@ -51,7 +52,8 @@ You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS
 
 ```
 provider "alks" {
-    url = "https://alks.foo.com/rest"
+    url     = "https://alks.foo.com/rest"
+    version = "~> 1.2.2"
 }
 ```
 
@@ -70,6 +72,7 @@ You can use an AWS credentials file to specify your credentials. The default loc
 ```
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
+    version                 = "~> 1.2.2"
     shared_credentials_file = "/Users/brianantonelli/.aws/credentials"
     profile                 = "foo"
 }
@@ -87,7 +90,8 @@ Your ALKS provider block can look just like this:
 
 ```
 provider "alks" {
-    url = "https://alks.foo.com/rest"
+    url     = "https://alks.foo.com/rest"
+    version = "~> 1.2.2"
 }
 ```
 
@@ -95,7 +99,8 @@ Since Machine Identities work with Instance Profile Metadata directly, it can be
 
 ```
 provider "alks" {
-   url = "https://alks.foo.com/rest"
+   url     = "https://alks.foo.com/rest"
+   version = "~> 1.2.2"
    assume_role {
       role_arn = "arn:aws:iam::112233445566:role/acct-managed/JenkinsPRODAccountTrust"
    }
