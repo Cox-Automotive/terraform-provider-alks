@@ -19,7 +19,7 @@ This module is used for creating IAM Roles via the ALKS API.
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.2.2/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.3.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
@@ -39,7 +39,7 @@ Static credentials can be provided via an `access_key`, `secret_key` and `token`
 ```
 provider "alks" {
     url        = "https://alks.foo.com/rest"
-    version    = "~> 1.2.2"
+    version    = "~> 1.3.0"
     access_key = "accesskey"
     secret_key = "secretkey"
     token      = "sessiontoken"
@@ -53,7 +53,7 @@ You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS
 ```
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = "~> 1.2.2"
+    version = "~> 1.3.0"
 }
 ```
 
@@ -72,7 +72,7 @@ You can use an AWS credentials file to specify your credentials. The default loc
 ```
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
-    version                 = "~> 1.2.2"
+    version                 = "~> 1.3.0"
     shared_credentials_file = "/Users/brianantonelli/.aws/credentials"
     profile                 = "foo"
 }
@@ -91,7 +91,7 @@ Your ALKS provider block can look just like this:
 ```
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = "~> 1.2.2"
+    version = "~> 1.3.0"
 }
 ```
 
@@ -100,7 +100,7 @@ Since Machine Identities work with Instance Profile Metadata directly, it can be
 ```
 provider "alks" {
    url     = "https://alks.foo.com/rest"
-   version = "~> 1.2.2"
+   version = "~> 1.3.0"
    assume_role {
       role_arn = "arn:aws:iam::112233445566:role/acct-managed/JenkinsPRODAccountTrust"
    }
@@ -180,7 +180,7 @@ This example is intended to show how to combine a typical AWS Terraform script w
 
 ## Building from Source
 
-To build the ALKS provider, install [Go](http://www.golang.org/) (version 1.8+ is required).
+To build the ALKS provider, install [Go](http://www.golang.org/) (version 1.11+ is required).
 
 Set up a [GOPATH](http://golang.org/doc/code.html#GOPATH) and add `$GOPATH/bin` to your `$PATH`.
 
