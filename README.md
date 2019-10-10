@@ -168,6 +168,19 @@ Value                             | Type     | Forces New | Value Type | Descrip
 `ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
 `enable_alks_access`        | Optional | yes | bool | If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
 
+#### `alks_machine_identity`
+
+```
+resource "alks_machine_identity" "test_mi" {
+    role_arn                     = "arn:aws:iam::123456789123:role/acct-managed/TestTrustRole"
+}
+```
+
+Value                             | Type     | Forces New | Value Type | Description
+--------------------------------- | -------- | ---------- | ---------- | -----------
+`role_arn`                       | Required | yes        | string     | The arn of the Iam role you want to create a machine identity for.
+`machine_identity_arn`           | Computed | n/a        | string     | The arn of the machine identity tied to the iam role.
+
 ## Example
 
 See [this example](examples/alks.tf) for a basic Terraform script which:
