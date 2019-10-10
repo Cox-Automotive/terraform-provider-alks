@@ -56,6 +56,26 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamMachineIdentity_Basic(t *testing.T) {
+	var resp alks.MachineIdentityResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamMachineIdentityDestroy(&resp),
+		Steps: []resource.TestStep{
+			resource.TestStep{
+				Config: testAccCheckAlksIamMachineIdentityConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_machine_identity.bob", "role_arn", "arn:aws:iam::805619180788:role/acct-managed/testing123",
+					),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*alks.Client)
@@ -68,6 +88,25 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 			respz, err := client.GetIamRole(rs.Primary.ID)
 			if respz != nil {
 				return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
+			}
+		}
+
+		return nil
+	}
+}
+
+func testAccCheckAlksIamMachineIdentityDestroy(mi *alks.MachineIdentityResponse) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		client := testAccProvider.Meta().(*alks.Client)
+
+		for _, rs := range s.RootModule().Resources {
+			if rs.Type != "alks_machine_identity" {
+				continue
+			}
+
+			respz, err := client.SearchRoleMachineIdentity(rs.Primary.ID)
+			if respz != nil {
+				return fmt.Errorf("Machine Identity still exists: %#v (%v)", respz, err)
 			}
 		}
 
@@ -136,5 +175,11 @@ resource "alks_iamtrustrole" "bar" {
     name = "bar"
     type = "Inner Account"
     trust_arn = "${alks_iamrole.foo.arn}"
+}
+`
+
+const testAccCheckAlksIamMachineIdentityConfigBasic = `
+resource "alks_machine_identity" "bob" {
+	role_arn = "arn:aws:iam::805619180788:role/acct-managed/testing123"
 }
 `

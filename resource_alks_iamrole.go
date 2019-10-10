@@ -108,6 +108,30 @@ func resourceAlksIamTrustRole() *schema.Resource {
 	}
 }
 
+func resourceAlksIamMachineIdentity() *schema.Resource {
+	return &schema.Resource{
+		Create: resourceAlksIamMachineIdentityCreate,
+		Read:   resourceAlksIamMachineIdentityRead,
+		Exists: resourceAlksIamMachineIdentityExists,
+		Delete: resourceAlksIamMachineIdentityDelete,
+
+		SchemaVersion: 1,
+		MigrateState:  migrateState,
+
+		Schema: map[string]*schema.Schema{
+			"role_arn": &schema.Schema{
+				Type:     schema.TypeString,
+				Required: true,
+				ForceNew: true,
+			},
+			"machine_identity_arn": &schema.Schema{
+				Type:     schema.TypeString,
+				Computed: true,
+			},
+		},
+	}
+}
+
 func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Create")
 
@@ -234,6 +258,13 @@ func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.Resource
 	return nil
 }
 
+func populateResourceDataFromMI(mi *alks.MachineIdentityResponse, d *schema.ResourceData) error {
+	d.SetId(mi.MachineIdentityArn)
+	d.Set("machine_identity_arn", mi.MachineIdentityArn)
+
+	return nil
+}
+
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
 	switch version {
 	case 0:
@@ -257,4 +288,75 @@ func migrateV0toV1(state *terraform.InstanceState) (*terraform.InstanceState, er
 	}
 
 	return state, nil
+}
+
+func resourceAlksIamMachineIdentityCreate(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[INFO] ALKS IAM Machine Identity Create")
+
+	var roleArn = d.Get("role_arn").(string)
+
+	client := meta.(*alks.Client)
+	resp, err := client.AddRoleMachineIdentity(roleArn)
+
+	if err != nil {
+		return err
+	}
+
+	d.SetId(roleArn)
+	d.Set("machine_identity_arn", resp.MachineIdentityArn)
+
+	log.Printf("[INFO] alks_machine_identity_arn: %v", d.Get("machine_identity_arn").(string))
+
+	return nil
+}
+
+func resourceAlksIamMachineIdentityRead(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[INFO] ALKS IAM Machine Identity Read")
+
+	client := meta.(*alks.Client)
+
+	foundMI, err := client.SearchRoleMachineIdentity(d.Id())
+
+	if err != nil {
+		return err
+	}
+
+	return populateResourceDataFromMI(foundMI, d)
+}
+
+func resourceAlksIamMachineIdentityExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
+	log.Printf("[INFO] ALKS IAM Machine Identity Exists")
+
+	client := meta.(*alks.Client)
+
+	foundMI, err := client.SearchRoleMachineIdentity(d.Id())
+
+	if err != nil {
+		if strings.Contains(err.Error(), "Could not find a matching record with the given parameters") {
+			return false, nil
+		}
+
+		return false, err
+	}
+
+	if foundMI == nil {
+		return false, nil
+	}
+
+	return true, nil
+}
+
+func resourceAlksIamMachineIdentityDelete(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[INFO] ALKS IAM Machine Identity Delete")
+
+	var roleArn = d.Get("role_arn").(string)
+
+	client := meta.(*alks.Client)
+	_, err := client.DeleteRoleMachineIdentity(roleArn)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
