@@ -12,8 +12,6 @@ import (
 	"github.com/vmihailenco/msgpack/codes"
 )
 
-const bytesAllocLimit = 1024 * 1024 // 1mb
-
 type bufReader interface {
 	io.Reader
 	io.ByteScanner
@@ -24,10 +22,6 @@ func newBufReader(r io.Reader) bufReader {
 		return br
 	}
 	return bufio.NewReader(r)
-}
-
-func makeBuffer() []byte {
-	return make([]byte, 0, 64)
 }
 
 // Unmarshal decodes the MessagePack-encoded data and stores the result
@@ -56,9 +50,7 @@ type Decoder struct {
 // beyond the MessagePack values requested. Buffering can be disabled
 // by passing a reader that implements io.ByteScanner interface.
 func NewDecoder(r io.Reader) *Decoder {
-	d := &Decoder{
-		buf: makeBuffer(),
-	}
+	d := new(Decoder)
 	d.resetReader(r)
 	return d
 }
@@ -92,6 +84,7 @@ func (d *Decoder) resetReader(r io.Reader) {
 	d.s = reader
 }
 
+//nolint:gocyclo
 func (d *Decoder) Decode(v interface{}) error {
 	var err error
 	switch v := v.(type) {
@@ -413,11 +406,14 @@ func (d *Decoder) Skip() error {
 
 	if codes.IsFixedNum(c) {
 		return nil
-	} else if codes.IsFixedMap(c) {
+	}
+	if codes.IsFixedMap(c) {
 		return d.skipMap(c)
-	} else if codes.IsFixedArray(c) {
+	}
+	if codes.IsFixedArray(c) {
 		return d.skipSlice(c)
-	} else if codes.IsFixedString(c) {
+	}
+	if codes.IsFixedString(c) {
 		return d.skipBytes(c)
 	}
 
@@ -493,20 +489,26 @@ func (d *Decoder) readN(n int) ([]byte, error) {
 	}
 	d.buf = buf
 	if d.rec != nil {
+		//TODO: read directly into d.rec?
 		d.rec = append(d.rec, buf...)
 	}
 	return buf, nil
 }
 
 func readN(r io.Reader, b []byte, n int) ([]byte, error) {
+	const bytesAllocLimit = 1024 * 1024 // 1mb
+
 	if b == nil {
 		if n == 0 {
 			return make([]byte, 0), nil
 		}
-		if n <= bytesAllocLimit {
-			b = make([]byte, n)
-		} else {
-			b = make([]byte, bytesAllocLimit)
+		switch {
+		case n < 64:
+			b = make([]byte, 0, 64)
+		case n <= bytesAllocLimit:
+			b = make([]byte, 0, n)
+		default:
+			b = make([]byte, 0, bytesAllocLimit)
 		}
 	}
 
@@ -539,7 +541,7 @@ func readN(r io.Reader, b []byte, n int) ([]byte, error) {
 	return b, nil
 }
 
-func min(a, b int) int {
+func min(a, b int) int { //nolint:unparam
 	if a <= b {
 		return a
 	}
