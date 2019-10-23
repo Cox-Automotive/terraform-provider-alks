@@ -66,10 +66,8 @@ func TestAccAlksIamMachineIdentity_Basic(t *testing.T) {
 		Steps: []resource.TestStep{
 			resource.TestStep{
 				Config: testAccCheckAlksIamMachineIdentityConfigBasic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"alks_machine_identity.bob", "role_arn", "arn:aws:iam::805619180788:role/acct-managed/testing123",
-					),
+				Check: resource.TestCheckResourceAttrSet(
+					"alks_machine_identity.bob", "role_arn",
 				),
 			},
 		},
@@ -100,13 +98,18 @@ func testAccCheckAlksIamMachineIdentityDestroy(mi *alks.MachineIdentityResponse)
 		client := testAccProvider.Meta().(*alks.Client)
 
 		for _, rs := range s.RootModule().Resources {
-			if rs.Type != "alks_machine_identity" {
+			if rs.Type == "alks_machine_identity" {
+				respz, err := client.SearchRoleMachineIdentity(rs.Primary.ID)
+				if respz != nil {
+					return fmt.Errorf("Machine Identity still exists: %#v (%v)", respz, err)
+				}
+			} else if rs.Type == "alks_iamrole" {
+				respz, err := client.GetIamRole(rs.Primary.ID)
+				if respz != nil {
+					return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
+				}
+			} else {
 				continue
-			}
-
-			respz, err := client.SearchRoleMachineIdentity(rs.Primary.ID)
-			if respz != nil {
-				return fmt.Errorf("Machine Identity still exists: %#v (%v)", respz, err)
 			}
 		}
 
@@ -179,7 +182,13 @@ resource "alks_iamtrustrole" "bar" {
 `
 
 const testAccCheckAlksIamMachineIdentityConfigBasic = `
+resource "alks_iamrole" "foo" {
+	name = "foo"
+	type = "Amazon EC2"
+	include_default_policies = false
+}
+
 resource "alks_machine_identity" "bob" {
-	role_arn = "arn:aws:iam::805619180788:role/acct-managed/testing123"
+	role_arn = "${alks_iamrole.foo.arn}"
 }
 `
