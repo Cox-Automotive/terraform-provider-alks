@@ -55,6 +55,31 @@ type DeleteRoleResponse struct {
 	Status   string `json:"roleArn"`
 }
 
+// AddRoleMachineIdentityRequest is used to represent a request for
+// adding a machine identity for a IamRole
+type AddRoleMachineIdentityRequest struct {
+	RoleARN string `json:"roleARN"`
+}
+
+// DeleteRoleMachineIdentityRequest is used to represent a request for
+// deleteing a machine identity for a IamRole
+type DeleteRoleMachineIdentityRequest struct {
+	RoleARN string `json:"roleARN"`
+}
+
+// SearchRoleMachineIdentityRequest is used to represent a request for
+// searching a machine identity for a given IamRole arn
+type SearchRoleMachineIdentityRequest struct {
+	RoleARN string `json:"roleARN"`
+}
+
+// MachineIdentityResponse is used to represent the results of a add
+// machine identity or delete machine identity request.
+type MachineIdentityResponse struct {
+	BaseResponse
+	MachineIdentityArn string `json:"machineIdentityArn"`
+}
+
 // CreateIamRole will create a new IAM role on AWS. If no error is returned
 // then you will receive a IamRoleResponse object representing the new role.
 func (c *Client) CreateIamRole(roleName string, roleType string, includeDefaultPolicies, enableAlksAccess bool) (*IamRoleResponse, error) {
@@ -263,4 +288,130 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 	}
 
 	return cr, nil
+}
+
+// AddRoleMachineIdentity enable machine identity for a IamRole.
+// If no error is returned then you will receieve the arn for the machine identity that was created.
+func (c *Client) AddRoleMachineIdentity(roleARN string) (*MachineIdentityResponse, error) {
+	log.Printf("[INFO] Adding role machine identity: %s", roleARN)
+	addMI := AddRoleMachineIdentityRequest{roleARN}
+
+	b, err := json.Marshal(struct {
+		AddRoleMachineIdentityRequest
+	}{addMI})
+
+	if err != nil {
+		return nil, fmt.Errorf("Error encoding add role machine identity JSON: %s", err)
+	}
+
+	req, err := c.NewRequest(b, "POST", "/roleMachineIdentity/")
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	cr := new(MachineIdentityResponse)
+	err = decodeBody(resp, &cr)
+
+	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing MachineIdentitiyResponse: [%s] %s", reqID, err)
+		}
+
+		return nil, fmt.Errorf("Error parsing MachineIdentityResponse: %s", err)
+	}
+
+	if cr.RequestFailed() {
+		return nil, fmt.Errorf("Error creating machine identity: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
+	}
+
+	return cr, nil
+}
+
+// DeleteRoleMachineIdentity disable machine identity for a IamRole.
+// If no error is returned then you will receieve the arn for the machine identity that was deleted.
+func (c *Client) DeleteRoleMachineIdentity(roleARN string) (*MachineIdentityResponse, error) {
+	log.Printf("[INFO] Deleting role machine identity: %s", roleARN)
+	deleteMI := DeleteRoleMachineIdentityRequest{roleARN}
+
+	b, err := json.Marshal(struct {
+		DeleteRoleMachineIdentityRequest
+	}{deleteMI})
+
+	if err != nil {
+		return nil, fmt.Errorf("Error encoding delete role machine identity JSON: %s", err)
+	}
+
+	req, err := c.NewRequest(b, "DELETE", "/roleMachineIdentity/")
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	dr := new(MachineIdentityResponse)
+	err = decodeBody(resp, &dr)
+
+	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing MachineIdentityResponse: [%s] %s", reqID, err)
+		}
+
+		return nil, fmt.Errorf("Error parsing MachineIdenttiyResponse: %s", err)
+	}
+
+	if dr.RequestFailed() {
+		return nil, fmt.Errorf("Error deleting machine identity: [%s] %s", dr.BaseResponse.RequestID, strings.Join(dr.GetErrors(), ", "))
+	}
+
+	return dr, nil
+}
+
+// SearchRoleMachineIdentity searches for a machine identity for a given roleARN
+// If no error is returned then you will receive the arn of the machine identity for the given roleARN
+func (c *Client) SearchRoleMachineIdentity(roleARN string) (*MachineIdentityResponse, error) {
+	log.Printf("[INFO] Searching role machine identity: %s", roleARN)
+	searchMI := SearchRoleMachineIdentityRequest{roleARN}
+
+	b, err := json.Marshal(struct {
+		SearchRoleMachineIdentityRequest
+	}{searchMI})
+
+	if err != nil {
+		return nil, fmt.Errorf("Error decoding search role machine identity JSON: %s", err)
+	}
+
+	req, err := c.NewRequest(b, "POST", "/roleMachineIdentity/search/")
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	sr := new(MachineIdentityResponse)
+	err = decodeBody(resp, &sr)
+
+	if err != nil {
+		if reqId := GetRequestID(resp); reqId != "" {
+			return nil, fmt.Errorf("Error parsing MachineIdentityResponse: [%s] %s", reqId, err)
+		}
+
+		return nil, fmt.Errorf("Error parsing MachineIdentityResponse: %s", err)
+	}
+
+	if sr.RequestFailed() {
+		return nil, fmt.Errorf("Error searching machine identity [%s] %s", sr.BaseResponse.RequestID, strings.Join(sr.GetErrors(), ", "))
+	}
+
+	return sr, nil
 }
