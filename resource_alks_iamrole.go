@@ -262,6 +262,8 @@ func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 		d.SetPartial("enable_alks_access")
 	}
 
+	d.Partial(false)
+
 	return nil
 }
 
