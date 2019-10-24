@@ -31,6 +31,20 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 				),
 			},
+			resource.TestStep{
+				// update the resource
+				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar420"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "enable_alks_access", "true"),
+				),
+			},
 		},
 	})
 }
@@ -50,6 +64,18 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 						"alks_iamtrustrole.bar", "name", "bar"),
 					resource.TestCheckResourceAttr(
 						"alks_iamtrustrole.bar", "type", "Inner Account"),
+				),
+			},
+			resource.TestStep{
+				// update the resource
+				Config: testAccCheckAlksIamTrustRoleConfigUpdateBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "name", "bar"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "type", "Inner Account"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "enable_alks_access", "true"),
 				),
 			},
 		},
@@ -125,6 +151,15 @@ resource "alks_iamrole" "foo" {
 }
 `
 
+const testAccCheckAlksIamRoleConfigUpdateBasic = `
+resource "alks_iamrole" "foo" {
+	name = "bar420"
+    type = "Amazon EC2"
+	include_default_policies = false
+	enable_alks_access = true
+}
+`
+
 const testAccCheckAlksIamTrustRoleConfigBasic = `
 resource "alks_iamrole" "foo" {
 	name = "foo"
@@ -136,5 +171,20 @@ resource "alks_iamtrustrole" "bar" {
     name = "bar"
     type = "Inner Account"
     trust_arn = "${alks_iamrole.foo.arn}"
+}
+`
+
+const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
+resource "alks_iamrole" "foo" {
+	name = "foo"
+	type = "Amazon EC2"
+	include_default_policies = false
+}
+
+resource "alks_iamtrustrole" "bar" {
+    name = "bar"
+    type = "Inner Account"
+	trust_arn = "${alks_iamrole.foo.arn}"
+	enable_alks_access = true
 }
 `
