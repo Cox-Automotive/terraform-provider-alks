@@ -64,6 +64,7 @@ func resourceAlksIamTrustRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlksIamTrustRoleCreate,
 		Read:   resourceAlksIamRoleRead,
+		Update: resourceAlksIamRoleUpdate,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
 
@@ -102,7 +103,6 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-				ForceNew: true,
 			},
 		},
 	}
