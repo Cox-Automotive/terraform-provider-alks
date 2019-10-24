@@ -23,11 +23,19 @@ type SessionResponse struct {
 	Expires         time.Time `json:"expires"`
 }
 
+// SkypieaAccount is used to represent Skypiea data
+type SkypieaAccount struct {
+	Account string `json:"Account"`
+	Alias   string `json:"alias"`
+	Label   string `json:"label"`
+}
+
 // AccountRole is used to represent an ALKS account and role combination
 type AccountRole struct {
-	Account   string `json:"account"`
-	Role      string `json:"role"`
-	IamActive bool   `json:"iamKeyActive"`
+	Account        string         `json:"account"`
+	Role           string         `json:"role"`
+	IamActive      bool           `json:"iamKeyActive"`
+	SkypieaAccount SkypieaAccount `json:"skypieaAccount"`
 }
 
 // AccountsResponseInt is used internally to represent a collection of ALKS accounts

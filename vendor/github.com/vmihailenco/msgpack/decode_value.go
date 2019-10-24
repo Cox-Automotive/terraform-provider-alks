@@ -11,6 +11,7 @@ var stringType = reflect.TypeOf((*string)(nil)).Elem()
 
 var valueDecoders []decoderFunc
 
+//nolint:gochecknoinits
 func init() {
 	valueDecoders = []decoderFunc{
 		reflect.Bool:          decodeBoolValue,
@@ -49,12 +50,16 @@ func mustSet(v reflect.Value) error {
 }
 
 func getDecoder(typ reflect.Type) decoderFunc {
-	kind := typ.Kind()
-
-	decoder, ok := typDecMap[typ]
-	if ok {
-		return decoder
+	if v, ok := typeDecMap.Load(typ); ok {
+		return v.(decoderFunc)
 	}
+	fn := _getDecoder(typ)
+	typeDecMap.Store(typ, fn)
+	return fn
+}
+
+func _getDecoder(typ reflect.Type) decoderFunc {
+	kind := typ.Kind()
 
 	if typ.Implements(customDecoderType) {
 		return decodeCustomValue
@@ -79,12 +84,10 @@ func getDecoder(typ reflect.Type) decoderFunc {
 		return ptrDecoderFunc(typ)
 	case reflect.Slice:
 		elem := typ.Elem()
-		switch elem.Kind() {
-		case reflect.Uint8:
+		if elem.Kind() == reflect.Uint8 {
 			return decodeBytesValue
 		}
-		switch elem {
-		case stringType:
+		if elem == stringType {
 			return decodeStringSliceValue
 		}
 	case reflect.Array:
@@ -171,7 +174,7 @@ func unmarshalValue(d *Decoder, v reflect.Value) error {
 		}
 		d.rec = b
 	} else {
-		d.rec = makeBuffer()
+		d.rec = make([]byte, 0, 64)
 		if err := d.Skip(); err != nil {
 			return err
 		}
