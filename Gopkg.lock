@@ -27,12 +27,12 @@
   version = "v0.3.1"
 
 [[projects]]
-  branch = "update-field"
-  digest = "1:1a074dd4ea7a142a33e26ed4760fe26bcf9748330272952292a0cfceb17f8e9e"
+  branch = "master"
+  digest = "1:65202979ae5ca539db80b9917b56aa43ea17917c0d0761b526246560a7ac5c02"
   name = "github.com/Cox-Automotive/alks-go"
   packages = ["."]
   pruneopts = "UT"
-  revision = "0eb177710ad52d6893e230e117f00bece8332369"
+  revision = "cf3293a3f9034fa03ae34857e1668aeab1e1b709"
 
 [[projects]]
   digest = "1:90afd0cfdffcc3df7855160ee2954cbca286e23c4eb9cb3d075536c9e4e1b04f"
