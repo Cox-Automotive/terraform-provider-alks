@@ -16,6 +16,7 @@ func resourceAlksIamRole() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlksIamRoleCreate,
 		Read:   resourceAlksIamRoleRead,
+		Update: resourceAlksIamRoleUpdate,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
 
@@ -54,7 +55,6 @@ func resourceAlksIamRole() *schema.Resource {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-				ForceNew: true,
 			},
 		},
 	}
@@ -247,10 +247,50 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	return populateResourceDataFromRole(foundrole, d)
 }
 
-func populateResourceDataFromRole(role *alks.IamRoleResponse, d *schema.ResourceData) error {
+func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[INFO] ALKS IAM Role Update")
+
+	// enable partial state mode
+	d.Partial(true)
+
+	if d.HasChange("enable_alks_access") {
+		// try updating enable_alks_access
+		if err := updateAlksAccess(d, meta); err != nil {
+			return err
+		}
+
+		d.SetPartial("enable_alks_access")
+	}
+
+	return nil
+}
+
+func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
+	var alksAccess = d.Get("enable_alks_access").(bool)
+	var roleArn = d.Get("arn").(string)
+	client := meta.(*alks.Client)
+	// create the machine identity
+	if alksAccess {
+		_, err := client.AddRoleMachineIdentity(roleArn)
+		if err != nil {
+			return err
+		}
+	} else {
+		// delete the machine identity
+		_, err := client.DeleteRoleMachineIdentity(roleArn)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func populateResourceDataFromRole(role *alks.GetIamRoleResponse, d *schema.ResourceData) error {
 	d.SetId(role.RoleName)
 	d.Set("arn", role.RoleArn)
 	d.Set("ip_arn", role.RoleIPArn)
+	d.Set("enable_alks_access", role.AlksAccess)
+
 	// role type isnt returned by alks api so this will always false report on a remote state change
 	// for more info see issue #125 on ALKS repo
 	// d.Set("type", role.RoleType)
