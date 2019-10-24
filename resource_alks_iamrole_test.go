@@ -186,6 +186,7 @@ resource "alks_iamrole" "foo" {
 	name = "foo"
 	type = "Amazon EC2"
 	include_default_policies = false
+	enable_alks_access = false
 }
 
 resource "alks_machine_identity" "bob" {
