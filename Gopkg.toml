@@ -34,5 +34,5 @@
   name = "github.com/aws/aws-sdk-go"
   
 [[constraint]]
-  branch = "master"
+  branch = "update-field"
   name = "github.com/Cox-Automotive/alks-go"
