@@ -31,6 +31,20 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 				),
 			},
+			resource.TestStep{
+				// update the resource
+				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar420"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "enable_alks_access", "true"),
+				),
+			},
 		},
 	})
 }
@@ -52,22 +66,16 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 						"alks_iamtrustrole.bar", "type", "Inner Account"),
 				),
 			},
-		},
-	})
-}
-
-func TestAccAlksIamMachineIdentity_Basic(t *testing.T) {
-	var resp alks.MachineIdentityResponse
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAlksIamMachineIdentityDestroy(&resp),
-		Steps: []resource.TestStep{
 			resource.TestStep{
-				Config: testAccCheckAlksIamMachineIdentityConfigBasic,
-				Check: resource.TestCheckResourceAttrSet(
-					"alks_machine_identity.bob", "role_arn",
+				// update the resource
+				Config: testAccCheckAlksIamTrustRoleConfigUpdateBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "name", "bar"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "type", "Inner Account"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "enable_alks_access", "true"),
 				),
 			},
 		},
@@ -86,30 +94,6 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 			respz, err := client.GetIamRole(rs.Primary.ID)
 			if respz != nil {
 				return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
-			}
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckAlksIamMachineIdentityDestroy(mi *alks.MachineIdentityResponse) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*alks.Client)
-
-		for _, rs := range s.RootModule().Resources {
-			if rs.Type == "alks_machine_identity" {
-				respz, err := client.SearchRoleMachineIdentity(rs.Primary.ID)
-				if respz != nil {
-					return fmt.Errorf("Machine Identity still exists: %#v (%v)", respz, err)
-				}
-			} else if rs.Type == "alks_iamrole" {
-				respz, err := client.GetIamRole(rs.Primary.ID)
-				if respz != nil {
-					return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
-				}
-			} else {
-				continue
 			}
 		}
 
@@ -160,35 +144,47 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 }
 
 const testAccCheckAlksIamRoleConfigBasic = `
-resource "alks_iamrole" "foo" {
+  resource "alks_iamrole" "foo" {
     name = "bar420"
     type = "Amazon EC2"
-    include_default_policies = false
-}
+		include_default_policies = false
+	}
+`
+
+const testAccCheckAlksIamRoleConfigUpdateBasic = `
+	resource "alks_iamrole" "foo" {
+		name = "bar420"
+		type = "Amazon EC2"
+		include_default_policies = false
+		enable_alks_access = true
+	}
 `
 
 const testAccCheckAlksIamTrustRoleConfigBasic = `
-resource "alks_iamrole" "foo" {
-	name = "foo"
-	type = "Amazon EC2"
-	include_default_policies = false
-}
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
 
-resource "alks_iamtrustrole" "bar" {
-    name = "bar"
-    type = "Inner Account"
-    trust_arn = "${alks_iamrole.foo.arn}"
-}
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+	}
 `
 
-const testAccCheckAlksIamMachineIdentityConfigBasic = `
-resource "alks_iamrole" "foo" {
-	name = "foo"
-	type = "Amazon EC2"
-	include_default_policies = false
-}
+const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
 
-resource "alks_machine_identity" "bob" {
-	role_arn = "${alks_iamrole.foo.arn}"
-}
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+		enable_alks_access = true
+	}
 `
