@@ -35,6 +35,18 @@ type IamRoleResponse struct {
 	Exists        bool   `json:"roleExists"`
 }
 
+// GetIamRoleResponse is used to represent a a IAM Role.
+type GetIamRoleResponse struct {
+	BaseResponse
+	RoleName      string `json:"roleName"`
+	RoleType      string `json:"roleType"`
+	RoleArn       string `json:"roleArn"`
+	RoleIPArn     string `json:"instanceProfileArn"`
+	RoleAddedToIP bool   `json:"addedRoleToInstanceProfile"`
+	Exists        bool   `json:"roleExists"`
+	AlksAccess    bool   `json:"machineIdentity"`
+}
+
 // GetRoleRequest is used to represent a request for details about
 // a specific role based on the role's name.
 type GetRoleRequest struct {
@@ -232,7 +244,7 @@ func (c *Client) DeleteIamRole(id string) error {
 // If no error is returned then you will received a IamRoleResponse object
 // representing the existing role. If the role does not exist the IamRoleResponse
 // object will also be nil.
-func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
+func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, error) {
 	log.Printf("[INFO] Getting IAM role: %s", roleName)
 	getRole := GetRoleRequest{roleName}
 
@@ -255,7 +267,7 @@ func (c *Client) GetIamRole(roleName string) (*IamRoleResponse, error) {
 		return nil, err
 	}
 
-	cr := new(IamRoleResponse)
+	cr := new(GetIamRoleResponse)
 	err = decodeBody(resp, &cr)
 
 	if err != nil {
