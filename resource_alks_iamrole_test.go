@@ -144,47 +144,47 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 }
 
 const testAccCheckAlksIamRoleConfigBasic = `
-resource "alks_iamrole" "foo" {
+  resource "alks_iamrole" "foo" {
     name = "bar420"
     type = "Amazon EC2"
-    include_default_policies = false
-}
+		include_default_policies = false
+	}
 `
 
 const testAccCheckAlksIamRoleConfigUpdateBasic = `
-resource "alks_iamrole" "foo" {
-	name = "bar420"
-    type = "Amazon EC2"
-	include_default_policies = false
-	enable_alks_access = true
-}
+	resource "alks_iamrole" "foo" {
+		name = "bar420"
+		type = "Amazon EC2"
+		include_default_policies = false
+		enable_alks_access = true
+	}
 `
 
 const testAccCheckAlksIamTrustRoleConfigBasic = `
-resource "alks_iamrole" "foo" {
-	name = "foo"
-	type = "Amazon EC2"
-	include_default_policies = false
-}
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
 
-resource "alks_iamtrustrole" "bar" {
-    name = "bar"
-    type = "Inner Account"
-    trust_arn = "${alks_iamrole.foo.arn}"
-}
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+	}
 `
 
 const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
-resource "alks_iamrole" "foo" {
-	name = "foo"
-	type = "Amazon EC2"
-	include_default_policies = false
-}
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
 
-resource "alks_iamtrustrole" "bar" {
-    name = "bar"
-    type = "Inner Account"
-	trust_arn = "${alks_iamrole.foo.arn}"
-	enable_alks_access = true
-}
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+		enable_alks_access = true
+	}
 `
