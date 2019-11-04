@@ -36,7 +36,7 @@ The ALKS provider offers a flexible means of providing authentication credential
 
 Static credentials can be provided via an `access_key`, `secret_key` and `token` in-line in the ALKS provider block.  This method is generally not recommended, since the credentials could accidentally be committed or shared.
 
-```
+```tf
 provider "alks" {
     url        = "https://alks.foo.com/rest"
     version    = "~> 1.3.0"
@@ -50,14 +50,14 @@ provider "alks" {
 
 You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables. If you need to pass multiple AWS credentials (when using a combination of Roles, like `PowerUser` and `IAMAdmin`) you can use the `ALKS_` prefix in place of `AWS_` (ex: `ALKS_ACCESS_KEY_ID`) as these are prioritized over the `AWS_` prefixed environment varaibles for the provider.
 
-```
+```tf
 provider "alks" {
     url     = "https://alks.foo.com/rest"
     version = "~> 1.3.0"
 }
 ```
 
-```
+```console
 $ alks sessions open -i
 $ export AWS_ACCESS_KEY_ID="accesskey"
 $ export AWS_SECRET_ACCESS_KEY="secretkey"
@@ -69,7 +69,7 @@ $ terraform plan
 
 You can use an AWS credentials file to specify your credentials. The default location is `$HOME/.aws/credentials` on Linux and OSX, or `"%USERPROFILE%\.aws\credentials"` for Windows users. If we fail to detect credentials inline, or in the environment, Terraform will check this location last. You can optionally specify a different location in the configuration via the `shared_credentials_file` attribute, or via the environment with the `AWS_SHARED_CREDENTIALS_FILE` variable. This method also supports a profile configuration and matching `AWS_PROFILE` environment variable.
 
-```
+```tf
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
     version                 = "~> 1.3.0"
@@ -88,7 +88,7 @@ The STS credentials are used and provided in the same way that the AWS CLI uses 
 
 Your ALKS provider block can look just like this:
 
-```
+```tf
 provider "alks" {
     url     = "https://alks.foo.com/rest"
     version = "~> 1.3.0"
@@ -97,7 +97,7 @@ provider "alks" {
 
 Since Machine Identities work with Instance Profile Metadata directly, it can be helpful to assume another role or cross account trust.  For example:
 
-```
+```tf
 provider "alks" {
    url     = "https://alks.foo.com/rest"
    version = "~> 1.3.0"
@@ -127,7 +127,7 @@ Provider Options:
 
 #### `alks_iamrole`
 
-```
+```tf
 resource "alks_iamrole" "test_role" {
     name                     = "My_Test_Role"
     type                     = "Amazon EC2"
@@ -148,7 +148,7 @@ Value                             | Type     | Forces New | Value Type | Descrip
 
 #### `alks_iamtrustrole`
 
-```
+```tf
 resource "alks_iamtrustrole" "test_trust_role" {
     name                     = "My_Cross_Test_Role"
     type                     = "Cross Account"
@@ -186,7 +186,7 @@ Set up a [GOPATH](http://golang.org/doc/code.html#GOPATH) and add `$GOPATH/bin` 
 
 Clone this repository into `$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks`. All the necessary dependencies are either vendored or automatically installed (using [Godep](https://github.com/tools/godep)), so type `make build test`. This will compile the code and then run the tests. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
 
-```
+```bash
 cd "$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks"
 make build test
 ```
