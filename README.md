@@ -18,6 +18,8 @@ This module is used for creating IAM Roles via the ALKS API.
 
 * Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
 
+For example on macOS:
+
 ```
 curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.3.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
