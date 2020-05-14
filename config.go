@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/hashicorp/go-cleanhttp"
@@ -138,11 +139,17 @@ providing credentials for the ALKS Provider`)
 	}
 
 	// make a basic api call to test creds are valid
-	_, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	cident, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 
 	// check for valid creds
 	if serr != nil {
 		return nil, serr
+	}
+
+	// check if the user is using a assume-role IAM admin session
+	if isValidIAM(cident.Arn) != true {
+		return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
+			"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
 	}
 
 	// got good creds, create alks sts client
@@ -165,4 +172,13 @@ func getPluginVersion() string {
 	}
 
 	return "unknown"
+}
+
+func isValidIAM(cident *string) bool {
+
+	if strings.Contains(*cident, "assumed-role/Admin/") || strings.Contains(*cident, "assumed-role/IAMAdmin/") {
+		return true
+	}
+
+	return false
 }
