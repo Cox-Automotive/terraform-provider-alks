@@ -16,6 +16,7 @@ import (
 
 	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/session"
@@ -85,7 +86,7 @@ func getCredentials(c *Config) *credentials.Credentials {
 	return credentials.NewChainCredentials(providers)
 }
 
-func getCredentialsFromSession(c *Config) *credentials.Credentials {
+func getCredentialsFromSession(c *Config) (*credentials.Credentials, error) {
 	var sess *session.Session
 	var err error
 	if c.Profile == "" {
@@ -94,16 +95,16 @@ func getCredentialsFromSession(c *Config) *credentials.Credentials {
 			return nil, ErrNoValidCredentialSources
 		}
 	} else {
-		options = &session.Options{
+		options := &session.Options{
 			Config: aws.Config{
 				HTTPClient: cleanhttp.DefaultClient(),
 				MaxRetries: aws.Int(0),
-				Region: aws.String("us-east-1"),
+				Region:     aws.String("us-east-1"),
 			},
 		}
 		options.Profile = c.Profile
 		options.SharedConfigState = session.SharedConfigEnable
-		
+
 		sess, err = session.NewSessionWithOptions(*options)
 		if err != nil {
 			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
@@ -113,11 +114,11 @@ func getCredentialsFromSession(c *Config) *credentials.Credentials {
 		}
 	}
 	creds := sess.Config.Credentials
-	cp, err := sess.Config.Credentials.Get()
+	_, err = sess.Config.Credentials.Get()
 	if err != nil {
 		return nil, ErrNoValidCredentialSources
 	}
-	retrn creds, nil
+	return creds, nil
 }
 
 // Client returns a properly configured ALKS client or an appropriate error if initialization fails
@@ -127,14 +128,16 @@ func (c *Config) Client() (*alks.Client, error) {
 	// lookup credentials
 	creds := getCredentials(c)
 	cp, cpErr := creds.Get()
-	
+
 	// validate we have credentials
 	if cpErr != nil {
 		if awsErr, ok := cpErr.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-			creds, err := getCredentialsFromSession(c)
+			var err error
+			creds, err = getCredentialsFromSession(c)
 			if err != nil {
 				return nil, err
 			}
+			cp, cpErr = creds.Get()
 		} else {
 			return nil, ErrNoValidCredentialSources
 		}
