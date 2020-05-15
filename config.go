@@ -25,6 +25,9 @@ import (
 // Version number, to be injected at link time
 // to set, add `-ldflags "-X main.versionNumber=1.2.3"` to the go build command
 var versionNumber string
+var ErrNoValidCredentialSources = errors.New(`No valid credential sources found for ALKS Provider.
+Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
+providing credentials for the ALKS Provider`)
 
 // Config stores ALKS configuration and credentials
 type Config struct {
@@ -82,6 +85,41 @@ func getCredentials(c *Config) *credentials.Credentials {
 	return credentials.NewChainCredentials(providers)
 }
 
+func getCredentialsFromSession(c *Config) *credentials.Credentials {
+	var sess *session.Session
+	var err error
+	if c.Profile == "" {
+		sess, err = session.NewSession()
+		if err != nil {
+			return nil, ErrNoValidCredentialSources
+		}
+	} else {
+		options = &session.Options{
+			Config: aws.Config{
+				HTTPClient: cleanhttp.DefaultClient(),
+				MaxRetries: aws.Int(0),
+				Region: aws.String("us-east-1"),
+			},
+		}
+		options.Profile = c.Profile
+		options.SharedConfigState = session.SharedConfigEnable
+		
+		sess, err = session.NewSessionWithOptions(*options)
+		if err != nil {
+			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+				return nil, ErrNoValidCredentialSources
+			}
+			return nil, fmt.Errorf("Error creating AWS session: %s", err)
+		}
+	}
+	creds := sess.Config.Credentials
+	cp, err := sess.Config.Credentials.Get()
+	if err != nil {
+		return nil, ErrNoValidCredentialSources
+	}
+	retrn creds, nil
+}
+
 // Client returns a properly configured ALKS client or an appropriate error if initialization fails
 func (c *Config) Client() (*alks.Client, error) {
 	log.Println("[DEBUG] Validting STS credentials")
@@ -89,12 +127,17 @@ func (c *Config) Client() (*alks.Client, error) {
 	// lookup credentials
 	creds := getCredentials(c)
 	cp, cpErr := creds.Get()
-
+	
 	// validate we have credentials
 	if cpErr != nil {
-		return nil, errors.New(`No valid credential sources found for ALKS Provider.
-Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
-providing credentials for the ALKS Provider`)
+		if awsErr, ok := cpErr.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
+			creds, err := getCredentialsFromSession(c)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			return nil, ErrNoValidCredentialSources
+		}
 	}
 
 	// create a new session to test credentails
