@@ -174,9 +174,15 @@ func getPluginVersion() string {
 	return "unknown"
 }
 
-func isValidIAM(cident *string) bool {
+func isValidIAM(arn *string) bool {
 
-	if strings.Contains(*cident, "assumed-role/Admin/") || strings.Contains(*cident, "assumed-role/IAMAdmin/") {
+	/*
+		Validates ARN for assumed-role of:
+			- Admin
+			- IAMAdmin
+			-Machine Identities.
+	*/
+	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") || (strings.Contains(*arn, "arn:aws:sts::") && strings.Contains(*arn, "assumed-role/")) {
 		return true
 	}
 
