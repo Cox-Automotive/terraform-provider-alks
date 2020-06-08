@@ -182,7 +182,7 @@ func isValidIAM(arn *string) bool {
 			- IAMAdmin
 			-Machine Identities.
 	*/
-	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") || (strings.Contains(*arn, "arn:aws:sts::") && strings.Contains(*arn, "assumed-role/")) {
+	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") || strings.Contains(*arn, "arn:aws:sts::") {
 		return true
 	}
 
