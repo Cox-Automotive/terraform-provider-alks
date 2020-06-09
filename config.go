@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 
-	alks "github.com/Cox-Automotive/alks-go"
+	"github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -146,14 +146,14 @@ providing credentials for the ALKS Provider`)
 		return nil, serr
 	}
 
-	// check if the user is using a assume-role IAM admin session
-	if isValidIAM(cident.Arn) != true {
+	// got good creds, create alks sts client
+	client, err := alks.NewSTSClient(c.URL, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
+
+	// check if the user is using a assume-role IAM admin session or MI.
+	if isValidIAM(cident.Arn, client) != true {
 		return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
 			"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
 	}
-
-	// got good creds, create alks sts client
-	client, err := alks.NewSTSClient(c.URL, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
 	if err != nil {
 		return nil, err
@@ -174,11 +174,29 @@ func getPluginVersion() string {
 	return "unknown"
 }
 
-func isValidIAM(cident *string) bool {
-
-	if strings.Contains(*cident, "assumed-role/Admin/") || strings.Contains(*cident, "assumed-role/IAMAdmin/") {
+/*
+	Validates ARN for assumed-role of:
+		- Admin
+		- IAMAdmin
+		- Machine Identities.
+*/
+func isValidIAM(arn *string, client *alks.Client) bool {
+	// Check if Admin || IAMAdmin
+	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") {
 		return true
 	}
 
-	return false
+	// Check if MI...
+	arnParts := strings.FieldsFunc(*arn, splitBy)
+	iamArn := fmt.Sprintf("arn:aws:iam::%s:role/acct-managed/%s", arnParts[3], arnParts[5])
+
+	_, err := client.SearchRoleMachineIdentity(iamArn)
+	if err != nil {
+		return false
+	}
+	return true
+}
+
+func splitBy(r rune) bool {
+	return r == ':' || r == '/'
 }
