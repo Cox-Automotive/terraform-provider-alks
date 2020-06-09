@@ -14,7 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/defaults"
 	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 
-	alks "github.com/Cox-Automotive/alks-go"
+	"github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
@@ -187,9 +187,16 @@ func isValidIAM(arn *string, client *alks.Client) bool {
 	}
 
 	// Check if MI...
-	_, err := client.SearchRoleMachineIdentity(*arn)
+	arnParts := strings.FieldsFunc(*arn, splitBy)
+	iamArn := fmt.Sprintf("arn:aws:iam::%s:role/acct-managed/%s", arnParts[3], arnParts[5])
+
+	_, err := client.SearchRoleMachineIdentity(iamArn)
 	if err != nil {
 		return false
 	}
 	return true
+}
+
+func splitBy(r rune) bool {
+	return r == ':' || r == '/'
 }
