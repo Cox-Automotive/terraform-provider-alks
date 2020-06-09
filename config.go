@@ -149,7 +149,7 @@ providing credentials for the ALKS Provider`)
 	// got good creds, create alks sts client
 	client, err := alks.NewSTSClient(c.URL, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
-	// check if the user is using a assume-role IAM admin session
+	// check if the user is using a assume-role IAM admin session or MI.
 	if isValidIAM(cident.Arn, client) != true {
 		return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
 			"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
@@ -174,24 +174,22 @@ func getPluginVersion() string {
 	return "unknown"
 }
 
+/*
+	Validates ARN for assumed-role of:
+		- Admin
+		- IAMAdmin
+		- Machine Identities.
+*/
 func isValidIAM(arn *string, client *alks.Client) bool {
-
-	/*
-		Validates ARN for assumed-role of:
-			- Admin
-			- IAMAdmin
-			- Machine Identities.
-	*/
+	// Check if Admin || IAMAdmin
 	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") {
-		return true
-	} else if strings.Contains(*arn, "arn:aws:sts::") {
-		// Check if MI...
-		_, err := client.SearchRoleMachineIdentity(*arn)
-		if err != nil {
-			return false
-		}
 		return true
 	}
 
-	return false
+	// Check if MI...
+	_, err := client.SearchRoleMachineIdentity(*arn)
+	if err != nil {
+		return false
+	}
+	return true
 }
