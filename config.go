@@ -182,7 +182,7 @@ func getPluginVersion() string {
 */
 func isValidIAM(arn *string, client *alks.Client) bool {
 	// Check if Admin || IAMAdmin
-	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") {
+	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") || strings.Contains(*arn, "assumed-role/LabAdmin/") {
 		return true
 	}
 
