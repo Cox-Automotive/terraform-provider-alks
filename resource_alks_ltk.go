@@ -1,7 +1,7 @@
 package main
 
 import (
-	alks "alks-go"
+	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/schema"
 	"log"
 )
@@ -24,13 +24,11 @@ func resourceAlksLtk() *schema.Resource {
 			},
 			"account_id": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"role_name": &schema.Schema{
 				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Computed: true,
 			},
 			"account": &schema.Schema{
 				Type:     schema.TypeString,
@@ -84,7 +82,9 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.SetId(resp.Account)
+	d.Set("account_id", resp.AccountDetails.Account)
+	d.Set("role_name", resp.AccountDetails.Role)
+
 	d.Set("role", resp.Role)
 	d.Set("action", resp.Action)
 	d.Set("added_iam_user_to_group", resp.AddedIAMUserToGroup)
@@ -131,7 +131,6 @@ func resourceAlksLtkDelete(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.SetId(resp.Account)
 	d.Set("role", resp.Role)
 	d.Set("action", resp.Action)
 	d.Set("added_iam_user_to_group", resp.AddedIAMUserToGroup)
