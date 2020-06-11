@@ -182,15 +182,14 @@ This example is intended to show how to combine a typical AWS Terraform script w
 
 ## Building from Source
 
-To build the ALKS provider, install [Go](http://www.golang.org/) (version 1.11+ is required).
+To build the ALKS provider, install [Go](http://www.golang.org/) (preferably version 1.14.4 or greater).
 
-Set up a [GOPATH](http://golang.org/doc/code.html#GOPATH) and add `$GOPATH/bin` to your `$PATH`.
-
-Clone this repository into `$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks`. All the necessary dependencies are either vendored or automatically installed (using [Godep](https://github.com/tools/godep)), so type `make build test`. This will compile the code and then run the tests. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
+Clone this repository and `cd` into the cloned directory. All the necessary dependencies are vendored, so type `make build test` to build and test the project. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
 
 ```bash
-cd "$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks"
+git clone https://github.com/Cox-Automotive/terraform-provider-alks.git
+cd terraform-provider-alks
 make build test
 ```
 
-If you add any additional depedencies to the project you'll need to run `godep save` to update `Godeps.json` and `/vendor`.
+If you need any additional depedencies while developing, add the dependency by running `go get <dependency>` and then add it to the vendor folder by running `go mod vendor`.
