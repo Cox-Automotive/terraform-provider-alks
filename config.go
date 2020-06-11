@@ -163,7 +163,6 @@ providing credentials for the ALKS Provider`)
 
 	log.Println("[INFO] ALKS Client configured")
 
-	log.Printf("[INFO] Client: %#v", client)
 	return client, nil
 }
 
