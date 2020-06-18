@@ -414,8 +414,8 @@ func (c *Client) SearchRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 	err = decodeBody(resp, &sr)
 
 	if err != nil {
-		if reqId := GetRequestID(resp); reqId != "" {
-			return nil, fmt.Errorf("Error parsing MachineIdentityResponse: [%s] %s", reqId, err)
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("Error parsing MachineIdentityResponse: [%s] %s", reqID, err)
 		}
 
 		return nil, fmt.Errorf("Error parsing MachineIdentityResponse: %s", err)
