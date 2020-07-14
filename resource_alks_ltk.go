@@ -6,7 +6,6 @@ import (
 	"log"
 )
 
-// TODO: Find a way to NOT store 'secret_key' to TF state file.
 func resourceAlksLtk() *schema.Resource {
 	return &schema.Resource{
 		Create: resourceAlksLtkCreate,
@@ -14,7 +13,6 @@ func resourceAlksLtk() *schema.Resource {
 		Delete: resourceAlksLtkDelete,
 
 		SchemaVersion: 1,
-		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
 			"iam_username": &schema.Schema{
@@ -62,10 +60,6 @@ func resourceAlksLtk() *schema.Resource {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"ltks": &schema.Schema{
-				Type:     schema.TypeMap,
-				Computed: true,
-			},
 		},
 	}
 }
@@ -82,16 +76,16 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	d.Set("account_id", resp.AccountDetails.Account)
-	d.Set("role_name", resp.AccountDetails.Role)
-
-	d.Set("role", resp.Role)
-	d.Set("action", resp.Action)
-	d.Set("added_iam_user_to_group", resp.AddedIAMUserToGroup)
-	d.Set("partial_error", resp.PartialError)
-	d.Set("iam_user_arn", resp.IAMUserArn)
-	d.Set("access_key", resp.AccessKey)
-	d.Set("secret_key", resp.SecretKey)
+	d.SetId(iamUsername)
+	_ = d.Set("account_id", resp.AccountDetails.Account)
+	_ = d.Set("role_name", resp.AccountDetails.Role)
+	_ = d.Set("role", resp.Role)
+	_ = d.Set("action", resp.Action)
+	_ = d.Set("added_iam_user_to_group", resp.AddedIAMUserToGroup)
+	_ = d.Set("partial_error", resp.PartialError)
+	_ = d.Set("iam_user_arn", resp.IAMUserArn)
+	_ = d.Set("access_key", resp.AccessKey)
+	_ = d.Set("secret_key", resp.SecretKey)
 
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
 
@@ -101,42 +95,35 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS LTK Users Read")
 
-	var accountID = d.Get("account_id").(string)
-	var roleName = d.Get("role_name").(string)
-
 	client := meta.(*alks.Client)
-	resp, err := client.GetLongTermKeys(accountID, roleName)
+	resp, err := client.GetLongTermKey(d.Id())
 
 	if err != nil {
 		return err
 	}
 
-	d.SetId(resp.RequestID)
-	d.Set("ltks", resp.LongTermKeys)
-
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
 
-	return nil
+	return populateResourceDataFromLTK(resp, d)
 }
 
 func resourceAlksLtkDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS LTK User Delete")
 
-	var iamUsername = d.Get("iam_username").(string)
-
 	client := meta.(*alks.Client)
-	resp, err := client.DeleteLongTermKey(iamUsername)
+	_, err := client.DeleteLongTermKey(d.Id())
 
 	if err != nil {
 		return err
 	}
 
-	d.Set("role", resp.Role)
-	d.Set("action", resp.Action)
-	d.Set("added_iam_user_to_group", resp.AddedIAMUserToGroup)
-	d.Set("partial_error", resp.PartialError)
+	return nil
+}
 
-	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
+func populateResourceDataFromLTK(longTermKey *alks.GetLongTermKeyResponse, d *schema.ResourceData) error {
+	d.SetId(longTermKey.UserName)
+	_ = d.Set("access_key", longTermKey.AccessKeyID)
+	_ = d.Set("create_date", longTermKey.CreateDate)
 
 	return nil
 }
