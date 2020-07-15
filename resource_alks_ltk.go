@@ -53,10 +53,12 @@ func resourceAlksLtk() *schema.Resource {
 				Computed: true,
 			},
 			"access_key": &schema.Schema{
+				Sensitive: true,
 				Type:     schema.TypeString,
 				Computed: true,
 			},
 			"secret_key": &schema.Schema{
+				Sensitive: true,
 				Type:     schema.TypeString,
 				Computed: true,
 			},
