@@ -3,7 +3,7 @@ package terraform
 import (
 	"fmt"
 
-	"github.com/hashicorp/hcl2/hcl"
+	"github.com/hashicorp/hcl/v2"
 	"github.com/hashicorp/terraform/tfdiags"
 	"github.com/zclconf/go-cty/cty"
 )
@@ -88,6 +88,22 @@ func evaluateResourceForEachExpressionKnown(expr hcl.Expression, ctx EvalContext
 		// thus the earlier IsKnown check suffices for maps
 		if !forEachVal.IsWhollyKnown() {
 			return map[string]cty.Value{}, false, diags
+		}
+
+		// A set of strings may contain null, which makes it impossible to
+		// convert to a map, so we must return an error
+		it := forEachVal.ElementIterator()
+		for it.Next() {
+			item, _ := it.Element()
+			if item.IsNull() {
+				diags = diags.Append(&hcl.Diagnostic{
+					Severity: hcl.DiagError,
+					Summary:  "Invalid for_each set argument",
+					Detail:   fmt.Sprintf(`The given "for_each" argument value is unsuitable: "for_each" sets must not contain null values.`),
+					Subject:  expr.Range().Ptr(),
+				})
+				return nil, true, diags
+			}
 		}
 	}
 

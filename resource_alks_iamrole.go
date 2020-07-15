@@ -152,6 +152,9 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 				return resource.NonRetryableError(err)
 			}
 
+			// Due to IAM eventual consistency, you might've just created a role that you need to link to a trust
+			// We'll keep checking every 15 seconds for up to 2 minutes to see if the role appears
+			time.Sleep(15 * time.Second)
 			return resource.RetryableError(err)
 		}
 		return resource.NonRetryableError(err)

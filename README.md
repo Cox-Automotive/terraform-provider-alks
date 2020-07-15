@@ -21,7 +21,7 @@ This module is used for creating IAM Roles via the ALKS API.
 For example on macOS:
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.3.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.4.2/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
 ```
 
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
@@ -41,7 +41,7 @@ Static credentials can be provided via an `access_key`, `secret_key` and `token`
 ```tf
 provider "alks" {
     url        = "https://alks.foo.com/rest"
-    version    = "~> 1.3.0"
+    version    = "~> 1.4.0"
     access_key = "accesskey"
     secret_key = "secretkey"
     token      = "sessiontoken"
@@ -55,7 +55,7 @@ You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS
 ```tf
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = "~> 1.3.0"
+    version = "~> 1.4.0"
 }
 ```
 
@@ -74,7 +74,7 @@ You can use an AWS credentials file to specify your credentials. The default loc
 ```tf
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
-    version                 = "~> 1.3.0"
+    version                 = "~> 1.4.0"
     shared_credentials_file = "/Users/brianantonelli/.aws/credentials"
     profile                 = "foo"
 }
@@ -93,7 +93,7 @@ Your ALKS provider block can look just like this:
 ```tf
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = "~> 1.3.0"
+    version = "~> 1.4.0"
 }
 ```
 
@@ -102,7 +102,7 @@ Since Machine Identities work with Instance Profile Metadata directly, it can be
 ```tf
 provider "alks" {
    url     = "https://alks.foo.com/rest"
-   version = "~> 1.3.0"
+   version = "~> 1.4.0"
    assume_role {
       role_arn = "arn:aws:iam::112233445566:role/acct-managed/JenkinsPRODAccountTrust"
    }
@@ -182,15 +182,14 @@ This example is intended to show how to combine a typical AWS Terraform script w
 
 ## Building from Source
 
-To build the ALKS provider, install [Go](http://www.golang.org/) (version 1.11+ is required).
+To build the ALKS provider, install [Go](http://www.golang.org/) (preferably version 1.14.4 or greater).
 
-Set up a [GOPATH](http://golang.org/doc/code.html#GOPATH) and add `$GOPATH/bin` to your `$PATH`.
-
-Clone this repository into `$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks`. All the necessary dependencies are either vendored or automatically installed (using [Godep](https://github.com/tools/godep)), so type `make build test`. This will compile the code and then run the tests. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
+Clone this repository and `cd` into the cloned directory. All the necessary dependencies are vendored, so type `make build test` to build and test the project. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
 
 ```bash
-cd "$GOPATH/src/github.com/Cox-Automotive/terraform-provider-alks"
+git clone https://github.com/Cox-Automotive/terraform-provider-alks.git
+cd terraform-provider-alks
 make build test
 ```
 
-If you add any additional depedencies to the project you'll need to run `godep save` to update `Godeps.json` and `/vendor`.
+If you need any additional depedencies while developing, add the dependency by running `go get <dependency>` and then add it to the vendor folder by running `go mod vendor`.

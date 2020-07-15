@@ -14,12 +14,6 @@ import (
 	cleanhttp "github.com/hashicorp/go-cleanhttp"
 )
 
-// AccountDetails represents the callers Account and Role information for ALKS requests
-type AccountDetails struct {
-	Account string `json:"account,omitempty"`
-	Role    string `json:"role,omitempty"`
-}
-
 // Client represents an ALKS client and contains the account info and base url.
 type Client struct {
 	Credentials    AuthInjecter
