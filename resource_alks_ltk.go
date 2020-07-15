@@ -79,12 +79,6 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(iamUsername)
-	_ = d.Set("account_id", resp.AccountDetails.Account)
-	_ = d.Set("role_name", resp.AccountDetails.Role)
-	_ = d.Set("role", resp.Role)
-	_ = d.Set("action", resp.Action)
-	_ = d.Set("added_iam_user_to_group", resp.AddedIAMUserToGroup)
-	_ = d.Set("partial_error", resp.PartialError)
 	_ = d.Set("iam_user_arn", resp.IAMUserArn)
 	_ = d.Set("access_key", resp.AccessKey)
 	_ = d.Set("secret_key", resp.SecretKey)
@@ -101,7 +95,8 @@ func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
 	resp, err := client.GetLongTermKey(d.Id())
 
 	if err != nil {
-		return err
+		d.SetId("")
+		return nil
 	}
 
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
