@@ -11,6 +11,11 @@ func resourceAlksLtk() *schema.Resource {
 		Create: resourceAlksLtkCreate,
 		Read:   resourceAlksLtkRead,
 		Delete: resourceAlksLtkDelete,
+		Exists: resourceAlksLtkExists,
+		Importer: &schema.ResourceImporter{
+			// Terraform provided importer
+			State: schema.ImportStatePassthrough,
+		},
 
 		SchemaVersion: 1,
 
@@ -57,11 +62,11 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
 
-	return nil
+	return resourceAlksLtkRead(d, meta)
 }
 
 func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[INFO] ALKS LTK Users Read")
+	log.Printf("[INFO] ALKS LTK User Read")
 
 	client := meta.(*alks.Client)
 	resp, err := client.GetLongTermKey(d.Id())
@@ -87,6 +92,24 @@ func resourceAlksLtkDelete(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	return nil
+}
+
+func resourceAlksLtkExists(d *schema.ResourceData, meta interface{}) (bool, error) {
+	log.Printf("[INFO] ALKS LTK User Exists")
+
+	client := meta.(*alks.Client)
+	resp, err := client.GetLongTermKey(d.Id())
+
+	if err != nil {
+		return false, err
+	}
+
+	// We can get a 200, but an empty string so this is the condition to check for.
+	if len(resp.LongTermKey.UserName) == 0 {
+		return false, nil
+	}
+
+	return true, nil
 }
 
 func populateResourceDataFromLTK(longTermKey *alks.GetLongTermKeyResponse, d *schema.ResourceData) error {
