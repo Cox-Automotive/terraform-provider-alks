@@ -20,34 +20,6 @@ func resourceAlksLtk() *schema.Resource {
 				Required: true,
 				ForceNew: true,
 			},
-			"account_id": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"role_name": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"account": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"role": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"action": &schema.Schema{
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"added_iam_user_to_group": &schema.Schema{
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"partial_error": &schema.Schema{
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
 			"iam_user_arn": &schema.Schema{
 				Type:     schema.TypeString,
 				Computed: true,
