@@ -79,6 +79,7 @@ func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
 
 	_ = d.Set("iam_username", resp.UserName)
+	_ = d.Set("access_key", resp.AccessKeyID)
 
 	return nil
 }
