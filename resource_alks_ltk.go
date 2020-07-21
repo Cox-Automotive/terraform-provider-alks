@@ -78,7 +78,9 @@ func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
 
-	return populateResourceDataFromLTK(resp, d)
+	_ = d.Set("iam_username", resp.UserName)
+
+	return nil
 }
 
 func resourceAlksLtkDelete(d *schema.ResourceData, meta interface{}) error {
@@ -110,12 +112,4 @@ func resourceAlksLtkExists(d *schema.ResourceData, meta interface{}) (bool, erro
 	}
 
 	return true, nil
-}
-
-func populateResourceDataFromLTK(longTermKey *alks.GetLongTermKeyResponse, d *schema.ResourceData) error {
-	d.SetId(longTermKey.UserName)
-	_ = d.Set("access_key", longTermKey.AccessKeyID)
-	_ = d.Set("create_date", longTermKey.CreateDate)
-
-	return nil
 }
