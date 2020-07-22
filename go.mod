@@ -3,7 +3,7 @@ module github.com/Cox-Automotive/terraform-provider-alks
 go 1.14
 
 require (
-	github.com/Cox-Automotive/alks-go v0.0.0-20200605150811-11bd4c1de348
+	github.com/Cox-Automotive/alks-go v0.0.0-20200714135032-e03438e39d50
 	github.com/aws/aws-sdk-go v1.31.15
 	github.com/hashicorp/go-cleanhttp v0.5.1
 	github.com/hashicorp/terraform v0.12.26

@@ -65,6 +65,7 @@ func Provider() terraform.ResourceProvider {
 		ResourcesMap: map[string]*schema.Resource{
 			"alks_iamrole":      resourceAlksIamRole(),
 			"alks_iamtrustrole": resourceAlksIamTrustRole(),
+			"alks_ltk":          resourceAlksLtk(),
 		},
 
 		ConfigureFunc: providerConfigure,
