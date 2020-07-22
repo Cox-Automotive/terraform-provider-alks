@@ -11,3 +11,5 @@ glide.lock
 
 # VSCode
 .vscode
+.DS_Store
+.terraform/

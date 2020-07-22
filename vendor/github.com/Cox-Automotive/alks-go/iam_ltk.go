@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"strings"
 )
 
@@ -19,6 +20,12 @@ type LongTermKey struct {
 type GetLongTermKeysResponse struct {
 	BaseResponse
 	LongTermKeys []LongTermKey `json:"longTermKeys"`
+}
+
+// GetLongTermKeyResponse is used to represent a single long term key.
+type GetLongTermKeyResponse struct {
+	BaseResponse
+	LongTermKey `json:"longTermKey"`
 }
 
 // BaseLongTermKeyResponse encapsulates shared response fields
@@ -95,6 +102,55 @@ func (c *Client) GetLongTermKeys() (*GetLongTermKeysResponse, error) {
 
 	if cr.RequestFailed() {
 		return nil, fmt.Errorf("Error getting long term keys: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
+	}
+
+	return cr, nil
+}
+
+// GetLongTermKey gets a single LTK for an account
+// If no error is returned, then you will receive an LTK for the given account.
+func (c *Client) GetLongTermKey(iamUsername string) (*GetLongTermKeyResponse, error) {
+	log.Printf("[INFO] Getting long term key")
+
+	var req *http.Request
+	var err error
+
+	if c.IsUsingSTSCredentials() {
+		req, err = c.NewRequest(nil, "GET", "/ltk/search/"+iamUsername)
+	} else {
+		accountID, err := c.AccountDetails.GetAccountNumber()
+		if err != nil {
+			return nil, fmt.Errorf("error reading Account value: %s", err)
+		}
+
+		roleName, err := c.AccountDetails.GetRoleName(false)
+		if err != nil {
+			return nil, fmt.Errorf("error reading Role value: %s", err)
+		}
+
+		req, err = c.NewRequest(nil, "GET", "/ltk/"+accountID+"/"+roleName+"/search/"+iamUsername)
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	cr := new(GetLongTermKeyResponse)
+	err = decodeBody(resp, &cr)
+
+	if err != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("error parsing GetLongTermKeyResponse: [%s] %s", reqID, err)
+		}
+	}
+
+	if cr.RequestFailed() {
+		return nil, fmt.Errorf("error getting long term keys: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
 	}
 
 	return cr, nil

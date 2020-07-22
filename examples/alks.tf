@@ -41,3 +41,8 @@ resource "aws_iam_role_policy_attachment" "sr-attach" {
     role       = "${alks_iamrole.test_role.name}"
     policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
 }
+
+# CREATE LTK USER
+resource "alks_ltk" "ltk" {
+    iam_username = "TEST_LTK_USER"
+}

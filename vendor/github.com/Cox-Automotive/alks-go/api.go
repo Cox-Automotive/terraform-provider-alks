@@ -64,6 +64,13 @@ func NewSTSClient(url string, accessKey string, secretKey string, token string) 
 		userAgent:   "alks-go",
 	}
 
+	// Fetch the current login role, and try to populate the account details object.  If we fail, just ignore
+	loginRole, err := client.GetMyLoginRole()
+	if err == nil {
+		client.AccountDetails.Account = loginRole.LoginRole.Account
+		client.AccountDetails.Role = loginRole.LoginRole.Role
+	}
+
 	return &client, nil
 }
 
@@ -89,6 +96,16 @@ func (c *Client) SetUserAgent(userAgent string) {
 	}
 
 	c.userAgent = userAgent
+}
+
+// IsUsingSTSCredentials returns a boolean indicating if the client was configured using AWS STS Credentials for authentication
+func (c *Client) IsUsingSTSCredentials() bool {
+	switch c.Credentials.(type) {
+	case *STS:
+		return true
+	default:
+		return false
+	}
 }
 
 // NewRequest will create a new request object for API requests.
