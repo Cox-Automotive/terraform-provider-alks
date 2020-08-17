@@ -50,6 +50,8 @@ release:
 	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.versionNumber=$(TRAVIS_TAG)" -o release/terraform-provider-alks_v$(TRAVIS_TAG).exe -mod=vendor $(package)
 	zip release/terraform-provider-alks-windows-amd64.zip release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 
+	shasum -a 256 release/*.zip > release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
+
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG)
 
