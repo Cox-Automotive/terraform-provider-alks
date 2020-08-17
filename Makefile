@@ -53,5 +53,5 @@ release:
 	shasum -a 256 release/*.zip > release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
-	rm release/terraform-provider-alks_v$(TRAVIS_TAG)
+	# rm release/terraform-provider-alks_v$(TRAVIS_TAG)
 
