@@ -12,7 +12,7 @@ This module is used for creating IAM Roles via the ALKS API.
     * With an `IAMAdmin|LabAdmin` role, you can create roles and attach policies, but you can't create other infrastructure.
 * Works with [Terraform](https://www.terraform.io/) version `0.10.0` or newer.
 
-## Installation
+## Terraform version < 0.13 Installation
 
 * Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
 
@@ -27,6 +27,37 @@ curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/downl
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
 
 * Note: If you've used a previous version of the ALKS provider and created a `.terraformrc` file in your home directory you'll want to remove it prior to updating.
+
+## Terraform version >= 0.13 Terraform Installation
+
+* Download and install [Terraform](https://www.terraform.io/intro/getting-started/install.html)
+
+* Download ALKS Provider binary for your platform from [Releases](https://github.com/Cox-Automotive/terraform-provider-alks/releases)
+  
+For example on macOS:
+
+```
+curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.4.3/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+```
+
+* Go into the Terraform plugins path; `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
+
+* Create the following directories: `coxautoinc.com/engineering-enablement/alks/1.4.3/darwin_amd64` and put the binary into the `darwin_amd64/` directory.
+
+* Finally, configure Terraform.
+    * In your `versions.tf` or `main.tf` file you'll want to add the new ALKS provider as such:
+    ```
+    terraform {
+        required_version = ">= 0.13"
+        required_providers {
+        alks = {
+            source = "coxautoinc.com/engineering-enablement/alks"
+            }
+        }
+    }
+    ```
+
+* Note: If you've previously installed our provider and it is stored in your remote state, you may need to run the [`replace-provider` command](https://www.terraform.io/docs/commands/state/replace-provider.html).
 
 ## Usage
 
@@ -138,15 +169,15 @@ resource "alks_iamrole" "test_role" {
 }
 ```
 
-Value                             | Type     | Forces New | Value Type | Description
---------------------------------- | -------- | ---------- | ---------- | -----------
-`name`                           | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
-`type`                           | Required | yes        | string     | The role type to use. [Available Roles](https://gist.github.com/brianantonelli/5769deff6fd8f3ff30e40b844f0b1fb4)
-`include_default_policies`                           | Required | yes        | bool     | Whether or not the default managed policies should be attached to the role.
-`role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
-`arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
-`ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
-`enable_alks_access` | Optional | yes | bool | If true, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
+| Value                      | Type     | Forces New | Value Type | Description                                                                                                                                                                                                                                                       |
+| -------------------------- | -------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`                     | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case. |
+| `type`                     | Required | yes        | string     | The role type to use. [Available Roles](https://gist.github.com/brianantonelli/5769deff6fd8f3ff30e40b844f0b1fb4)                                                                                                                                                  |
+| `include_default_policies` | Required | yes        | bool       | Whether or not the default managed policies should be attached to the role.                                                                                                                                                                                       |
+| `role_added_to_ip`         | Computed | n/a        | bool       | Indicates whether or not an instance profile role was created.                                                                                                                                                                                                    |
+| `arn`                      | Computed | n/a        | string     | Provides the ARN of the role that was created.                                                                                                                                                                                                                    |
+| `ip_arn`                   | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.                                                                                                                                                                          |
+| `enable_alks_access`       | Optional | yes        | bool       | If true, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.                                                                                                                                                           |
 
 #### `alks_iamtrustrole`
 
@@ -160,15 +191,15 @@ resource "alks_iamtrustrole" "test_trust_role" {
 }
 ```
 
-Value                             | Type     | Forces New | Value Type | Description
---------------------------------- | -------- | ---------- | ---------- | -----------
-`name`                           | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
-`type`                           | Required | yes        | string     | The role type to use `Cross Account` or `Inner Account`.
-`trust_arn`                           | Required | yes        | string     | account role arn to trust.
-`role_added_to_ip`                           | Computed | n/a        | bool     | Indicates whether or not an instance profile role was created.
-`arn`                           | Computed | n/a        | string     | Provides the ARN of the role that was created.
-`ip_arn`                           | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
-`enable_alks_access`        | Optional | yes | bool | If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.
+| Value                | Type     | Forces New | Value Type | Description                                                                                                                                                                                                                                                       |
+| -------------------- | -------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `name`               | Required | yes        | string     | The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case. |
+| `type`               | Required | yes        | string     | The role type to use `Cross Account` or `Inner Account`.                                                                                                                                                                                                          |
+| `trust_arn`          | Required | yes        | string     | account role arn to trust.                                                                                                                                                                                                                                        |
+| `role_added_to_ip`   | Computed | n/a        | bool       | Indicates whether or not an instance profile role was created.                                                                                                                                                                                                    |
+| `arn`                | Computed | n/a        | string     | Provides the ARN of the role that was created.                                                                                                                                                                                                                    |
+| `ip_arn`             | Computed | n/a        | string     | If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.                                                                                                                                                                          |
+| `enable_alks_access` | Optional | yes        | bool       | If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role.                                                                                                                                                         |
 
 ### `alks_ltk`
 
@@ -178,12 +209,12 @@ resource "alks_ltk" "test_ltk_user" {
 }
 ```
 
-Value                             | Type     | Forces New | Value Type | Description
---------------------------------- | -------- | ---------- | ---------- | -----------
-`iam_username`                    | Required | yes        | string     | The name of the IAM user to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. User names are not distinguished by case.
-`iam_user_arn`                           | Computed | n/a        | string     | The ARN associated with the LTK user.
-`access_key`                           | Computed | n/a        | string     | Generated access key for the LTK user. Note: This is saved in the state file, so please be aware of this.
-`secret_key`                           | Computed | n/a        | string     | Generated secret key for the LTK user. Note: This is saved in the state file, so please be aware of this.
+| Value          | Type     | Forces New | Value Type | Description                                                                                                                                                                                                                                                       |
+| -------------- | -------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `iam_username` | Required | yes        | string     | The name of the IAM user to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. User names are not distinguished by case. |
+| `iam_user_arn` | Computed | n/a        | string     | The ARN associated with the LTK user.                                                                                                                                                                                                                             |
+| `access_key`   | Computed | n/a        | string     | Generated access key for the LTK user. Note: This is saved in the state file, so please be aware of this.                                                                                                                                                         |
+| `secret_key`   | Computed | n/a        | string     | Generated secret key for the LTK user. Note: This is saved in the state file, so please be aware of this.                                                                                                                                                         |
 
 
 ## Example
