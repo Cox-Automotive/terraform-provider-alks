@@ -42,7 +42,8 @@ curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/downl
 
 * Go into the Terraform plugins path; `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
 
-* Create the following directories: `coxautoinc.com/engineering-enablement/alks/1.4.3/darwin_amd64` and put the binary into the `darwin_amd64/` directory.
+* Create the following directories: `coxautoinc.com/engineering-enablement/alks/1.4.3/<OS>_<ARCH>` and put the binary into the `<OS>_<ARCH>/` directory.
+  * Note: This `<OS>_<ARCH>` will vary depending on your system. For example, 64-bit MacOS would be: `darwin_amd64` while 64-bit Windows 10 would be: `windows_amd64` 
 
 * Finally, configure Terraform.
     * In your `versions.tf` or `main.tf` file you'll want to add the new ALKS provider as such:
