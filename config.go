@@ -39,6 +39,8 @@ type Config struct {
 	CredsFilename string
 	Profile       string
 	AssumeRole    assumeRoleDetails
+	Account       string
+	Role          string
 }
 
 type assumeRoleDetails struct {
@@ -123,7 +125,7 @@ func getCredentialsFromSession(c *Config) (*credentials.Credentials, error) {
 
 // Client returns a properly configured ALKS client or an appropriate error if initialization fails
 func (c *Config) Client() (*alks.Client, error) {
-	log.Println("[DEBUG] Validting STS credentials")
+	log.Println("[DEBUG] Validating STS credentials") // TODO: Fix typo.
 
 	// lookup credentials
 	creds := getCredentials(c)
@@ -196,14 +198,27 @@ func (c *Config) Client() (*alks.Client, error) {
 	// got good creds, create alks sts client
 	client, err := alks.NewSTSClient(c.URL, cp.AccessKeyID, cp.SecretAccessKey, cp.SessionToken)
 
+	if err != nil {
+		return nil, err
+	}
+
+	// 1. Check if calling for a specific account
+	if len(c.Account) > 0 && len(c.Role) > 0 {
+
+		// 2. Generate client specified
+		newClient, err := generateNewClient(c, cident, client)
+
+		if err != nil {
+			return nil, err
+		}
+
+		return newClient, nil
+	}
+
 	// check if the user is using a assume-role IAM admin session or MI.
 	if isValidIAM(cident.Arn, client) != true {
 		return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
 			"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	client.SetUserAgent(fmt.Sprintf("alks-terraform-provider-%s", getPluginVersion()))
@@ -246,4 +261,50 @@ func isValidIAM(arn *string, client *alks.Client) bool {
 
 func splitBy(r rune) bool {
 	return r == ':' || r == '/'
+}
+
+func generateNewClient(c *Config, cident *sts.GetCallerIdentityOutput, client *alks.Client) (*alks.Client, error) {
+
+	// 3. Create account string
+	newAccDetail := c.Account + "/ALKS" + c.Role
+
+	// Calling for the same account; fine.
+	if strings.Contains(newAccDetail, client.AccountDetails.Account) {
+
+		// check if the user is using a assume-role IAM admin session or MI.
+		if isValidIAM(cident.Arn, client) != true {
+			return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
+				"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
+		}
+
+		client.SetUserAgent(fmt.Sprintf("alks-terraform-provider-%s", getPluginVersion()))
+
+		log.Println("[INFO] ALKS Client configured")
+
+		return client, nil
+	} else {
+
+		// 4. Alright, new credentials needed - swap em out.
+		client.AccountDetails.Account = newAccDetail
+		client.AccountDetails.Role = c.Role
+
+		newCreds, _ := client.CreateIamSession()
+		newClient, err := alks.NewSTSClient(c.URL, newCreds.AccessKey, newCreds.SecretKey, newCreds.SessionToken)
+
+		if err != nil {
+			return nil, err
+		}
+
+		if isValidIAM(cident.Arn, newClient) != true {
+			return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
+				"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
+		}
+
+		newClient.SetUserAgent(fmt.Sprintf("alks-terraform-provider-%s", getPluginVersion()))
+
+		log.Println("[INFO] ALKS Client configured")
+
+		// 5. Return this new client for provider
+		return newClient, nil
+	}
 }
