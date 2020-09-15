@@ -2,18 +2,36 @@
 # PROVIDERS
 #
 provider "alks" {
-    url      = "https://alks.foo.com/rest"
+  url = "https://alks.foo.com/rest"
 }
+
+provider "alks" {
+  url     = "https://alks.foo.com/rest"
+  account = "<account No>"
+  role    = "<role>"
+  alias   = "second"
+}
+
 
 provider "aws" {
-    region     = "us-east-1"
+  region = "us-east-1"
 }
 
-# CREATE IAM ROLE
+# CREATE IAM ROLE -- Initial Provider
 resource "alks_iamrole" "test_role" {
-    name                     = "aba-test-123456"
-    type                     = "Amazon EC2"
-    include_default_policies = false
+  name                     = "TEST-DELETE"
+  type                     = "AWS CodeBuild"
+  include_default_policies = false
+  enable_alks_access       = true
+}
+
+# CREATE IAM ROLE -- Secondary Provider
+resource "alks_iamrole" "test_role_nonprod" {
+  provider                 = alks.second
+  name                     = "TEST-DELETE"
+  type                     = "AWS CodeBuild"
+  include_default_policies = false
+  enable_alks_access       = true
 }
 
 # ATTACH POLICY
