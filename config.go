@@ -125,7 +125,7 @@ func getCredentialsFromSession(c *Config) (*credentials.Credentials, error) {
 
 // Client returns a properly configured ALKS client or an appropriate error if initialization fails
 func (c *Config) Client() (*alks.Client, error) {
-	log.Println("[DEBUG] Validating STS credentials") // TODO: Fix typo.
+	log.Println("[DEBUG] Validating STS credentials")
 
 	// lookup credentials
 	creds := getCredentials(c)
