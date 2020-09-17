@@ -80,6 +80,10 @@ func Provider() terraform.ResourceProvider {
 			"alks_ltk":          resourceAlksLtk(),
 		},
 
+		DataSourcesMap: map[string]*schema.Resource{
+			"alks_keys": dataSourceAlksKeys(),
+		},
+
 		ConfigureFunc: providerConfigure,
 	}
 }
