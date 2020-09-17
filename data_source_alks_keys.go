@@ -7,9 +7,9 @@ import (
 	"strings"
 )
 
-func dataSourceAlksAccountCreds() *schema.Resource {
+func dataSourceAlksKeys() *schema.Resource {
 	return &schema.Resource{
-		Read: dataSourceAlksAccountCredsRead,
+		Read: dataSourceAlksKeysRead,
 		Schema: map[string]*schema.Schema{
 			"access_key": {
 				Type:     schema.TypeString,
@@ -35,8 +35,8 @@ func dataSourceAlksAccountCreds() *schema.Resource {
 	}
 }
 
-func dataSourceAlksAccountCredsRead(d *schema.ResourceData, meta interface{}) error {
-	log.Printf("[INFO] ALKS Account Credential Read")
+func dataSourceAlksKeysRead(d *schema.ResourceData, meta interface{}) error {
+	log.Printf("[INFO] ALKS Keys Data Source Read")
 
 	client := meta.(*alks.Client)
 	resp, err := client.CreateIamSession()
