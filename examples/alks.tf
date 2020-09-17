@@ -5,16 +5,31 @@ provider "alks" {
   url = "https://alks.foo.com/rest"
 }
 
+# Second ALKS provider, for an account I have access to.
 provider "alks" {
   url     = "https://alks.foo.com/rest"
   account = "<account No>"
   role    = "<role>"
-  alias   = "second"
+  alias   = "nonprod"
 }
 
+data "alks_keys" "non_prod_keys" {
+  provider = alks.nonprod
+}
 
 provider "aws" {
   region = "us-east-1"
+}
+
+# Second AWS provider, using credentials retreived from data source.
+provider "aws" {
+  region = "us-east-1"
+  alias = "nonprod"
+
+  # data source alks keys
+  access_key = data.alks_keys.non_prod_keys.access_key
+  secret_key = data.alks_keys.non_prod_keys.secret_key
+  token = data.alks_keys.non_prod_keys.session_token
 }
 
 # CREATE IAM ROLE -- Initial Provider
@@ -27,7 +42,7 @@ resource "alks_iamrole" "test_role" {
 
 # CREATE IAM ROLE -- Secondary Provider
 resource "alks_iamrole" "test_role_nonprod" {
-  provider                 = alks.second
+  provider                 = alks.nonprod
   name                     = "TEST-DELETE"
   type                     = "AWS CodeBuild"
   include_default_policies = false
