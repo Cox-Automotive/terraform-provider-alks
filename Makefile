@@ -52,9 +52,7 @@ release:
 
 	shasum -a 256 release/*.zip > release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
-	# FIXME: This needs to be done by Admin.
-	# gpg --detach-sign release/terraform-provider-alks_$(TRAVIS_TAG)_SHA256SUMS
+	gpg --detach-sign release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
-	# rm release/terraform-provider-alks_v$(TRAVIS_TAG)
 
