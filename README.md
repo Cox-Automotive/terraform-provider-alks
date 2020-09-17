@@ -217,6 +217,25 @@ resource "alks_ltk" "test_ltk_user" {
 | `access_key`   | Computed | n/a        | string     | Generated access key for the LTK user. Note: This is saved in the state file, so please be aware of this.                                                                                                                                                         |
 | `secret_key`   | Computed | n/a        | string     | Generated secret key for the LTK user. Note: This is saved in the state file, so please be aware of this.                                                                                                                                                         |
 
+### Data Source Configuration
+#### `alks_keys`
+```tf
+data "alks_keys" "account_keys" {
+   providers: alks.my_alias
+}
+```
+
+| Value          | Type     | Forces New | Value Type | Description                                                                                                                                                                                                                                                       |
+| -------------- | -------- | ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `access_key`   | Computed | n/a        | string     | Generated access key for the specified provider. If multiple providers, it takes the `provider` field. Otherwise uses the initial provider.                                                                                                                                                        |
+| `secret_key`   | Computed | n/a        | string     | Generated secret key for the specified provider. If multiple providers, it takes the `provider` field. Otherwise uses the initial provider.                                                                                                                                                   |
+| `session_token`| Computed | n/a        | string     | Generated session token for the specified provider. If multiple providers, it takes the `provider` field. Otherwise uses the initial provider.                                                                                                                                 |
+| `account`   | Computed    | n/a        | string     | The account number of the returned keys.  
+| `role`   | Computed       | n/a        | string     | The role from the returned keys.   
+
+_Note: This does not take any arguments. See below._ 
+- **How it works**: Whatever your default provider credentials are, will be used. If multiple providers have been configured, then one can point the data source to return keys for specific providers using `providers` field with a specific `alias`.
+
 
 ## Example
 
