@@ -52,5 +52,7 @@ func dataSourceAlksKeysRead(d *schema.ResourceData, meta interface{}) error {
 	_ = d.Set("account", client.AccountDetails.Account)
 	_ = d.Set("role", strings.Split(client.AccountDetails.Role, "/")[0])
 
+	d.SetId(client.AccountDetails.Account)
+
 	return nil
 }
