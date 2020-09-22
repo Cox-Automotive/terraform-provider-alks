@@ -288,7 +288,12 @@ func generateNewClient(c *Config, cident *sts.GetCallerIdentityOutput, client *a
 		client.AccountDetails.Account = newAccDetail
 		client.AccountDetails.Role = c.Role
 
-		newCreds, _ := client.CreateIamSession()
+		newCreds, err := client.CreateIamSession()
+
+		if err != nil {
+			return nil, err
+		}
+
 		newClient, err := alks.NewSTSClient(c.URL, newCreds.AccessKey, newCreds.SecretKey, newCreds.SessionToken)
 
 		if err != nil {
