@@ -177,7 +177,7 @@ func (c *Config) Client() (*alks.Client, error) {
 	// 1. Check if calling for a specific account
 	if len(c.Account) > 0 && len(c.Role) > 0 {
 		// 2. Generate client specified
-		client, err = generateNewClient(c, cident, client)
+		client, err = generateNewClient(c, client)
 		if err != nil {
 			return nil, err
 		}
@@ -232,7 +232,7 @@ func splitBy(r rune) bool {
 	return r == ':' || r == '/'
 }
 
-func generateNewClient(c *Config, cident *sts.GetCallerIdentityOutput, client *alks.Client) (*alks.Client, error) {
+func generateNewClient(c *Config, client *alks.Client) (*alks.Client, error) {
 
 	// 3. Create account string
 	newAccDetail := c.Account + "/ALKS" + c.Role
