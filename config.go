@@ -4,21 +4,14 @@ import (
 	"errors"
 	"fmt"
 	"log"
-	"os"
 	"strings"
-	"time"
-
-	"github.com/hashicorp/go-cleanhttp"
 
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
-	"github.com/aws/aws-sdk-go/aws/defaults"
-	"github.com/aws/aws-sdk-go/aws/ec2metadata"
 
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
 	"github.com/aws/aws-sdk-go/aws/credentials"
-	"github.com/aws/aws-sdk-go/aws/credentials/ec2rolecreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/sts"
 )
@@ -54,9 +47,6 @@ func getCredentials(c *Config) *credentials.Credentials {
 	// Follow the  same priority as the AWS Terraform Provider
 	// https://www.terraform.io/docs/providers/aws/#authentication
 
-	// needed for the EC2MetaData service
-	sess := session.Must(session.NewSession())
-
 	providers := []credentials.Provider{
 		&credentials.StaticProvider{Value: credentials.Value{
 			AccessKeyID:     c.AccessKey,
@@ -68,21 +58,6 @@ func getCredentials(c *Config) *credentials.Credentials {
 			Filename: c.CredsFilename,
 			Profile:  c.Profile,
 		},
-		&ec2rolecreds.EC2RoleProvider{
-			Client: ec2metadata.New(sess),
-		},
-	}
-
-	// Check for ECS container, for more details see:
-	// https://docs.aws.amazon.com/AmazonECS/latest/developerguide/task-iam-roles.html
-	if uri := os.Getenv("AWS_CONTAINER_CREDENTIALS_RELATIVE_URI"); len(uri) > 0 {
-		client := cleanhttp.DefaultClient()
-		client.Timeout = 100 * time.Millisecond
-		cfg := &aws.Config{
-			HTTPClient: client,
-		}
-
-		providers = append(providers, defaults.RemoteCredProvider(*cfg, defaults.Handlers()))
 	}
 
 	return credentials.NewChainCredentials(providers)
@@ -91,35 +66,30 @@ func getCredentials(c *Config) *credentials.Credentials {
 func getCredentialsFromSession(c *Config) (*credentials.Credentials, error) {
 	var sess *session.Session
 	var err error
-	if c.Profile == "" {
-		sess, err = session.NewSession()
-		if err != nil {
+	options := &session.Options{
+		Config: aws.Config{
+			MaxRetries: aws.Int(0),
+			Region:     aws.String("us-east-1"),
+		},
+	}
+	options.Profile = c.Profile
+	options.SharedConfigState = session.SharedConfigEnable
+
+	sess, err = session.NewSessionWithOptions(*options)
+	if err != nil {
+		if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
 			return nil, ErrNoValidCredentialSources
 		}
-	} else {
-		options := &session.Options{
-			Config: aws.Config{
-				HTTPClient: cleanhttp.DefaultClient(),
-				MaxRetries: aws.Int(0),
-				Region:     aws.String("us-east-1"),
-			},
-		}
-		options.Profile = c.Profile
-		options.SharedConfigState = session.SharedConfigEnable
-
-		sess, err = session.NewSessionWithOptions(*options)
-		if err != nil {
-			if awsErr, ok := err.(awserr.Error); ok && awsErr.Code() == "NoCredentialProviders" {
-				return nil, ErrNoValidCredentialSources
-			}
-			return nil, fmt.Errorf("Error creating AWS session: %s", err)
-		}
+		return nil, fmt.Errorf("Error creating AWS session: %s", err)
 	}
 	creds := sess.Config.Credentials
-	_, err = sess.Config.Credentials.Get()
+	cp, err := sess.Config.Credentials.Get()
 	if err != nil {
 		return nil, ErrNoValidCredentialSources
 	}
+
+	log.Printf("[DEBUG] Got session credentials from provider: %s\n", cp.ProviderName)
+
 	return creds, nil
 }
 
@@ -130,6 +100,10 @@ func (c *Config) Client() (*alks.Client, error) {
 	// lookup credentials
 	creds := getCredentials(c)
 	cp, cpErr := creds.Get()
+
+	if cpErr == nil {
+		log.Printf("[DEBUG] Got credentials from provider: %s\n", cp.ProviderName)
+	}
 
 	// validate we have credentials
 	if cpErr != nil {
