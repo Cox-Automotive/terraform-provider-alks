@@ -13,3 +13,4 @@ glide.lock
 .vscode
 .DS_Store
 .terraform/
+gpg/
