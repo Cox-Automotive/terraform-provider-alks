@@ -52,9 +52,9 @@ release:
 
 	shasum -a 256 release/*.zip > release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
-	gpg --import gpg/2975641402110640.pub.asc
+	echo "$GPG_KEY" | base64 --decode --ignore-garbage | gpg --batch  --allow-secret-key-import --import
 
-	gpg --batch -c --passphrase $(GPG_PASSPHRASE) -u 2975641402110640 --detach-sign release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
+	@gpg --batch -c --passphrase $(GPG_PASSPHRASE) -u C182B91A3A62B0D5 --detach-sign release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 
