@@ -59,6 +59,18 @@ func Provider() terraform.ResourceProvider {
 				Description: "The path to the shared credentials file. If not set this defaults to ~/.aws/credentials.",
 				DefaultFunc: schema.EnvDefaultFunc("AWS_SHARED_CREDENTIALS_FILE", nil),
 			},
+			"account": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The account which you'd like to retrieve credentials for.",
+				DefaultFunc: schema.EnvDefaultFunc("Account", nil),
+			},
+			"role": {
+				Type:        schema.TypeString,
+				Optional:    true,
+				Description: "The role which you'd like to retrieve credentials for.",
+				DefaultFunc: schema.EnvDefaultFunc("Role", nil),
+			},
 			"assume_role": assumeRoleSchema(),
 		},
 
@@ -66,6 +78,10 @@ func Provider() terraform.ResourceProvider {
 			"alks_iamrole":      resourceAlksIamRole(),
 			"alks_iamtrustrole": resourceAlksIamTrustRole(),
 			"alks_ltk":          resourceAlksLtk(),
+		},
+
+		DataSourcesMap: map[string]*schema.Resource{
+			"alks_keys": dataSourceAlksKeys(),
 		},
 
 		ConfigureFunc: providerConfigure,
@@ -111,6 +127,8 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		SecretKey: d.Get("secret_key").(string),
 		Token:     d.Get("token").(string),
 		Profile:   d.Get("profile").(string),
+		Account:   d.Get("account").(string),
+		Role:      d.Get("role").(string),
 	}
 
 	assumeRoleList := d.Get("assume_role").(*schema.Set).List()
