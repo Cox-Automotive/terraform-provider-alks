@@ -18,6 +18,26 @@ install:
 	go get -t -v ./...
 
 release:
+package=github.com/Cox-Automotive/terraform-provider-alks
+GOFMT_FILES?=$$(find . -name '*.go' | grep -v vendor)
+
+format:
+	gofmt -w $(GOFMT_FILES)
+
+build:
+	go fmt
+	go build -v -o examples/terraform-provider-alks -mod=vendor .
+
+test:
+	go test -v .
+
+plan:
+	@terraform plan
+
+install:
+	go get -t -v ./...
+
+release:
 	mkdir -p release
 
 	GOOS=darwin GOARCH=amd64 go build -ldflags "-X main.versionNumber=$(TRAVIS_TAG)" -o release/terraform-provider-alks_v$(TRAVIS_TAG) -mod=vendor $(package)
@@ -52,9 +72,9 @@ release:
 
 	shasum -a 256 release/*.tar.gz release/*.zip > release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
-	echo $(GPG_KEY) | base64 --decode --ignore-garbage | gpg --batch  --allow-secret-key-import --import
+	echo $(GPG_KEY) | base64 --decode | gpg --batch --no-tty --yes --import
 
-	@gpg --batch -c --passphrase $(GPG_PASSPHRASE) -u C182B91A3A62B0D5 --detach-sign release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
+	@gpg --pinentry-mode loopback --passphrase $(GPG_PASSPHRASE) -u C182B91A3A62B0D5 --detach-sign release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
 
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 
