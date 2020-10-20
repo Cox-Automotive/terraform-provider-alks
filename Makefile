@@ -50,6 +50,11 @@ release:
 	GOOS=windows GOARCH=amd64 go build -ldflags "-X main.versionNumber=$(TRAVIS_TAG)" -o release/terraform-provider-alks_v$(TRAVIS_TAG).exe -mod=vendor $(package)
 	zip release/terraform-provider-alks-windows-amd64.zip release/terraform-provider-alks_v$(TRAVIS_TAG).exe
 
+	shasum -a 256 release/*.tar.gz release/*.zip > release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
+
+	echo "$GPG_KEY" | base64 --decode --ignore-garbage | gpg --batch  --allow-secret-key-import --import
+
+	@gpg --batch -c --passphrase $(GPG_PASSPHRASE) -u C182B91A3A62B0D5 --detach-sign release/terraform-provider-alks_v$(TRAVIS_TAG)_SHA256SUMS
+
 	rm release/terraform-provider-alks_v$(TRAVIS_TAG).exe
-	rm release/terraform-provider-alks_v$(TRAVIS_TAG)
 
