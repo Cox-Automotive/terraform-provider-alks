@@ -73,7 +73,7 @@ Static credentials can be provided via an `access_key`, `secret_key` and `token`
 ```tf
 provider "alks" {
     url        = "https://alks.foo.com/rest"
-    version    = "~> 1.4.3"
+    version    = ">= 1.4.0, < 2.0.0"
     access_key = "accesskey"
     secret_key = "secretkey"
     token      = "sessiontoken"
@@ -87,7 +87,7 @@ You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS
 ```tf
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = "~> 1.4.3"
+    version = ">= 1.4.0, < 2.0.0"
 }
 ```
 
@@ -106,7 +106,7 @@ You can use an AWS credentials file to specify your credentials. The default loc
 ```tf
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
-    version                 = "~> 1.4.3"
+    version                 = ">= 1.4.0, < 2.0.0"
     shared_credentials_file = "/Users/brianantonelli/.aws/credentials"
     profile                 = "foo"
 }
@@ -125,7 +125,7 @@ Your ALKS provider block can look just like this:
 ```tf
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = "~> 1.4.3"
+    version = ">= 1.4.0, < 2.0.0"
 }
 ```
 
@@ -134,10 +134,52 @@ Since Machine Identities work with Instance Profile Metadata directly, it can be
 ```tf
 provider "alks" {
    url     = "https://alks.foo.com/rest"
-   version = "~> 1.4.3"
+   version = ">= 1.4.0, < 2.0.0"
    assume_role {
       role_arn = "arn:aws:iam::112233445566:role/acct-managed/JenkinsPRODAccountTrust"
    }
+}
+```
+
+#### Multiple Provider Configuration
+
+You can configure multiple ALKS providers to each have their own account context. 
+
+The initial provider must have credentials set in a default way (static, shared credentials file, environment variables, etc) before the second provider can determine whether your account/role combination are allowed. 
+
+The second (or so) provider can then be used to generate resources for multiple accounts in one plan / apply.
+
+Note: This only works for accounts you have access to!
+
+```tf
+# PROVIDER 1
+provider "alks" {
+  url = "https://alks.coxautoinc.com/rest"
+}
+
+# PROVIDER 2
+provider "alks" {
+  url     = "https://alks.coxautoinc.com/rest"
+  account = "<account No>"
+  role    = "<role>"
+  alias   = "second"
+}
+
+# CREATE IAM ROLE -- PROVIDER 1
+resource "alks_iamrole" "test_role" {
+  name                     = "TEST-DELETE"
+  type                     = "AWS CodeBuild"
+  include_default_policies = false
+  enable_alks_access       = true
+}
+
+# CREATE IAM ROLE -- PROVIDER 2
+resource "alks_iamrole" "test_role_nonprod" {
+  provider                 = alks.second
+  name                     = "TEST-DELETE"
+  type                     = "AWS CodeBuild"
+  include_default_policies = false
+  enable_alks_access       = true
 }
 ```
 
