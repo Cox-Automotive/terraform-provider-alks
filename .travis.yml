@@ -24,6 +24,8 @@ deploy:
     - release/terraform-provider-alks-solaris-amd64.tar.gz
     - release/terraform-provider-alks-windows-386.zip
     - release/terraform-provider-alks-windows-amd64.zip
+    - release/terraform-provider-alks_SHA256SUMS
+    - release/terraform-provider-alks_SHA256SUMS.sig
   skip_cleanup: true
   on:
     repo: Cox-Automotive/terraform-provider-alks
