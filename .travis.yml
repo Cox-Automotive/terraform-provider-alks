@@ -7,7 +7,6 @@ os:
 
 install:
   - GIT_TAG=$(git describe --tags --abbrev=0)
-  - echo $GIT_TAG
   - make build test
 
 before_deploy:
