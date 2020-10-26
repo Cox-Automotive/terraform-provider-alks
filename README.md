@@ -21,7 +21,7 @@ This module is used for creating IAM Roles via the ALKS API.
 For example on macOS:
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.5.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.5.0/terraform-provider-alks_1.5.0_darwin_amd64.zip -O -J -L | unzip
 ```
 
 * Configure Terraform to use this plugin by placing the binary in `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
@@ -37,7 +37,7 @@ curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/downl
 For example on macOS:
 
 ```
-curl -L https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.5.0/terraform-provider-alks-darwin-amd64.tar.gz | tar zxv
+curl https://github.com/Cox-Automotive/terraform-provider-alks/releases/download/1.5.0/terraform-provider-alks_1.5.0_darwin_amd64.zip -O -J -L | unzip
 ```
 
 * Go into the Terraform plugins path; `.terraform.d/plugins/` on MacOS/Linux or `terraform.d\plugins\` in your user's "Application Data" directory on Windows.
