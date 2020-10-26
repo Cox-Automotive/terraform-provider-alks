@@ -6,7 +6,6 @@ os:
   - osx
 
 install:
-  - GIT_TAG=$(git describe --tags --abbrev=0)
   - make build test
 
 before_deploy:
