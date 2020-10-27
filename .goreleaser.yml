@@ -15,7 +15,7 @@ builds:
       - -trimpath
       - -tags=all
     ldflags:
-      - '-s -w -X main.version={{.Version}} -X main.commit={{.Commit}}'
+      - '-s -w -X main.versionNumber={{.Version}}'
     goos:
       - windows
       - linux
