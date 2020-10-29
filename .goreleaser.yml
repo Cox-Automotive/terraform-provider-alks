@@ -4,7 +4,6 @@ before:
   hooks:
     # this is just an example and not a requirement for provider building/publishing
     - go mod tidy
-    - go mod vendor
 builds:
   - env:
       # goreleaser does not work with CGO, it could also complicate
@@ -26,6 +25,7 @@ builds:
       - amd64
       - '386'
       - arm
+      - arm64
     ignore:
       - goos: darwin
         goarch: '386'
