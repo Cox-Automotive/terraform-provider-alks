@@ -1,7 +1,7 @@
 terraform {
   required_providers {
     alks = {
-      source = "Cox-Automotive/alks"
+      source  = "Cox-Automotive/alks"
       version = "1.5.8"
     }
     aws = {
