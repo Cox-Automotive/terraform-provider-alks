@@ -162,4 +162,4 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
     * `policy` - (Optional) This specifies additional policy restrictions to apply to the resulting STS credentials beyond any existing inline or managed policies. Please see the AWS SDK documentation for more information.
 
 ---
-For more in-depth docs, please visit the [Github repository](https://github.com/Cox-Automotive/terraform-provider-alks).
+For questions, please reach out to the [ALKS team](https://github.com/orgs/Cox-Automotive/teams/alks).
