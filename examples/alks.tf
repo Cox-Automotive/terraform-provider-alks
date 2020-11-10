@@ -24,12 +24,12 @@ provider "aws" {
 # Second AWS provider, using credentials retreived from data source.
 provider "aws" {
   region = "us-east-1"
-  alias = "nonprod"
+  alias  = "nonprod"
 
   # data source alks keys
   access_key = data.alks_keys.non_prod_keys.access_key
   secret_key = data.alks_keys.non_prod_keys.secret_key
-  token = data.alks_keys.non_prod_keys.session_token
+  token      = data.alks_keys.non_prod_keys.session_token
 }
 
 # CREATE IAM ROLE -- Initial Provider
@@ -51,9 +51,9 @@ resource "alks_iamrole" "test_role_nonprod" {
 
 # ATTACH POLICY
 resource "aws_iam_role_policy" "test_policy" {
-    name     = "test_policy"
-    role     = "${alks_iamrole.test_role.name}"
-    policy   = <<EOF
+  name   = "test_policy"
+  role   = "${alks_iamrole.test_role.name}"
+  policy = <<EOF
 {
   "Version": "2012-10-17",
   "Statement": [
@@ -71,11 +71,11 @@ EOF
 
 # ATTACH MANAGED POLICY
 resource "aws_iam_role_policy_attachment" "sr-attach" {
-    role       = "${alks_iamrole.test_role.name}"
-    policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
+  role       = "${alks_iamrole.test_role.name}"
+  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
 }
 
 # CREATE LTK USER
 resource "alks_ltk" "ltk" {
-    iam_username = "TEST_LTK_USER"
+  iam_username = "TEST_LTK_USER"
 }

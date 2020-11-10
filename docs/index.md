@@ -102,6 +102,49 @@ provider "alks" {
 }
 ```
 
+
+### Multiple Provider Configuration
+
+You can configure multiple ALKS providers to each have their own account context. 
+
+The initial provider must have credentials set in a default way (static, shared credentials file, environment variables, etc) before the second provider can determine whether your account/role combination are allowed. 
+
+The second (or so) provider can then be used to generate resources for multiple accounts in one plan / apply.
+
+Note: This only works for accounts you have access to!
+
+```tf
+# PROVIDER 1
+provider "alks" {
+  url = "https://alks.coxautoinc.com/rest"
+}
+
+# PROVIDER 2
+provider "alks" {
+  url     = "https://alks.coxautoinc.com/rest"
+  account = "<account No>"
+  role    = "<role>"
+  alias   = "second"
+}
+
+# CREATE IAM ROLE -- PROVIDER 1
+resource "alks_iamrole" "test_role" {
+  name                     = "TEST-DELETE"
+  type                     = "AWS CodeBuild"
+  include_default_policies = false
+  enable_alks_access       = true
+}
+
+# CREATE IAM ROLE -- PROVIDER 2
+resource "alks_iamrole" "test_role_nonprod" {
+  provider                 = alks.second
+  name                     = "TEST-DELETE"
+  type                     = "AWS CodeBuild"
+  include_default_policies = false
+  enable_alks_access       = true
+}
+```
+
 ## Argument Reference
 
 In addition to [generic `provider` arguments](https://www.terraform.io/docs/configuration/providers.html?_ga=2.182283811.562816692.1597670778-20010454.1565803281) (e.g. `alias` and `version`), the following arguments are supported in the AWS provider block:
@@ -119,4 +162,4 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
     * `policy` - (Optional) This specifies additional policy restrictions to apply to the resulting STS credentials beyond any existing inline or managed policies. Please see the AWS SDK documentation for more information.
 
 ---
-For more in-depth docs, please visit the [Github repository](https://github.com/Cox-Automotive/terraform-provider-alks).
+For questions, please reach out to the [ALKS team](https://github.com/orgs/Cox-Automotive/teams/cai-internal-tools).
