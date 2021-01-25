@@ -19,6 +19,9 @@ func resourceAlksIamRole() *schema.Resource {
 		Update: resourceAlksIamRoleUpdate,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		SchemaVersion: 1,
 		MigrateState:  migrateState,
@@ -67,6 +70,9 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		Update: resourceAlksIamRoleUpdate,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		SchemaVersion: 1,
 		MigrateState:  migrateState,
