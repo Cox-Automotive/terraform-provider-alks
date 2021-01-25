@@ -20,7 +20,7 @@ func resourceAlksIamRole() *schema.Resource {
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
 		Importer: &schema.ResourceImporter{
-			State: resourceAlksIamRoleImport,
+			State: schema.ImportStatePassthrough,
 		},
 
 		SchemaVersion: 1,
@@ -130,13 +130,16 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(resp.RoleName)
-	_ = d.Set("arn", resp.RoleArn)
-	_ = d.Set("ip_arn", resp.RoleIPArn)
-	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
+	//_ = d.Set("type", roleType)
+	//_ = d.Set("include_default_policies", incDefPol)
+	//_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
+	//_ = d.Set("arn", resp.RoleArn)
+	//_ = d.Set("ip_arn", resp.RoleIPArn)
+	//_ = d.Set("enable_alks_access", enableAlksAccess)
 
 	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
 
-	return nil
+	return resourceAlksIamRoleRead(d, meta)
 }
 
 func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -222,14 +225,23 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Read")
 
 	client := meta.(*alks.Client)
-
 	foundrole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
+		d.SetId("")
 		return err
 	}
 
-	return populateResourceDataFromRole(foundrole, d)
+	log.Printf("[INFO] alks_iamrole.id %v", d.Id())
+
+	_ = d.Set("name", foundrole.RoleName)
+	_ = d.Set("type", d.Get("type").(string))
+	_ = d.Set("include_default_policies", d.Get("include_default_policies").(bool))
+	_ = d.Set("arn", foundrole.RoleArn)
+	_ = d.Set("ip_arn", foundrole.RoleIPArn)
+	_ = d.Set("enable_alks_access", foundrole.AlksAccess)
+
+	return nil
 }
 
 func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -250,24 +262,6 @@ func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	d.Partial(false)
 
 	return nil
-}
-
-func resourceAlksIamRoleImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
-	log.Printf("[INFO] ALKS IAM Role Import")
-
-	// TODO: Delete or finalize this!
-	log.Printf("ID: " + d.Id())
-	client := meta.(*alks.Client)
-	foundrole, _ := client.GetIamRole(d.Id())
-
-	log.Printf("Role Type: " + foundrole.RoleType)
-
-	_ = d.Set("name", d.Id())
-	_ = d.Set("type", "AWS CodeBuild") // How do we know? API never returns.
-	_ = d.Set("include_default_policies", false) // Cannot retrieve this for some reason?
-
-	return []*schema.ResourceData{d}, nil
-
 }
 
 func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
