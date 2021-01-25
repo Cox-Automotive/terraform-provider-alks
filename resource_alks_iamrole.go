@@ -20,7 +20,7 @@ func resourceAlksIamRole() *schema.Resource {
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			State: resourceAlksIamRoleImport,
 		},
 
 		SchemaVersion: 1,
@@ -130,9 +130,9 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(resp.RoleName)
-	d.Set("arn", resp.RoleArn)
-	d.Set("ip_arn", resp.RoleIPArn)
-	d.Set("role_added_to_ip", resp.RoleAddedToIP)
+	_ = d.Set("arn", resp.RoleArn)
+	_ = d.Set("ip_arn", resp.RoleIPArn)
+	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
 
@@ -173,9 +173,9 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	response := *resp
 
 	d.SetId(response.RoleName)
-	d.Set("arn", response.RoleArn)
-	d.Set("ip_arn", response.RoleIPArn)
-	d.Set("role_added_to_ip", response.RoleAddedToIP)
+	_ = d.Set("arn", response.RoleArn)
+	_ = d.Set("ip_arn", response.RoleIPArn)
+	_ = d.Set("role_added_to_ip", response.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamtrustrole.id: %v", d.Id())
 
@@ -252,6 +252,24 @@ func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
+func resourceAlksIamRoleImport(d *schema.ResourceData, meta interface{}) ([]*schema.ResourceData, error) {
+	log.Printf("[INFO] ALKS IAM Role Import")
+
+	// TODO: Delete or finalize this!
+	log.Printf("ID: " + d.Id())
+	client := meta.(*alks.Client)
+	foundrole, _ := client.GetIamRole(d.Id())
+
+	log.Printf("Role Type: " + foundrole.RoleType)
+
+	_ = d.Set("name", d.Id())
+	_ = d.Set("type", "AWS CodeBuild") // How do we know? API never returns.
+	_ = d.Set("include_default_policies", false) // Cannot retrieve this for some reason?
+
+	return []*schema.ResourceData{d}, nil
+
+}
+
 func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	var alksAccess = d.Get("enable_alks_access").(bool)
 	var roleArn = d.Get("arn").(string)
@@ -273,21 +291,13 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 }
 
 func populateResourceDataFromRole(role *alks.GetIamRoleResponse, d *schema.ResourceData) error {
-	d.SetId(role.RoleName)
-	d.Set("arn", role.RoleArn)
-	d.Set("ip_arn", role.RoleIPArn)
-	d.Set("enable_alks_access", role.AlksAccess)
+	_ = d.Set("arn", role.RoleArn)
+	_ = d.Set("ip_arn", role.RoleIPArn)
+	_ = d.Set("enable_alks_access", role.AlksAccess)
 
 	// role type isnt returned by alks api so this will always false report on a remote state change
 	// for more info see issue #125 on ALKS repo
 	// d.Set("type", role.RoleType)
-
-	return nil
-}
-
-func populateResourceDataFromMI(mi *alks.MachineIdentityResponse, d *schema.ResourceData) error {
-	d.SetId(mi.MachineIdentityArn)
-	d.Set("machine_identity_arn", mi.MachineIdentityArn)
 
 	return nil
 }
