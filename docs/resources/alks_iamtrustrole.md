@@ -26,3 +26,10 @@ The following arguments are supported:
 * `arn` - (Computed) Provides the ARN of the role that was created.
 * `ip_arn` - (Computed) If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
 * `enable_alks_access` - (Optional) If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role. Note: This enables **machine identity** capability.
+
+## Import
+
+ALKS IAM trust roles can be imported using the `name`, e.g.
+```
+$ terraform import alks_iamtrustrole.test_trust_role My_Cross_Test_Role
+```
