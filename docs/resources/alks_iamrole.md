@@ -27,6 +27,8 @@ The following arguments are supported:
 
 ## Import
 
+!> **Warning:** This will force-replace the resource.
+
 ALKS IAM roles can be imported using the `name`, e.g.
 ```
 $ terraform import alks_iamrole.test_role My_Test_Role

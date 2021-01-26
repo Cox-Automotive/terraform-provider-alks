@@ -29,6 +29,8 @@ The following arguments are supported:
 
 ## Import
 
+!> **Warning:** This will force-replace the resource.
+
 ALKS IAM trust roles can be imported using the `name`, e.g.
 ```
 $ terraform import alks_iamtrustrole.test_trust_role My_Cross_Test_Role
