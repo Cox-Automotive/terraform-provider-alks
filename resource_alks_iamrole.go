@@ -130,6 +130,7 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(resp.RoleName)
+	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
 
@@ -170,6 +171,7 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	response := *resp
 
 	d.SetId(response.RoleName)
+	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamtrustrole.id: %v", d.Id())
 
