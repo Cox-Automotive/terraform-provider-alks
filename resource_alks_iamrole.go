@@ -19,6 +19,9 @@ func resourceAlksIamRole() *schema.Resource {
 		Update: resourceAlksIamRoleUpdate,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		SchemaVersion: 1,
 		MigrateState:  migrateState,
@@ -67,6 +70,9 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		Update: resourceAlksIamRoleUpdate,
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
+		Importer: &schema.ResourceImporter{
+			State: schema.ImportStatePassthrough,
+		},
 
 		SchemaVersion: 1,
 		MigrateState:  migrateState,
@@ -124,13 +130,11 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	d.SetId(resp.RoleName)
-	d.Set("arn", resp.RoleArn)
-	d.Set("ip_arn", resp.RoleIPArn)
-	d.Set("role_added_to_ip", resp.RoleAddedToIP)
+	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
 
-	return nil
+	return resourceAlksIamRoleRead(d, meta)
 }
 
 func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) error {
@@ -167,13 +171,11 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	response := *resp
 
 	d.SetId(response.RoleName)
-	d.Set("arn", response.RoleArn)
-	d.Set("ip_arn", response.RoleIPArn)
-	d.Set("role_added_to_ip", response.RoleAddedToIP)
+	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamtrustrole.id: %v", d.Id())
 
-	return nil
+	return resourceAlksIamRoleRead(d, meta)
 }
 
 func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
@@ -194,7 +196,7 @@ func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool
 
 	client := meta.(*alks.Client)
 
-	foundrole, err := client.GetIamRole(d.Id())
+	foundRole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
 		// TODO: Clean-up this logic, likely by improving the error responses from `alks-go`
@@ -205,7 +207,7 @@ func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool
 		return false, err
 	}
 
-	if foundrole == nil {
+	if foundRole == nil {
 		return false, nil
 	}
 
@@ -216,14 +218,26 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Read")
 
 	client := meta.(*alks.Client)
-
-	foundrole, err := client.GetIamRole(d.Id())
+	foundRole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
+		d.SetId("")
 		return err
 	}
 
-	return populateResourceDataFromRole(foundrole, d)
+	log.Printf("[INFO] alks_iamrole.id %v", d.Id())
+
+	_ = d.Set("name", foundRole.RoleName)
+	_ = d.Set("arn", foundRole.RoleArn)
+	_ = d.Set("ip_arn", foundRole.RoleIPArn)
+	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
+
+	// TODO: In the future, our API or tags need to dynamically grab these values.
+	//  Till then, all imports require a destroy + create.
+	//_ = d.Set("type", foundrole.RoleType)
+	//_ = d.Set("include_default_policies", foundrole.InclDefaultPolicies)
+
+	return nil
 }
 
 func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
@@ -263,26 +277,6 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 			return err
 		}
 	}
-	return nil
-}
-
-func populateResourceDataFromRole(role *alks.GetIamRoleResponse, d *schema.ResourceData) error {
-	d.SetId(role.RoleName)
-	d.Set("arn", role.RoleArn)
-	d.Set("ip_arn", role.RoleIPArn)
-	d.Set("enable_alks_access", role.AlksAccess)
-
-	// role type isnt returned by alks api so this will always false report on a remote state change
-	// for more info see issue #125 on ALKS repo
-	// d.Set("type", role.RoleType)
-
-	return nil
-}
-
-func populateResourceDataFromMI(mi *alks.MachineIdentityResponse, d *schema.ResourceData) error {
-	d.SetId(mi.MachineIdentityArn)
-	d.Set("machine_identity_arn", mi.MachineIdentityArn)
-
 	return nil
 }
 
