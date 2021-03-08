@@ -65,4 +65,4 @@ mkdir -p ~/.terraform.d/plugins &&
     }
     ```
 
-* Note: If you've previously installed our provider and it is stored in your remote state, you may need to run the [`replace-provider` command](https://www.terraform.io/docs/commands/state/replace-provider.html).
+* Note: If you've previously installed our provider, and it is stored in your remote state: you may need to run the [`replace-provider` command](https://www.terraform.io/docs/commands/state/replace-provider.html).
