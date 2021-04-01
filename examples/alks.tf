@@ -40,6 +40,18 @@ resource "alks_iamrole" "test_role" {
   enable_alks_access       = true
 }
 
+resource "alks_iamrole" "test_dynamic_role" {
+  name                     = "TEST-DELETE-DYNAMIC"
+  type                     = "Amazon EKS IRSA"
+  include_default_policies = false
+  enable_alks_access       = true
+  template_fields = {
+    "OIDC_PROVIDER" = "abc1234"
+    "K8S_NAMESPACE" = "default"
+    "K8S_SERVICE_ACCOUNT" = "definitely-not-real"
+  }
+}
+
 # CREATE IAM ROLE -- Secondary Provider
 resource "alks_iamrole" "test_role_nonprod" {
   provider                 = alks.nonprod
