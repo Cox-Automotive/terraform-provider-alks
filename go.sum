@@ -27,8 +27,6 @@ github.com/Azure/go-ntlmssp v0.0.0-20180810175552-4a21cbd618b4/go.mod h1:chxPXzS
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/ChrisTrenkamp/goxpath v0.0.0-20170922090931-c385f95c6022/go.mod h1:nuWgzSkT5PnyOd+272uUmV0dnAnAn42Mk7PiQC5VzN4=
-github.com/Cox-Automotive/alks-go v0.0.0-20200605150811-11bd4c1de348 h1:4yYbNR8TKaRSYgRbQsH4cC4qFf4VZmmaVC8mp8VWZVg=
-github.com/Cox-Automotive/alks-go v0.0.0-20200605150811-11bd4c1de348/go.mod h1:on+ImEZYjpdcu+CD07RLqMTQmiPkulolQJb387YMpPo=
 github.com/Cox-Automotive/alks-go v0.0.0-20200714135032-e03438e39d50 h1:vGPXuT++0/9xJJvn0rmTsPBJ6jgSIdoyFhNqZIK51bQ=
 github.com/Cox-Automotive/alks-go v0.0.0-20200714135032-e03438e39d50/go.mod h1:on+ImEZYjpdcu+CD07RLqMTQmiPkulolQJb387YMpPo=
 github.com/QcloudApi/qcloud_sign_golang v0.0.0-20141224014652-e4130a326409/go.mod h1:1pk82RBxDY/JZnPQrtqHlUFfCctgdorsd9M06fMynOM=
