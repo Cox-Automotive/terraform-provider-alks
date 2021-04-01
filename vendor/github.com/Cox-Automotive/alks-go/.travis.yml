@@ -1,12 +1,10 @@
 language: go
 sudo: false
 go:
-  - 1.7
+  - "1.12"
   - tip
-before_install:
-- go get github.com/hashicorp/go-cleanhttp
-- go get github.com/motain/gocheck
 script:
+- export GO111MODULE=on
 - make test
 notifications:
   email: false
