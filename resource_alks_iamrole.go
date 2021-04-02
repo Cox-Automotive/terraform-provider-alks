@@ -59,6 +59,12 @@ func resourceAlksIamRole() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
+			"template_fields": &schema.Schema{
+				Type:     schema.TypeMap,
+				Elem:     schema.TypeString,
+				ForceNew: true,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -121,9 +127,15 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
+	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
+
+	templateFields := make(map[string]string)
+	for k, v := range rawTemplateFields {
+		templateFields[k] = v.(string)
+	}
 
 	client := meta.(*alks.Client)
-	resp, err := client.CreateIamRole(roleName, roleType, incDefPol, enableAlksAccess)
+	resp, err := client.CreateIamRole(roleName, roleType, templateFields, incDefPol, enableAlksAccess)
 
 	if err != nil {
 		return err
