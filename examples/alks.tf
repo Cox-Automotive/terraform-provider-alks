@@ -46,8 +46,8 @@ resource "alks_iamrole" "test_dynamic_role" {
   include_default_policies = false
   enable_alks_access       = true
   template_fields = {
-    "OIDC_PROVIDER" = "abc1234"
-    "K8S_NAMESPACE" = "default"
+    "OIDC_PROVIDER"       = "abc1234"
+    "K8S_NAMESPACE"       = "default"
     "K8S_SERVICE_ACCOUNT" = "definitely-not-real"
   }
 }
@@ -64,7 +64,7 @@ resource "alks_iamrole" "test_role_nonprod" {
 # ATTACH POLICY
 resource "aws_iam_role_policy" "test_policy" {
   name   = "test_policy"
-  role   = "${alks_iamrole.test_role.name}"
+  role   = alks_iamrole.test_role.name
   policy = <<EOF
 {
   "Version": "2012-10-17",
@@ -83,7 +83,7 @@ EOF
 
 # ATTACH MANAGED POLICY
 resource "aws_iam_role_policy_attachment" "sr-attach" {
-  role       = "${alks_iamrole.test_role.name}"
+  role       = alks_iamrole.test_role.name
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSElasticBeanstalkService"
 }
 
