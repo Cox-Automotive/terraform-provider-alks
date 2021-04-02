@@ -15,9 +15,7 @@ func (b BaseResponse) RequestFailed() bool {
 // GetErrors returns a list of error messages from an ALKS response
 func (b BaseResponse) GetErrors() []string {
 	var errorMessages []string
-	for _, err := range b.Errors {
-		errorMessages = append(errorMessages, err)
-	}
+	errorMessages = append(errorMessages, b.Errors...)
 
 	if len(errorMessages) == 0 {
 		errorMessages = []string{

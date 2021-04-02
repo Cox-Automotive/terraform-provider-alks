@@ -6,7 +6,7 @@ cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
 cloud.google.com/go/storage
-# github.com/Cox-Automotive/alks-go v0.0.0-20200714135032-e03438e39d50
+# github.com/Cox-Automotive/alks-go v0.0.0-20210331173447-21b08aca8d67
 ## explicit
 github.com/Cox-Automotive/alks-go
 # github.com/agext/levenshtein v1.2.2
@@ -95,7 +95,6 @@ github.com/googleapis/gax-go/v2
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
 # github.com/hashicorp/go-cleanhttp v0.5.1
-## explicit
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02
 github.com/hashicorp/go-getter
