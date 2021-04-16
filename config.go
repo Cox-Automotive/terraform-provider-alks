@@ -211,21 +211,20 @@ func getPluginVersion() string {
 		- Machine Identities.
 */
 func isValidIAM(arn *string, client *alks.Client) bool {
-	// Check if Admin || IAMAdmin
-	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") || strings.Contains(*arn, "assumed-role/LabAdmin/") {
-		return true
-	}
 
-	// Check if MI...
-	arnParts := strings.FieldsFunc(*arn, splitBy)
-	iamArn := fmt.Sprintf("arn:aws:iam::%s:role/acct-managed/%s", arnParts[3], arnParts[5])
-
-	_, err := client.SearchRoleMachineIdentity(iamArn)
+	// Validate Machine Identity
+	responseMI, err := client.IsIamEnabled(*arn)
 	if err != nil {
 		return false
 	}
 
-	return true
+	// Validate STS
+	responseSTS, err := client.IsIamEnabled("")
+	if err != nil {
+		return false
+	}
+
+	return responseMI.IamEnabled || responseSTS.IamEnabled
 }
 
 func splitBy(r rune) bool {
