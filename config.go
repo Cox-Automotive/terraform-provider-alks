@@ -162,7 +162,7 @@ func (c *Config) Client() (*alks.Client, error) {
 	}
 
 	// make a basic api call to test creds are valid
-	cident, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	_, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	// check for valid creds
 	if serr != nil {
 		return nil, serr
@@ -183,8 +183,9 @@ func (c *Config) Client() (*alks.Client, error) {
 		}
 	}
 
-	// check if the user is using a assume-role IAM admin session or MI.
-	if isValidIAM(cident.Arn, client) != true {
+	// Validate STS for IAM active.
+	validateSTS, err := client.IsIamEnabled("")
+	if err != nil || validateSTS.IamEnabled != true {
 		return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
 			"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
 	}
@@ -202,34 +203,6 @@ func getPluginVersion() string {
 	}
 
 	return "unknown"
-}
-
-/*
-	Validates ARN for assumed-role of:
-		- Admin
-		- IAMAdmin
-		- Machine Identities.
-*/
-func isValidIAM(arn *string, client *alks.Client) bool {
-	// Check if Admin || IAMAdmin
-	if strings.Contains(*arn, "assumed-role/Admin/") || strings.Contains(*arn, "assumed-role/IAMAdmin/") || strings.Contains(*arn, "assumed-role/LabAdmin/") {
-		return true
-	}
-
-	// Check if MI...
-	arnParts := strings.FieldsFunc(*arn, splitBy)
-	iamArn := fmt.Sprintf("arn:aws:iam::%s:role/acct-managed/%s", arnParts[3], arnParts[5])
-
-	_, err := client.SearchRoleMachineIdentity(iamArn)
-	if err != nil {
-		return false
-	}
-
-	return true
-}
-
-func splitBy(r rune) bool {
-	return r == ':' || r == '/'
 }
 
 func generateNewClient(c *Config, client *alks.Client) (*alks.Client, error) {

@@ -6,7 +6,7 @@ cloud.google.com/go/internal/optional
 cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
 cloud.google.com/go/storage
-# github.com/Cox-Automotive/alks-go v0.0.0-20210331173447-21b08aca8d67
+# github.com/Cox-Automotive/alks-go v0.0.0-20210414185953-754a7e5f7114
 ## explicit
 github.com/Cox-Automotive/alks-go
 # github.com/agext/levenshtein v1.2.2
@@ -94,7 +94,8 @@ github.com/google/uuid
 github.com/googleapis/gax-go/v2
 # github.com/hashicorp/errwrap v1.0.0
 github.com/hashicorp/errwrap
-# github.com/hashicorp/go-cleanhttp v0.5.1
+# github.com/hashicorp/go-cleanhttp v0.5.2
+## explicit
 github.com/hashicorp/go-cleanhttp
 # github.com/hashicorp/go-getter v1.4.2-0.20200106182914-9813cbd4eb02
 github.com/hashicorp/go-getter
@@ -221,8 +222,6 @@ github.com/mitchellh/hashstructure
 github.com/mitchellh/mapstructure
 # github.com/mitchellh/reflectwalk v1.0.0
 github.com/mitchellh/reflectwalk
-# github.com/motain/gocheck v0.0.0-20131023154940-9beb271d26e6
-## explicit
 # github.com/oklog/run v1.0.0
 github.com/oklog/run
 # github.com/posener/complete v1.2.1
@@ -374,5 +373,3 @@ google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
 google.golang.org/grpc/test/bufconn
-# launchpad.net/gocheck v0.0.0-20140225173054-000000000087
-## explicit
