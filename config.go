@@ -183,8 +183,13 @@ func (c *Config) Client() (*alks.Client, error) {
 		}
 	}
 
-	// check if the user is using a assume-role IAM admin session or MI.
-	if isValidIAM(cident.Arn, client) != true {
+	// Validate STS for IAM active.
+	validateSTS, err := client.IsIamEnabled("")
+	if err != nil {
+		return nil, err
+	}
+
+	if validateSTS.IamEnabled != true {
 		return nil, errors.New("Looks like you are not using ALKS IAM credentials. This will result in errors when creating roles. \n " +
 			"Note: If using ALKS CLI to get credentials, be sure to use the '-i' flag. \n Please see https://coxautoinc.sharepoint.com/sites/service-internal-tools-team/SitePages/ALKS-Terraform-Provider---Troubleshooting.aspx for more information.")
 	}
@@ -202,33 +207,6 @@ func getPluginVersion() string {
 	}
 
 	return "unknown"
-}
-
-/*
-	Validates ARN for assumed-role of:
-		- Admin
-		- IAMAdmin
-		- Machine Identities.
-*/
-func isValidIAM(arn *string, client *alks.Client) bool {
-
-	// Validate Machine Identity
-	responseMI, err := client.IsIamEnabled(*arn)
-	if err != nil {
-		return false
-	}
-
-	// Validate STS
-	responseSTS, err := client.IsIamEnabled("")
-	if err != nil {
-		return false
-	}
-
-	return responseMI.IamEnabled || responseSTS.IamEnabled
-}
-
-func splitBy(r rune) bool {
-	return r == ':' || r == '/'
 }
 
 func generateNewClient(c *Config, client *alks.Client) (*alks.Client, error) {
