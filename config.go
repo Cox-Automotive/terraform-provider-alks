@@ -162,7 +162,7 @@ func (c *Config) Client() (*alks.Client, error) {
 	}
 
 	// make a basic api call to test creds are valid
-	cident, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
+	_, serr := stsconn.GetCallerIdentity(&sts.GetCallerIdentityInput{})
 	// check for valid creds
 	if serr != nil {
 		return nil, serr
