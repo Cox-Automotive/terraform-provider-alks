@@ -1,4 +1,4 @@
-name: ALKS Terraform Provider CI
+name: ALKS TFP CI
 
 on:
   push:
