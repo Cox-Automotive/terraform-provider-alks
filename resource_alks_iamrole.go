@@ -135,8 +135,11 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	client := meta.(*alks.Client)
-	resp, err := client.CreateIamRole(roleName, roleType, templateFields, incDefPol, enableAlksAccess)
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
 
+	resp, err := client.CreateIamRole(roleName, roleType, templateFields, incDefPol, enableAlksAccess)
 	if err != nil {
 		return err
 	}
@@ -158,6 +161,9 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 
 	client := meta.(*alks.Client)
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
 
 	var resp *alks.IamRoleResponse
 	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
@@ -194,9 +200,11 @@ func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS IAM Role Delete")
 
 	client := meta.(*alks.Client)
-	err := client.DeleteIamRole(d.Id())
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
 
-	if err != nil {
+	if err := client.DeleteIamRole(d.Id()); err != nil {
 		return err
 	}
 
@@ -276,6 +284,9 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	var alksAccess = d.Get("enable_alks_access").(bool)
 	var roleArn = d.Get("arn").(string)
 	client := meta.(*alks.Client)
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
 	// create the machine identity
 	if alksAccess {
 		_, err := client.AddRoleMachineIdentity(roleArn)

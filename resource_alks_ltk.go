@@ -1,9 +1,10 @@
 package main
 
 import (
+	"log"
+
 	alks "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform/helper/schema"
-	"log"
 )
 
 func resourceAlksLtk() *schema.Resource {
@@ -49,8 +50,11 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 	var iamUsername = d.Get("iam_username").(string)
 
 	client := meta.(*alks.Client)
-	resp, err := client.CreateLongTermKey(iamUsername)
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
 
+	resp, err := client.CreateLongTermKey(iamUsername)
 	if err != nil {
 		return err
 	}
@@ -88,9 +92,11 @@ func resourceAlksLtkDelete(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS LTK User Delete")
 
 	client := meta.(*alks.Client)
-	_, err := client.DeleteLongTermKey(d.Id())
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
 
-	if err != nil {
+	if _, err := client.DeleteLongTermKey(d.Id()); err != nil {
 		return err
 	}
 
