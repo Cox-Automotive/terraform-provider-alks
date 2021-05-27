@@ -47,12 +47,11 @@ mkdir -p ~/.terraform.d/plugins &&
 **One-liner download for macOS / Linux:**
 
 ```sh
-mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.12/darwin_amd64 &&
-      curl -Ls https://api.github.com/repos/Cox-Automotive/terraform-provider-alks/releases/latest |
-      jq -r ".assets[] | select(.browser_download_url | contains(\"$(uname -s | tr A-Z a-z)\")) | select(.browser_download_url | contains(\"amd64\")) | .browser_download_url" |
-            xargs -n 1 curl -Lo ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.12/darwin_amd64/terraform-provider-alks.zip &&
-      pushd ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.12/darwin_amd64 &&
-      unzip ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.12/darwin_amd64/terraform-provider-alks.zip -d terraform-provider-alks-tmp &&
+mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64 &&
+      curl -Ls https://api.github.com/repos/Cox-Automotive/terraform-provider-alks/releases | jq -r --arg release "v1.5.14" --arg arch "$(uname -s | tr A-Z a-z)" '.[] | select(.tag_name | contains($release)) | .assets[]| select(.browser_download_url | contains($arch)) | select(.browser_download_url | contains("amd64")) | .browser_download_url' |
+            xargs -n 1 curl -Lo ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64/terraform-provider-alks.zip &&
+      pushd ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64 &&
+      unzip ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64/terraform-provider-alks.zip -d terraform-provider-alks-tmp &&
       mv terraform-provider-alks-tmp/terraform-provider-alks* . &&
       chmod +x terraform-provider-alks* &&
       rm -rf terraform-provider-alks-tmp &&
