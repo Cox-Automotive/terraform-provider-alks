@@ -14,3 +14,5 @@ glide.lock
 .DS_Store
 .terraform/
 gpg/
+
+.terraform.lock.hcl
