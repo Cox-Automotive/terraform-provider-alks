@@ -20,25 +20,25 @@ func resourceAlksLtk() *schema.Resource {
 		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
-			"iam_username": &schema.Schema{
+			"iam_username": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"iam_user_arn": &schema.Schema{
+						},
+			"iam_user_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"access_key": &schema.Schema{
+						},
+			"access_key": {
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Computed:  true,
-			},
-			"secret_key": &schema.Schema{
+						},
+			"secret_key": {
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Computed:  true,
-			},
+						},
 		},
 	}
 }

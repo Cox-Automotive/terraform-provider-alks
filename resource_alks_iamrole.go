@@ -27,44 +27,44 @@ func resourceAlksIamRole() *schema.Resource {
 		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"type": &schema.Schema{
+						},
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"include_default_policies": &schema.Schema{
+						},
+			"include_default_policies": {
 				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: true,
-			},
-			"role_added_to_ip": &schema.Schema{
+						},
+			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
-			},
-			"arn": &schema.Schema{
+						},
+			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"ip_arn": &schema.Schema{
+						},
+			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"enable_alks_access": &schema.Schema{
+						},
+			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-			},
-			"template_fields": &schema.Schema{
+						},
+			"template_fields": {
 				Type:     schema.TypeMap,
 				Elem:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
-			},
+						},
 		},
 	}
 }
@@ -84,38 +84,38 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"type": &schema.Schema{
+						},
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"trust_arn": &schema.Schema{
+						},
+			"trust_arn": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-			},
-			"role_added_to_ip": &schema.Schema{
+						},
+			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
-			},
-			"arn": &schema.Schema{
+						},
+			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"ip_arn": &schema.Schema{
+						},
+			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-			},
-			"enable_alks_access": &schema.Schema{
+						},
+			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-			},
+						},
 		},
 	}
 }
