@@ -14,8 +14,7 @@ func resourceAlksLtk() *schema.Resource {
 		Delete: resourceAlksLtkDelete,
 		Exists: resourceAlksLtkExists,
 		Importer: &schema.ResourceImporter{
-			// Terraform provided importer
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		SchemaVersion: 1,
