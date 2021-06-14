@@ -7,9 +7,9 @@ import (
 	"time"
 
 	alks "github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func resourceAlksIamRole() *schema.Resource {
@@ -271,8 +271,6 @@ func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 		if err := updateAlksAccess(d, meta); err != nil {
 			return err
 		}
-
-		d.SetPartial("enable_alks_access")
 	}
 
 	d.Partial(false)

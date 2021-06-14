@@ -3,48 +3,47 @@ package main
 import (
 	"log"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Provider returns a terraform.ResourceProvider.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"url": &schema.Schema{
+			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
-			},
-			"access_key": &schema.Schema{
+						},
+			"access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "This is the AWS access key. It must be provided, but it can also be sourced from the ALKS_ACCESS_KEY_ID or AWS_ACCESS_KEY_ID environment variable.",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"ALKS_ACCESS_KEY_ID",
 					"AWS_ACCESS_KEY_ID",
-				}, nil),
-			},
-			"secret_key": &schema.Schema{
+							}, nil),
+						},
+			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "This is the AWS secret key. It must be provided, but it can also be sourced from the ALKS_SECRET_ACCESS_KEY or AWS_SECRET_ACCESS_KEY environment variable",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"ALKS_SECRET_ACCESS_KEY",
 					"AWS_SECRET_ACCESS_KEY",
-				}, nil),
-			},
-			"token": &schema.Schema{
+							}, nil),
+						},
+			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "This is the AWS session token. It must be provided, but it can also be sourced from the ALKS_SESSION_TOKEN or AWS_SESSION_TOKEN environment variable",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"ALKS_SESSION_TOKEN",
 					"AWS_SESSION_TOKEN",
-				}, nil),
-			},
+							}, nil),
+						},
 			"profile": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -83,8 +82,6 @@ func Provider() terraform.ResourceProvider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"alks_keys": dataSourceAlksKeys(),
 		},
-
-		ConfigureFunc: providerConfigure,
 	}
 }
 
