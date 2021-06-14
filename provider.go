@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -82,6 +84,8 @@ func Provider() *schema.Provider {
 		DataSourcesMap: map[string]*schema.Resource{
 			"alks_keys": dataSourceAlksKeys(),
 		},
+
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
@@ -117,7 +121,10 @@ func assumeRoleSchema() *schema.Schema {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+
 	config := Config{
 		URL:       d.Get("url").(string),
 		AccessKey: d.Get("access_key").(string),
@@ -140,10 +147,15 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	// Set CredsFilename, expanding home directory
 	credsPath, err := homedir.Expand(d.Get("shared_credentials_file").(string))
 	if err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 	config.CredsFilename = credsPath
 
+	c, err := config.Client()
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
 	log.Println("[INFO] Initializing ALKS client")
-	return config.Client()
+	return c, diags
 }
