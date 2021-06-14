@@ -24,7 +24,7 @@ func resourceAlksLtk() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+									},
 			"iam_user_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
