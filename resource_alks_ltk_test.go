@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	alks "github.com/Cox-Automotive/alks-go"
+	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"

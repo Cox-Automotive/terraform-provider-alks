@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	alks "github.com/Cox-Automotive/alks-go"
+	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
