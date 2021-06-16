@@ -1,126 +1,115 @@
 package main
 
 import (
-	"fmt"
+	"context"
+	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"strings"
 	"time"
-
-	"github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func resourceAlksIamRole() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlksIamRoleCreate,
-		Read:   resourceAlksIamRoleRead,
-		Update: resourceAlksIamRoleUpdate,
-		Exists: resourceAlksIamRoleExists,
-		Delete: resourceAlksIamRoleDelete,
+		CreateContext: resourceAlksIamRoleCreate,
+		ReadContext:   resourceAlksIamRoleRead,
+		UpdateContext: resourceAlksIamRoleUpdate,
+		DeleteContext: resourceAlksIamRoleDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		SchemaVersion: 1,
-		MigrateState:  migrateState,
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"include_default_policies": {
 				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
-						},
+			},
 			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-						},
+			},
 			"template_fields": {
 				Type:     schema.TypeMap,
 				Elem:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
-						},
+			},
 		},
 	}
 }
 
 func resourceAlksIamTrustRole() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlksIamTrustRoleCreate,
-		Read:   resourceAlksIamRoleRead,
-		Update: resourceAlksIamRoleUpdate,
-		Exists: resourceAlksIamRoleExists,
-		Delete: resourceAlksIamRoleDelete,
+		CreateContext: resourceAlksIamTrustRoleCreate,
+		ReadContext:   resourceAlksIamRoleRead,
+		UpdateContext: resourceAlksIamRoleUpdate,
+		DeleteContext: resourceAlksIamRoleDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		SchemaVersion: 1,
-		MigrateState:  migrateState,
-
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"trust_arn": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
-						},
+			},
 			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-						},
+			},
 		},
 	}
 }
 
-func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
 
 	var roleName = d.Get("name").(string)
@@ -136,12 +125,12 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resp, err := client.CreateIamRole(roleName, roleType, templateFields, incDefPol, enableAlksAccess)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resp.RoleName)
@@ -149,11 +138,13 @@ func resourceAlksIamRoleCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
 
-	return resourceAlksIamRoleRead(d, meta)
+	return resourceAlksIamRoleRead(ctx, d, meta)
 }
 
-func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Trust Role Create")
+
+	var diags diag.Diagnostics
 
 	var roleName = d.Get("name").(string)
 	var roleType = d.Get("type").(string)
@@ -162,7 +153,7 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	var resp *alks.IamRoleResponse
@@ -183,7 +174,7 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 	})
 
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	response := *resp
@@ -193,56 +184,39 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 
 	log.Printf("[INFO] alks_iamtrustrole.id: %v", d.Id())
 
-	return resourceAlksIamRoleRead(d, meta)
+	return diags
 }
 
-func resourceAlksIamRoleDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Delete")
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if err := client.DeleteIamRole(d.Id()); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
 }
 
-func resourceAlksIamRoleExists(d *schema.ResourceData, meta interface{}) (b bool, e error) {
-	log.Printf("[INFO] ALKS IAM Role Exists")
-
-	client := meta.(*alks.Client)
-
-	foundRole, err := client.GetIamRole(d.Id())
-
-	if err != nil {
-		// TODO: Clean-up this logic, likely by improving the error responses from `alks-go`
-		if strings.Contains(err.Error(), "Role not found") {
-			return false, nil
-		}
-
-		return false, err
-	}
-
-	if foundRole == nil {
-		return false, nil
-	}
-
-	return true, nil
-}
-
-func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Read")
 
 	client := meta.(*alks.Client)
+
+	// Check if role exists.
+	if d.Id() == "" || d.Id() == "none" {
+		return nil
+	}
+
 	foundRole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
 		d.SetId("")
-		return err
+		return nil
 	}
 
 	log.Printf("[INFO] alks_iamrole.id %v", d.Id())
@@ -260,7 +234,7 @@ func resourceAlksIamRoleRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Update")
 
 	// enable partial state mode
@@ -269,13 +243,13 @@ func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 	if d.HasChange("enable_alks_access") {
 		// try updating enable_alks_access
 		if err := updateAlksAccess(d, meta); err != nil {
-			return err
+			return diag.FromErr(err)
 		}
 	}
 
 	d.Partial(false)
 
-	return nil
+	return resourceAlksIamRoleRead(ctx, d, meta)
 }
 
 func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
@@ -299,29 +273,4 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	return nil
-}
-
-func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
-	switch version {
-	case 0:
-		log.Println("[INFO] Found Instance State v0, migrating to v1")
-		return migrateV0toV1(state)
-	default:
-		return state, fmt.Errorf("Unrecognized version '%d' in schema for instance of ALKS IAM role '%s'", version, state.Attributes["name"])
-	}
-}
-
-func migrateV0toV1(state *terraform.InstanceState) (*terraform.InstanceState, error) {
-	if state.Empty() {
-		log.Println("[DEBUG] Empty InstanceState, nothing to migrate")
-		return state, nil
-	}
-
-	if _, ok := state.Attributes["enable_alks_access"]; !ok {
-		log.Printf("[DEBUG] Attributes before migration: %#v", state.Attributes)
-		state.Attributes["enable_alks_access"] = "false"
-		log.Printf("[DEBUG] Attributes after migration: %#v", state.Attributes)
-	}
-
-	return state, nil
 }

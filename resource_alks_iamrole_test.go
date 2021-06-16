@@ -29,8 +29,8 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
-							),
-						},
+				),
+			},
 			{
 				// update the resource
 				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
@@ -43,41 +43,8 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "enable_alks_access", "true"),
-							),
-						},
-		},
-	})
-}
-
-func TestAccAlksIamTrustRole_Basic(t *testing.T) {
-	var resp alks.IamRoleResponse
-
-	resource.Test(t, resource.TestCase{
-		PreCheck:     func() { testAccPreCheck(t) },
-		Providers:    testAccProviders,
-		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
-		Steps: []resource.TestStep{
-			{
-				Config: testAccCheckAlksIamTrustRoleConfigBasic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"alks_iamtrustrole.bar", "name", "bar"),
-					resource.TestCheckResourceAttr(
-						"alks_iamtrustrole.bar", "type", "Inner Account"),
-							),
-						},
-			{
-				// update the resource
-				Config: testAccCheckAlksIamTrustRoleConfigUpdateBasic,
-				Check: resource.ComposeTestCheckFunc(
-					resource.TestCheckResourceAttr(
-						"alks_iamtrustrole.bar", "name", "bar"),
-					resource.TestCheckResourceAttr(
-						"alks_iamtrustrole.bar", "type", "Inner Account"),
-					resource.TestCheckResourceAttr(
-						"alks_iamtrustrole.bar", "enable_alks_access", "true"),
-							),
-						},
+				),
+			},
 		},
 	})
 }
@@ -95,34 +62,6 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 			if respz != nil {
 				return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
 			}
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckAlksIamRoleExists(n string, role *alks.IamRoleResponse) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No role ID is set")
-		}
-
-		client := testAccProvider.Meta().(*alks.Client)
-
-		foundRole, err := client.GetIamRole(rs.Primary.ID)
-
-		if err != nil {
-			return err
-		}
-
-		if foundRole.RoleArn != rs.Primary.ID {
-			return fmt.Errorf("Role not found")
 		}
 
 		return nil
