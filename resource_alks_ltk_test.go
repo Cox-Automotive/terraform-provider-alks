@@ -20,12 +20,12 @@ func TestAlksLTKCreate(t *testing.T) {
 			{
 				Config: testAlksLTKCreateConfig,
 				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("alks_ltk.foo", "iam_username", "TEST_LTK_USER")),
-						},
+			},
 			// Update the resource
 			{
 				Config: testAlksLTKUpdateConfig,
 				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("alks_ltk.foo", "iam_username", "TEST_LTK_USER_2")),
-						},
+			},
 		},
 	})
 }

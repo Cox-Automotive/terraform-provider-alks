@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"strings"
-	"time"
-
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"log"
+	"strings"
+	"time"
 )
 
 func resourceAlksIamRole() *schema.Resource {
@@ -31,40 +30,40 @@ func resourceAlksIamRole() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"include_default_policies": {
 				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
-						},
+			},
 			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-						},
+			},
 			"template_fields": {
 				Type:     schema.TypeMap,
 				Elem:     schema.TypeString,
 				ForceNew: true,
 				Optional: true,
-						},
+			},
 		},
 	}
 }
@@ -88,34 +87,34 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"trust_arn": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-						},
+			},
 			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
-						},
+			},
 			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
-						},
+			},
 		},
 	}
 }
@@ -179,9 +178,10 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 			time.Sleep(15 * time.Second)
 			return resource.RetryableError(err)
 		}
-		return resource.NonRetryableError(err)
+		return nil
 	})
 
+	//resp, err := client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
 	if err != nil {
 		return err
 	}

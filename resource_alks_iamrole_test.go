@@ -29,8 +29,8 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
-							),
-						},
+				),
+			},
 			{
 				// update the resource
 				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
@@ -43,8 +43,8 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "enable_alks_access", "true"),
-							),
-						},
+				),
+			},
 		},
 	})
 }
@@ -64,8 +64,8 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 						"alks_iamtrustrole.bar", "name", "bar"),
 					resource.TestCheckResourceAttr(
 						"alks_iamtrustrole.bar", "type", "Inner Account"),
-							),
-						},
+				),
+			},
 			{
 				// update the resource
 				Config: testAccCheckAlksIamTrustRoleConfigUpdateBasic,
@@ -76,8 +76,8 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 						"alks_iamtrustrole.bar", "type", "Inner Account"),
 					resource.TestCheckResourceAttr(
 						"alks_iamtrustrole.bar", "enable_alks_access", "true"),
-							),
-						},
+				),
+			},
 		},
 	})
 }

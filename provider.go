@@ -18,7 +18,7 @@ func Provider() *schema.Provider {
 				Required:    true,
 				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
-						},
+			},
 			"access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -26,8 +26,8 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"ALKS_ACCESS_KEY_ID",
 					"AWS_ACCESS_KEY_ID",
-							}, nil),
-						},
+				}, nil),
+			},
 			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -35,8 +35,8 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"ALKS_SECRET_ACCESS_KEY",
 					"AWS_SECRET_ACCESS_KEY",
-							}, nil),
-						},
+				}, nil),
+			},
 			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
@@ -44,8 +44,8 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
 					"ALKS_SESSION_TOKEN",
 					"AWS_SESSION_TOKEN",
-							}, nil),
-						},
+				}, nil),
+			},
 			"profile": {
 				Type:        schema.TypeString,
 				Optional:    true,
