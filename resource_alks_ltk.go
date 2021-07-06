@@ -23,26 +23,26 @@ func resourceAlksLtk() *schema.Resource {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
-									},
+			},
 			"iam_user_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
-						},
+			},
 			"access_key": {
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Computed:  true,
-						},
+			},
 			"secret_key": {
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Computed:  true,
-						},
+			},
 		},
 	}
 }
 
-func resourceAlksLtkCreate(ctx context.Context,d *schema.ResourceData, meta interface{}) diag.Diagnostics {
+func resourceAlksLtkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS LTK User Create")
 
 	var iamUsername = d.Get("iam_username").(string)
