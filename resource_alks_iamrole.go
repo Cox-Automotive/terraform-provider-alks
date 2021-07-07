@@ -170,7 +170,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 			time.Sleep(15 * time.Second)
 			return resource.RetryableError(err)
 		}
-		return resource.NonRetryableError(err)
+		return nil
 	})
 
 	if err != nil {
