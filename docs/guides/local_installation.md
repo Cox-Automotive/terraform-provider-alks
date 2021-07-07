@@ -47,11 +47,11 @@ mkdir -p ~/.terraform.d/plugins &&
 **One-liner download for macOS / Linux:**
 
 ```sh
-mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64 &&
-      curl -Ls https://api.github.com/repos/Cox-Automotive/terraform-provider-alks/releases | jq -r --arg release "v1.5.14" --arg arch "$(uname -s | tr A-Z a-z)" '.[] | select(.tag_name | contains($release)) | .assets[]| select(.browser_download_url | contains($arch)) | select(.browser_download_url | contains("amd64")) | .browser_download_url' |
-            xargs -n 1 curl -Lo ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64/terraform-provider-alks.zip &&
-      pushd ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64 &&
-      unzip ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.14/darwin_amd64/terraform-provider-alks.zip -d terraform-provider-alks-tmp &&
+mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.0/darwin_amd64 &&
+      curl -Ls https://api.github.com/repos/Cox-Automotive/terraform-provider-alks/releases | jq -r --arg release "v2.0.0" --arg arch "$(uname -s | tr A-Z a-z)" '.[] | select(.tag_name | contains($release)) | .assets[]| select(.browser_download_url | contains($arch)) | select(.browser_download_url | contains("amd64")) | .browser_download_url' |
+            xargs -n 1 curl -Lo ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.0/darwin_amd64/terraform-provider-alks.zip &&
+      pushd ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.0/darwin_amd64 &&
+      unzip ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.0/darwin_amd64/terraform-provider-alks.zip -d terraform-provider-alks-tmp &&
       mv terraform-provider-alks-tmp/terraform-provider-alks* . &&
       chmod +x terraform-provider-alks* &&
       rm -rf terraform-provider-alks-tmp &&
@@ -93,6 +93,6 @@ mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/1.5.1
 
 ### Supported Versions
 
-| Terraform 0.10.x       | Terraform 0.12.x  | Terraform 0.13.x | Terraform 0.14.x |
-| ----------------       | ----------------  | ---------------- | ---------------- |
-| ALKS TFP 0.9.0 < 1.3.0 | ALKS TFP 1.3.0+   | ALKS TFP 1.3.0+  | ALKS TFP 1.3.0+  |
+| Terraform 0.10.x       |  Terraform 0.11.x        | Terraform 0.12.x  | Terraform 0.13.x | Terraform 0.14.x |
+| ----------------       | ----------------         | ----------------  | ---------------- | ---------------- | 
+| ALKS TFP 0.9.0 < 1.3.0 | ALKS TFP 1.3.0 < 1.5.15  | ALKS TFP 1.3.0+   | ALKS TFP 1.3.0+  | ALKS TFP 1.3.0+  | 

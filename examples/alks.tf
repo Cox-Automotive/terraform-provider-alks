@@ -34,7 +34,7 @@ provider "aws" {
 
 # CREATE IAM ROLE -- Initial Provider
 resource "alks_iamrole" "test_role" {
-  name                     = "TEST-DELETE"
+  name                     = "TEST-DELETE-PRIMARY-PROVIDER"
   type                     = "AWS CodeBuild"
   include_default_policies = false
   enable_alks_access       = true
@@ -55,7 +55,7 @@ resource "alks_iamrole" "test_dynamic_role" {
 # CREATE IAM ROLE -- Secondary Provider
 resource "alks_iamrole" "test_role_nonprod" {
   provider                 = alks.nonprod
-  name                     = "TEST-DELETE"
+  name                     = "TEST-DELETE-SECONDARY-PROVIDER"
   type                     = "AWS CodeBuild"
   include_default_policies = false
   enable_alks_access       = true
@@ -89,5 +89,5 @@ resource "aws_iam_role_policy_attachment" "sr-attach" {
 
 # CREATE LTK USER
 resource "alks_ltk" "ltk" {
-  iam_username = "TEST_LTK_USER"
+  iam_username = "TEST-LTK-USER"
 }
