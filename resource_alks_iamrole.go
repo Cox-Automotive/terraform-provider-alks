@@ -181,7 +181,6 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 		return nil
 	})
 
-	//resp, err := client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
 	if err != nil {
 		return err
 	}
