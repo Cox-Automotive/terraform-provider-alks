@@ -3,8 +3,8 @@ package main
 import (
 	"log"
 
-	alks "github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform/helper/schema"
+	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func resourceAlksLtk() *schema.Resource {
@@ -14,28 +14,27 @@ func resourceAlksLtk() *schema.Resource {
 		Delete: resourceAlksLtkDelete,
 		Exists: resourceAlksLtkExists,
 		Importer: &schema.ResourceImporter{
-			// Terraform provided importer
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
-			"iam_username": &schema.Schema{
+			"iam_username": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"iam_user_arn": &schema.Schema{
+			"iam_user_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"access_key": &schema.Schema{
+			"access_key": {
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Computed:  true,
 			},
-			"secret_key": &schema.Schema{
+			"secret_key": {
 				Sensitive: true,
 				Type:      schema.TypeString,
 				Computed:  true,

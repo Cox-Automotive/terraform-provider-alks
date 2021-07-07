@@ -5,9 +5,9 @@ import (
 	"log"
 	"testing"
 
-	alks "github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
@@ -18,7 +18,7 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					// testAccCheckAlksIamRoleExists("bar420", &resp),
@@ -31,7 +31,7 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 				),
 			},
-			resource.TestStep{
+			{
 				// update the resource
 				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
 				Check: resource.ComposeTestCheckFunc(
@@ -57,7 +57,7 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 		Providers:    testAccProviders,
 		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
-			resource.TestStep{
+			{
 				Config: testAccCheckAlksIamTrustRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -66,7 +66,7 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 						"alks_iamtrustrole.bar", "type", "Inner Account"),
 				),
 			},
-			resource.TestStep{
+			{
 				// update the resource
 				Config: testAccCheckAlksIamTrustRoleConfigUpdateBasic,
 				Check: resource.ComposeTestCheckFunc(

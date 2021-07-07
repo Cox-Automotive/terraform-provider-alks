@@ -7,7 +7,7 @@ This provider is for creating and modifying IAM roles via the ALKS API.
 
 ## Pre-Requisites
 
-* An ALKS Admin or IAMAdmin STS [assume-role](http://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) session is needed. PowerUser access is not sufficient to create IAM roles.
+* An ALKS Admin or IAMAdmin STS [assume-role](http://docs.aws.amazon.com/STS/latest/APIReference/API_AssumeRole.html) session needed. PowerUser access is not sufficient to create IAM roles.
     * This tool is best suited for users with an `Admin` role
     * With an `IAMAdmin|LabAdmin` role, you can create roles and attach policies, but you can't create other infrastructure.
 * Works with [Terraform](https://www.terraform.io/) version `0.10.0` or newer.

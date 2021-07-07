@@ -1,24 +1,25 @@
 package main
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/mitchellh/go-homedir"
 )
 
 // Provider returns a terraform.ResourceProvider.
-func Provider() terraform.ResourceProvider {
+func Provider() *schema.Provider {
 	return &schema.Provider{
 		Schema: map[string]*schema.Schema{
-			"url": &schema.Schema{
+			"url": {
 				Type:        schema.TypeString,
 				Required:    true,
 				Description: "This is the base URL to ALKS service. It must be provided, but it can also be sourced from the ALKS_URL environment variable.",
 				DefaultFunc: schema.EnvDefaultFunc("ALKS_URL", nil),
 			},
-			"access_key": &schema.Schema{
+			"access_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "This is the AWS access key. It must be provided, but it can also be sourced from the ALKS_ACCESS_KEY_ID or AWS_ACCESS_KEY_ID environment variable.",
@@ -27,7 +28,7 @@ func Provider() terraform.ResourceProvider {
 					"AWS_ACCESS_KEY_ID",
 				}, nil),
 			},
-			"secret_key": &schema.Schema{
+			"secret_key": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "This is the AWS secret key. It must be provided, but it can also be sourced from the ALKS_SECRET_ACCESS_KEY or AWS_SECRET_ACCESS_KEY environment variable",
@@ -36,7 +37,7 @@ func Provider() terraform.ResourceProvider {
 					"AWS_SECRET_ACCESS_KEY",
 				}, nil),
 			},
-			"token": &schema.Schema{
+			"token": {
 				Type:        schema.TypeString,
 				Optional:    true,
 				Description: "This is the AWS session token. It must be provided, but it can also be sourced from the ALKS_SESSION_TOKEN or AWS_SESSION_TOKEN environment variable",
@@ -84,7 +85,7 @@ func Provider() terraform.ResourceProvider {
 			"alks_keys": dataSourceAlksKeys(),
 		},
 
-		ConfigureFunc: providerConfigure,
+		ConfigureContextFunc: providerConfigure,
 	}
 }
 
@@ -120,7 +121,10 @@ func assumeRoleSchema() *schema.Schema {
 	}
 }
 
-func providerConfigure(d *schema.ResourceData) (interface{}, error) {
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+
+	var diags diag.Diagnostics
+
 	config := Config{
 		URL:       d.Get("url").(string),
 		AccessKey: d.Get("access_key").(string),
@@ -143,10 +147,15 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 	// Set CredsFilename, expanding home directory
 	credsPath, err := homedir.Expand(d.Get("shared_credentials_file").(string))
 	if err != nil {
-		return nil, err
+		return nil, diag.FromErr(err)
 	}
 	config.CredsFilename = credsPath
 
+	c, err := config.Client()
+	if err != nil {
+		return nil, diag.FromErr(err)
+	}
+
 	log.Println("[INFO] Initializing ALKS client")
-	return config.Client()
+	return c, diags
 }
