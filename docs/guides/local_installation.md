@@ -93,6 +93,6 @@ mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.0
 
 ### Supported Versions
 
-| Terraform 0.10.x       | Terraform 0.12.x  | Terraform 0.13.x | Terraform 0.14.x | Terraform 0.11.x |
-| ----------------       | ----------------  | ---------------- | ---------------- | ---------------- |
-| ALKS TFP 0.9.0 < 1.3.0 | ALKS TFP 1.3.0+   | ALKS TFP 1.3.0+  | ALKS TFP 1.3.0+  | ALKS TFP 1.3.0 < 1.5.15 |
+| Terraform 0.10.x       |  Terraform 0.11.x        | Terraform 0.12.x  | Terraform 0.13.x | Terraform 0.14.x |
+| ----------------       | ----------------         | ----------------  | ---------------- | ---------------- | 
+| ALKS TFP 0.9.0 < 1.3.0 | ALKS TFP 1.3.0 < 1.5.15  | ALKS TFP 1.3.0+   | ALKS TFP 1.3.0+  | ALKS TFP 1.3.0+  | 
