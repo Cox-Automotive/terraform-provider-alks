@@ -2,9 +2,9 @@ package main
 
 import (
 	"fmt"
-	alks "github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/terraform"
+	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"testing"
 )
 
@@ -17,12 +17,12 @@ func TestAlksLTKCreate(t *testing.T) {
 		CheckDestroy: testAlksLtkDestroy(&resp),
 		Steps: []resource.TestStep{
 			// Create the resource
-			resource.TestStep{
+			{
 				Config: testAlksLTKCreateConfig,
 				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("alks_ltk.foo", "iam_username", "TEST_LTK_USER")),
 			},
 			// Update the resource
-			resource.TestStep{
+			{
 				Config: testAlksLTKUpdateConfig,
 				Check:  resource.ComposeTestCheckFunc(resource.TestCheckResourceAttr("alks_ltk.foo", "iam_username", "TEST_LTK_USER_2")),
 			},

@@ -2,14 +2,13 @@ package main
 
 import (
 	"fmt"
+	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 	"log"
 	"strings"
 	"time"
-
-	alks "github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform/helper/resource"
-	"github.com/hashicorp/terraform/helper/schema"
-	"github.com/hashicorp/terraform/terraform"
 )
 
 func resourceAlksIamRole() *schema.Resource {
@@ -20,46 +19,46 @@ func resourceAlksIamRole() *schema.Resource {
 		Exists: resourceAlksIamRoleExists,
 		Delete: resourceAlksIamRoleDelete,
 		Importer: &schema.ResourceImporter{
-			State: schema.ImportStatePassthrough,
+			StateContext: schema.ImportStatePassthroughContext,
 		},
 
 		SchemaVersion: 1,
 		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"include_default_policies": &schema.Schema{
+			"include_default_policies": {
 				Type:     schema.TypeBool,
 				Required: true,
 				ForceNew: true,
 			},
-			"role_added_to_ip": &schema.Schema{
+			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"arn": &schema.Schema{
+			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"ip_arn": &schema.Schema{
+			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"enable_alks_access": &schema.Schema{
+			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
 			},
-			"template_fields": &schema.Schema{
+			"template_fields": {
 				Type:     schema.TypeMap,
 				Elem:     schema.TypeString,
 				ForceNew: true,
@@ -84,34 +83,34 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		MigrateState:  migrateState,
 
 		Schema: map[string]*schema.Schema{
-			"name": &schema.Schema{
+			"name": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"type": &schema.Schema{
+			"type": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"trust_arn": &schema.Schema{
+			"trust_arn": {
 				Type:     schema.TypeString,
 				Required: true,
 				ForceNew: true,
 			},
-			"role_added_to_ip": &schema.Schema{
+			"role_added_to_ip": {
 				Type:     schema.TypeBool,
 				Computed: true,
 			},
-			"arn": &schema.Schema{
+			"arn": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"ip_arn": &schema.Schema{
+			"ip_arn": {
 				Type:     schema.TypeString,
 				Computed: true,
 			},
-			"enable_alks_access": &schema.Schema{
+			"enable_alks_access": {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
@@ -179,7 +178,7 @@ func resourceAlksIamTrustRoleCreate(d *schema.ResourceData, meta interface{}) er
 			time.Sleep(15 * time.Second)
 			return resource.RetryableError(err)
 		}
-		return resource.NonRetryableError(err)
+		return nil
 	})
 
 	if err != nil {
@@ -271,8 +270,6 @@ func resourceAlksIamRoleUpdate(d *schema.ResourceData, meta interface{}) error {
 		if err := updateAlksAccess(d, meta); err != nil {
 			return err
 		}
-
-		d.SetPartial("enable_alks_access")
 	}
 
 	d.Partial(false)
