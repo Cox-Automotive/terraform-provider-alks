@@ -184,7 +184,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 
 	log.Printf("[INFO] alks_iamtrustrole.id: %v", d.Id())
 
-	return diags
+	return resourceAlksIamRoleRead(ctx, d, meta)
 }
 
 func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
