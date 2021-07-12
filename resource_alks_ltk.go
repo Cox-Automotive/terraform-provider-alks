@@ -1,6 +1,8 @@
 package main
 
 import (
+	"context"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 
 	"github.com/Cox-Automotive/alks-go"
@@ -9,15 +11,12 @@ import (
 
 func resourceAlksLtk() *schema.Resource {
 	return &schema.Resource{
-		Create: resourceAlksLtkCreate,
-		Read:   resourceAlksLtkRead,
-		Delete: resourceAlksLtkDelete,
-		Exists: resourceAlksLtkExists,
+		CreateContext: resourceAlksLtkCreate,
+		ReadContext:   resourceAlksLtkRead,
+		DeleteContext: resourceAlksLtkDelete,
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
-		SchemaVersion: 1,
 
 		Schema: map[string]*schema.Schema{
 			"iam_username": {
@@ -43,19 +42,19 @@ func resourceAlksLtk() *schema.Resource {
 	}
 }
 
-func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksLtkCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS LTK User Create")
 
 	var iamUsername = d.Get("iam_username").(string)
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	resp, err := client.CreateLongTermKey(iamUsername)
 	if err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	d.SetId(iamUsername)
@@ -65,13 +64,19 @@ func resourceAlksLtkCreate(d *schema.ResourceData, meta interface{}) error {
 
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
 
-	return resourceAlksLtkRead(d, meta)
+	return resourceAlksLtkRead(ctx, d, meta)
 }
 
-func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksLtkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS LTK User Read")
 
 	client := meta.(*alks.Client)
+
+	// Check if role exists.
+	if d.Id() == "" || d.Id() == "none" {
+		return nil
+	}
+
 	resp, err := client.GetLongTermKey(d.Id())
 
 	if err != nil {
@@ -87,35 +92,17 @@ func resourceAlksLtkRead(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func resourceAlksLtkDelete(d *schema.ResourceData, meta interface{}) error {
+func resourceAlksLtkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS LTK User Delete")
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	if _, err := client.DeleteLongTermKey(d.Id()); err != nil {
-		return err
+		return diag.FromErr(err)
 	}
 
 	return nil
-}
-
-func resourceAlksLtkExists(d *schema.ResourceData, meta interface{}) (bool, error) {
-	log.Printf("[INFO] ALKS LTK User Exists")
-
-	client := meta.(*alks.Client)
-	resp, err := client.GetLongTermKey(d.Id())
-
-	if err != nil {
-		return false, err
-	}
-
-	// We can get a 200, but an empty string so this is the condition to check for.
-	if len(resp.LongTermKey.UserName) == 0 {
-		return false, nil
-	}
-
-	return true, nil
 }
