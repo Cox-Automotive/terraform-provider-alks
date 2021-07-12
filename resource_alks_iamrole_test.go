@@ -2,12 +2,11 @@ package main
 
 import (
 	"fmt"
-	"log"
-	"testing"
-
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	"log"
+	"testing"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
@@ -21,8 +20,6 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 			{
 				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
-					// testAccCheckAlksIamRoleExists("bar420", &resp),
-					// testAccCheckAlksIamRoleAttributes(&resp),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "name", "bar420"),
 					resource.TestCheckResourceAttr(
@@ -95,34 +92,6 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 			if respz != nil {
 				return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
 			}
-		}
-
-		return nil
-	}
-}
-
-func testAccCheckAlksIamRoleExists(n string, role *alks.IamRoleResponse) resource.TestCheckFunc {
-	return func(s *terraform.State) error {
-		rs, ok := s.RootModule().Resources[n]
-
-		if !ok {
-			return fmt.Errorf("Not found: %s", n)
-		}
-
-		if rs.Primary.ID == "" {
-			return fmt.Errorf("No role ID is set")
-		}
-
-		client := testAccProvider.Meta().(*alks.Client)
-
-		foundRole, err := client.GetIamRole(rs.Primary.ID)
-
-		if err != nil {
-			return err
-		}
-
-		if foundRole.RoleArn != rs.Primary.ID {
-			return fmt.Errorf("Role not found")
 		}
 
 		return nil
