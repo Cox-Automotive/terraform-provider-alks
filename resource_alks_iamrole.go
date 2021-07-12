@@ -144,8 +144,6 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Trust Role Create")
 
-	var diags diag.Diagnostics
-
 	var roleName = d.Get("name").(string)
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
