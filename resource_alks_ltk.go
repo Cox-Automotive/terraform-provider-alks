@@ -17,7 +17,7 @@ func resourceAlksLtk() *schema.Resource {
 		Importer: &schema.ResourceImporter{
 			StateContext: schema.ImportStatePassthroughContext,
 		},
-
+		SchemaVersion: 1,
 		Schema: map[string]*schema.Schema{
 			"iam_username": {
 				Type:     schema.TypeString,
