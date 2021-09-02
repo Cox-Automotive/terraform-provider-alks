@@ -24,6 +24,10 @@ release:
 	chmod +x release/terraform-provider-alks_v$(TRAVIS_TAG)
 	zip release/terraform-provider-alks_$(TRAVIS_TAG)_darwin_amd64.zip release/terraform-provider-alks_v$(TRAVIS_TAG)
 
+	GOOS=darwin GOARCH=arm64 go build -ldflags "-X main.versionNumber=$(TRAVIS_TAG)" -o release/terraform-provider-alks_v$(TRAVIS_TAG) -mod=vendor $(package)
+	chmod +x release/terraform-provider-alks_v$(TRAVIS_TAG)
+	zip release/terraform-provider-alks_$(TRAVIS_TAG)_darwin_arm64.zip release/terraform-provider-alks_v$(TRAVIS_TAG)
+
 	GOOS=freebsd GOARCH=386 go build -ldflags "-X main.versionNumber=$(TRAVIS_TAG)" -o release/terraform-provider-alks_v$(TRAVIS_TAG) -mod=vendor $(package)
 	chmod +x release/terraform-provider-alks_v$(TRAVIS_TAG)
 	zip release/terraform-provider-alks_$(TRAVIS_TAG)_freebsd_386.zip release/terraform-provider-alks_v$(TRAVIS_TAG)
