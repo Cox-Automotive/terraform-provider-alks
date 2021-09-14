@@ -3,14 +3,12 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	"log"
-	"strings"
-	"time"
 )
 
 func resourceAlksIamRole() *schema.Resource {
@@ -23,7 +21,7 @@ func resourceAlksIamRole() *schema.Resource {
 			StateContext: schema.ImportStatePassthroughContext,
 		},
 		SchemaVersion: 1,
-		MigrateState: migrateState,
+		MigrateState:  migrateState,
 		Schema: map[string]*schema.Schema{
 			"name": {
 				Type:     schema.TypeString,
@@ -67,54 +65,6 @@ func resourceAlksIamRole() *schema.Resource {
 	}
 }
 
-func resourceAlksIamTrustRole() *schema.Resource {
-	return &schema.Resource{
-		CreateContext: resourceAlksIamTrustRoleCreate,
-		ReadContext:   resourceAlksIamRoleRead,
-		UpdateContext: resourceAlksIamRoleUpdate,
-		DeleteContext: resourceAlksIamRoleDelete,
-		Importer: &schema.ResourceImporter{
-			StateContext: schema.ImportStatePassthroughContext,
-		},
-		SchemaVersion: 1,
-		MigrateState: migrateState,
-		Schema: map[string]*schema.Schema{
-			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"trust_arn": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
-			},
-			"role_added_to_ip": {
-				Type:     schema.TypeBool,
-				Computed: true,
-			},
-			"arn": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"ip_arn": {
-				Type:     schema.TypeString,
-				Computed: true,
-			},
-			"enable_alks_access": {
-				Type:     schema.TypeBool,
-				Default:  false,
-				Optional: true,
-			},
-		},
-	}
-}
-
 func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
 
@@ -143,50 +93,6 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
 
 	log.Printf("[INFO] alks_iamrole.id: %v", d.Id())
-
-	return resourceAlksIamRoleRead(ctx, d, meta)
-}
-
-func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
-	log.Printf("[INFO] ALKS IAM Trust Role Create")
-
-	var roleName = d.Get("name").(string)
-	var roleType = d.Get("type").(string)
-	var trustArn = d.Get("trust_arn").(string)
-	var enableAlksAccess = d.Get("enable_alks_access").(bool)
-
-	client := meta.(*alks.Client)
-	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err)
-	}
-
-	var resp *alks.IamRoleResponse
-	err := resource.Retry(2*time.Minute, func() *resource.RetryError {
-		var err error
-		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
-		if err != nil {
-			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
-				return resource.NonRetryableError(err)
-			}
-
-			// Due to IAM eventual consistency, you might've just created a role that you need to link to a trust
-			// We'll keep checking every 15 seconds for up to 2 minutes to see if the role appears
-			time.Sleep(15 * time.Second)
-			return resource.RetryableError(err)
-		}
-		return nil
-	})
-
-	if err != nil {
-		return diag.FromErr(err)
-	}
-
-	response := *resp
-
-	d.SetId(response.RoleName)
-	_ = d.Set("role_added_to_ip", resp.RoleAddedToIP)
-
-	log.Printf("[INFO] alks_iamtrustrole.id: %v", d.Id())
 
 	return resourceAlksIamRoleRead(ctx, d, meta)
 }
