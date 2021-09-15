@@ -14,7 +14,7 @@ func validateIAMEnabled(client *alks.Client) error {
 	}
 
 	if !resp.LoginRole.IamKeyActive {
-		return errors.New("uh oh! You're using the " + resp.LoginRole.Role + " which is not IAM active. " +
+		return errors.New("uh oh! You're using the " + resp.LoginRole.Role + " role which is not IAM active. " +
 			"Please instead use one of the following roles: Admin, IAMAdmin, LabAdmin, or a Machine Identity")
 	}
 
