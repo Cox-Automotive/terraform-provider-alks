@@ -88,11 +88,3 @@ mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.5
   ```
 
 * Note: If you've previously installed our provider, and it is stored in your remote state: you may need to run the [`replace-provider` command](https://www.terraform.io/docs/commands/state/replace-provider.html).
-
----
-
-### Supported Versions
-
-| Terraform 0.10.x       |  Terraform 0.11.x        | Terraform 0.12.x - Terraform 0.15.x  | Terraform 1.0.x   |
-| ---------------------- | ------------------------ | ------------------------------------ | ----------------- |
-| ALKS TFP 0.9.0 < 1.3.0 | ALKS TFP 1.3.0 < 1.5.15  | ALKS TFP 1.3.0+                      | ALKS TFP 2.0.0+   |
