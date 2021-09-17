@@ -162,4 +162,10 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
     * `policy` - (Optional) This specifies additional policy restrictions to apply to the resulting STS credentials beyond any existing inline or managed policies. Please see the AWS SDK documentation for more information.
 
 ---
+### Supported Versions
+
+| Terraform 0.10.x       |  Terraform 0.11.x        | Terraform 0.12.x - Terraform 0.15.x  | Terraform 1.0.x   |
+| ---------------------- | ------------------------ | ------------------------------------ | ----------------- |
+| ALKS TFP 0.9.0 < 1.3.0 | ALKS TFP 1.3.0 < 1.5.15  | ALKS TFP 1.3.0+                      | ALKS TFP 2.0.0+   |
+
 For questions, please reach out to the [ALKS team](https://github.com/orgs/Cox-Automotive/teams/cai-internal-tools).
