@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"testing"
 
 	"github.com/Cox-Automotive/alks-go"
@@ -41,6 +42,31 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "enable_alks_access", "true"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccIAMRole_NamePrefix(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlksIamRoleConfigNamePrefix,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.nameprefix", "name_prefix", "alks_test_acc_"),
+					resource.TestMatchResourceAttr(
+						"alks_iamrole.nameprefix", "name", regexp.MustCompile("alks_test_acc_[0-9]{26}")),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.nameprefix", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.nameprefix", "include_default_policies", "false"),
 				),
 			},
 		},
@@ -94,5 +120,12 @@ const testAccCheckAlksIamRoleConfigUpdateBasic = `
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
+	}
+`
+const testAccCheckAlksIamRoleConfigNamePrefix = `
+  resource "alks_iamrole" "nameprefix" {
+    name_prefix = "alks_test_acc_"
+    type = "Amazon EC2"
+		include_default_policies = false
 	}
 `
