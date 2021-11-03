@@ -19,7 +19,8 @@ resource "alks_iamtrustrole" "test_trust_role" {
 ## Argument Reference
 
 The following arguments are supported:
-* `name` - (Required) The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
+* `name` - (Optional/Computed) The name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
+* `name_prefix` - (Optional/Computed) A prefix for a generated name of the IAM role to create. This parameter allows a string of characters consisting of upper and lowercase alphanumeric characters with no spaces. You can also include any of the following characters: =,.@-. Role names are not distinguished by case.
 * `type` - (Required) 	The role type to use `Cross Account` or `Inner Account`.
 * `trust_arn` - (Required) Account role ARN to trust.
   * _Note: This only allows **ONE** account role ARN. This is an intended security control by CAI._
