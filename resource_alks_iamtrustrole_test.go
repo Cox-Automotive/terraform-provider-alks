@@ -50,15 +50,31 @@ func TestAccAlksIamTrustRole_NamePrefix(t *testing.T) {
 		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAlksIamTrustRoleConfigBasic,
+				Config: testAccCheckAlksIamTrustRoleConfigNamePrefix,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.nameprefix", "name_prefix", "alks_test_acc_"),
+						"alks_iamtrustrole.nameprefix_trustrole", "name_prefix", "alks_test_acc_"),
 					resource.TestMatchResourceAttr(
-						"alks_iamrole.nameprefix", "name", regexp.MustCompile("alks_test_acc_[0-9]{26}")),
+						"alks_iamtrustrole.nameprefix_trustrole", "name", regexp.MustCompile("alks_test_acc_[0-9]{26}")),
 					resource.TestCheckResourceAttr(
-						"alks_iamtrustrole.bar", "type", "Inner Account"),
+						"alks_iamtrustrole.nameprefix_trustrole", "type", "Inner Account"),
 				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamTrustRole_NameAndNamePrefixConflict(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamTrustRoleConfigNameAndNamePrefixConflict,
+				ExpectError: regexp.MustCompile(".*\"name\": conflicts with name_prefix.*"),
 			},
 		},
 	})
@@ -92,6 +108,7 @@ const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
 		enable_alks_access = true
 	}
 `
+
 const testAccCheckAlksIamTrustRoleConfigNamePrefix = `
 	resource "alks_iamrole" "nameprefix_role" {
 		name_prefix = "alks_test_acc_"
@@ -99,9 +116,24 @@ const testAccCheckAlksIamTrustRoleConfigNamePrefix = `
 		include_default_policies = false
 	}
 
-	resource "alks_iamtrustrole" "name-prefix_trustrole" {
+	resource "alks_iamtrustrole" "nameprefix_trustrole" {
 		name_prefix = "alks_test_acc_"
 		type = "Inner Account"
 		trust_arn = "${alks_iamrole.nameprefix_role.arn}"
+	}
+`
+
+const testAccCheckAlksIamTrustRoleConfigNameAndNamePrefixConflict = `
+	resource "alks_iamrole" "nameprefixconflict_role" {
+		name_prefix = "alks_test_acc_"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+
+	resource "alks_iamtrustrole" "nameprefixconflict_trustrole" {
+        name = "alks_test_acc"
+		name_prefix = "alks_test_acc_"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.nameprefixconflict_role.arn}"
 	}
 `

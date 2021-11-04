@@ -73,6 +73,22 @@ func TestAccIAMRole_NamePrefix(t *testing.T) {
 	})
 }
 
+func TestAccIAMRole_NameAndNamePrefixConflict(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamRoleConfigNameAndNamePrefixConflict,
+				ExpectError: regexp.MustCompile(".*\"name\": conflicts with name_prefix.*"),
+			},
+		},
+	})
+}
+
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*alks.Client)
@@ -124,6 +140,14 @@ const testAccCheckAlksIamRoleConfigUpdateBasic = `
 `
 const testAccCheckAlksIamRoleConfigNamePrefix = `
   resource "alks_iamrole" "nameprefix" {
+    name_prefix = "alks_test_acc_"
+    type = "Amazon EC2"
+		include_default_policies = false
+	}
+`
+const testAccCheckAlksIamRoleConfigNameAndNamePrefixConflict = `
+  resource "alks_iamrole" "nameandnameprefixconflict" {
+    name = "test-role"
     name_prefix = "alks_test_acc_"
     type = "Amazon EC2"
 		include_default_policies = false
