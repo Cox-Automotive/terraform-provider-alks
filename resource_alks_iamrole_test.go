@@ -41,6 +41,8 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "include_default_policies", "false"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "enable_alks_access", "true"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "max_session_duration_in_seconds", "3600"),
 				),
 			},
 		},
@@ -94,5 +96,6 @@ const testAccCheckAlksIamRoleConfigUpdateBasic = `
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
+		max_session_duration_in_seconds = 3600
 	}
 `

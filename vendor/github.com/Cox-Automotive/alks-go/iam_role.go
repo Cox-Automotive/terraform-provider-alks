@@ -9,12 +9,22 @@ import (
 )
 
 // IamRoleRequest is used to represent a new IAM Role request.
+type CreateIamRoleParams struct {
+	roleName                    string
+	roleType                    string
+	templateFields              map[string]string
+	includeDefaultPolicies      bool
+	enableAlksAccess            bool
+	maxSessionDurationInSeconds int
+}
+
 type IamRoleRequest struct {
-	RoleName       string            `json:"roleName"`
-	RoleType       string            `json:"roleType"`
-	IncDefPols     int               `json:"includeDefaultPolicy"`
-	AlksAccess     bool              `json:"enableAlksAccess"`
-	TemplateFields map[string]string `json:"templateFields,omitempty"`
+	RoleName                    string            `json:"roleName"`
+	RoleType                    string            `json:"roleType"`
+	IncDefPols                  int               `json:"includeDefaultPolicy"`
+	AlksAccess                  bool              `json:"enableAlksAccess"`
+	TemplateFields              map[string]string `json:"templateFields,omitempty"`
+	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds"`
 }
 
 // IamTrustRoleRequest is used to represent a new IAM Trust Role request.
@@ -28,13 +38,14 @@ type IamTrustRoleRequest struct {
 // IamRoleResponse is used to represent a a IAM Role.
 type IamRoleResponse struct {
 	BaseResponse
-	RoleName       string            `json:"roleName"`
-	RoleType       string            `json:"roleType"`
-	RoleArn        string            `json:"roleArn"`
-	RoleIPArn      string            `json:"instanceProfileArn"`
-	RoleAddedToIP  bool              `json:"addedRoleToInstanceProfile"`
-	Exists         bool              `json:"roleExists"`
-	TemplateFields map[string]string `json:"templateFields,omitempty"`
+	RoleName                    string            `json:"roleName"`
+	RoleType                    string            `json:"roleType"`
+	RoleArn                     string            `json:"roleArn"`
+	RoleIPArn                   string            `json:"instanceProfileArn"`
+	RoleAddedToIP               bool              `json:"addedRoleToInstanceProfile"`
+	Exists                      bool              `json:"roleExists"`
+	TemplateFields              map[string]string `json:"templateFields,omitempty"`
+	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds"`
 }
 
 // GetIamRoleResponse is used to represent a a IAM Role.
@@ -96,20 +107,27 @@ type MachineIdentityResponse struct {
 
 // CreateIamRole will create a new IAM role on AWS. If no error is returned
 // then you will receive a IamRoleResponse object representing the new role.
-func (c *Client) CreateIamRole(roleName, roleType string, templateFields map[string]string, includeDefaultPolicies, enableAlksAccess bool) (*IamRoleResponse, error) {
-	log.Printf("[INFO] Creating IAM role: %s", roleName)
+//roleName, roleType string, templateFields map[string]string, includeDefaultPolicies, enableAlksAccess bool, maxSessionDurationInSeconds int
+func (c *Client) CreateIamRole(p CreateIamRoleParams) (*IamRoleResponse, error) {
+	log.Printf("[INFO] Creating IAM role: %s", p.roleName)
 
 	var include int
-	if includeDefaultPolicies {
+	if p.includeDefaultPolicies {
 		include = 1
 	}
 
+	var maxSessionDurationInSeconds int
+	if p.maxSessionDurationInSeconds == 0 {
+		maxSessionDurationInSeconds = 3600
+	}
+
 	iam := IamRoleRequest{
-		roleName,
-		roleType,
+		p.roleName,
+		p.roleType,
 		include,
-		enableAlksAccess,
-		templateFields,
+		p.enableAlksAccess,
+		p.templateFields,
+		maxSessionDurationInSeconds,
 	}
 
 	b, err := json.Marshal(struct {
