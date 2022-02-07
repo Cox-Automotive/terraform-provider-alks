@@ -49,6 +49,45 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlksIamRoleConfigBasic,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar420"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+				),
+			},
+			{
+				// update the resource
+				Config: testAccCheckAlksIamRoleConfigUpdateNoMaxDuration,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar420"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "enable_alks_access", "true"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "max_session_duration_in_seconds", "3600"),
+				),
+			},
+		},
+	})
+}
+
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*alks.Client)
@@ -91,6 +130,16 @@ const testAccCheckAlksIamRoleConfigBasic = `
 `
 
 const testAccCheckAlksIamRoleConfigUpdateBasic = `
+	resource "alks_iamrole" "foo" {
+		name = "bar420"
+		type = "Amazon EC2"
+		include_default_policies = false
+		enable_alks_access = true
+		max_session_duration_in_seconds = 3600
+	}
+`
+
+const testAccCheckAlksIamRoleConfigUpdateNoMaxDuration = `
 	resource "alks_iamrole" "foo" {
 		name = "bar420"
 		type = "Amazon EC2"
