@@ -8,13 +8,21 @@ import (
 	"strings"
 )
 
+type CreateIamRoleOptions struct {
+	IncDefPols                  int
+	AlksAccess                  bool
+	TemplateFields              map[string]string
+	MaxSessionDurationInSeconds int
+}
+
 // IamRoleRequest is used to represent a new IAM Role request.
 type IamRoleRequest struct {
-	RoleName       string            `json:"roleName"`
-	RoleType       string            `json:"roleType"`
-	IncDefPols     int               `json:"includeDefaultPolicy"`
-	AlksAccess     bool              `json:"enableAlksAccess"`
-	TemplateFields map[string]string `json:"templateFields,omitempty"`
+	RoleName                    string            `json:"roleName"`
+	RoleType                    string            `json:"roleType"`
+	IncDefPols                  int               `json:"includeDefaultPolicy"`
+	AlksAccess                  bool              `json:"enableAlksAccess"`
+	TemplateFields              map[string]string `json:"templateFields,omitempty"`
+	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds"`
 }
 
 // IamTrustRoleRequest is used to represent a new IAM Trust Role request.
@@ -28,13 +36,14 @@ type IamTrustRoleRequest struct {
 // IamRoleResponse is used to represent a a IAM Role.
 type IamRoleResponse struct {
 	BaseResponse
-	RoleName       string            `json:"roleName"`
-	RoleType       string            `json:"roleType"`
-	RoleArn        string            `json:"roleArn"`
-	RoleIPArn      string            `json:"instanceProfileArn"`
-	RoleAddedToIP  bool              `json:"addedRoleToInstanceProfile"`
-	Exists         bool              `json:"roleExists"`
-	TemplateFields map[string]string `json:"templateFields,omitempty"`
+	RoleName                    string            `json:"roleName"`
+	RoleType                    string            `json:"roleType"`
+	RoleArn                     string            `json:"roleArn"`
+	RoleIPArn                   string            `json:"instanceProfileArn"`
+	RoleAddedToIP               bool              `json:"addedRoleToInstanceProfile"`
+	Exists                      bool              `json:"roleExists"`
+	TemplateFields              map[string]string `json:"templateFields,omitempty"`
+	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds"`
 }
 
 // GetIamRoleResponse is used to represent a a IAM Role.
@@ -94,22 +103,18 @@ type MachineIdentityResponse struct {
 	MachineIdentityArn string `json:"machineIdentityArn"`
 }
 
-// CreateIamRole will create a new IAM role on AWS. If no error is returned
+// CreateIamRoleWithOptions will create a new IAM role on AWS. If no error is returned
 // then you will receive a IamRoleResponse object representing the new role.
-func (c *Client) CreateIamRole(roleName, roleType string, templateFields map[string]string, includeDefaultPolicies, enableAlksAccess bool) (*IamRoleResponse, error) {
+func (c *Client) CreateIamRoleWithOptions(roleName, roleType string, options CreateIamRoleOptions) (*IamRoleResponse, error) {
 	log.Printf("[INFO] Creating IAM role: %s", roleName)
-
-	var include int
-	if includeDefaultPolicies {
-		include = 1
-	}
 
 	iam := IamRoleRequest{
 		roleName,
 		roleType,
-		include,
-		enableAlksAccess,
-		templateFields,
+		options.IncDefPols,
+		options.AlksAccess,
+		options.TemplateFields,
+		options.MaxSessionDurationInSeconds,
 	}
 
 	b, err := json.Marshal(struct {
@@ -147,6 +152,23 @@ func (c *Client) CreateIamRole(roleName, roleType string, templateFields map[str
 	}
 
 	return cr, nil
+}
+
+func (c *Client) CreateIamRole(roleName, roleType string, templateFields map[string]string, includeDefaultPolicies, enableAlksAccess bool) (*IamRoleResponse, error) {
+
+	var include int
+	if includeDefaultPolicies {
+		include = 1
+	}
+
+	options := CreateIamRoleOptions{
+		IncDefPols:                  include,
+		AlksAccess:                  enableAlksAccess,
+		TemplateFields:              templateFields,
+		MaxSessionDurationInSeconds: 3600,
+	}
+
+	return c.CreateIamRoleWithOptions(roleName, roleType, options)
 }
 
 // CreateIamTrustRole will create a new IAM trust role on AWS. If no error is returned
