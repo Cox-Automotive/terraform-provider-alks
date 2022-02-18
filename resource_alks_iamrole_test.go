@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"testing"
 
 	"github.com/Cox-Automotive/alks-go"
@@ -88,6 +89,47 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 	})
 }
 
+func TestAccIAMRole_NamePrefix(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlksIamRoleConfigNamePrefix,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.nameprefix", "name_prefix", "alks_test_acc_"),
+					resource.TestMatchResourceAttr(
+						"alks_iamrole.nameprefix", "name", regexp.MustCompile("alks_test_acc_[0-9]{26}")),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.nameprefix", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.nameprefix", "include_default_policies", "false"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccIAMRole_NameAndNamePrefixConflict(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamRoleConfigNameAndNamePrefixConflict,
+				ExpectError: regexp.MustCompile(".*\"name\": conflicts with name_prefix.*"),
+			},
+		},
+	})
+}
+
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*alks.Client)
@@ -146,5 +188,20 @@ const testAccCheckAlksIamRoleConfigUpdateNoMaxDuration = `
 		include_default_policies = false
 		enable_alks_access = true
 		max_session_duration_in_seconds = 3600
+	}
+`
+const testAccCheckAlksIamRoleConfigNamePrefix = `
+  resource "alks_iamrole" "nameprefix" {
+    name_prefix = "alks_test_acc_"
+    type = "Amazon EC2"
+		include_default_policies = false
+	}
+`
+const testAccCheckAlksIamRoleConfigNameAndNamePrefixConflict = `
+  resource "alks_iamrole" "nameandnameprefixconflict" {
+    name = "test-role"
+    name_prefix = "alks_test_acc_"
+    type = "Amazon EC2"
+		include_default_policies = false
 	}
 `
