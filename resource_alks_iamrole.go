@@ -70,6 +70,11 @@ func resourceAlksIamRole() *schema.Resource {
 				ForceNew: true,
 				Optional: true,
 			},
+			"max_session_duration_in_seconds": {
+				Type:     schema.TypeInt,
+				Default:  3600,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -82,10 +87,16 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	var incDefPol = d.Get("include_default_policies").(bool)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
+	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
 
 	templateFields := make(map[string]string)
 	for k, v := range rawTemplateFields {
 		templateFields[k] = v.(string)
+	}
+
+	var include int
+	if incDefPol {
+		include = 1
 	}
 
 	client := meta.(*alks.Client)
@@ -93,7 +104,12 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	resp, err := client.CreateIamRole(roleName, roleType, templateFields, incDefPol, enableAlksAccess)
+	options := alks.CreateIamRoleOptions{IncDefPols: include,
+		AlksAccess:                  enableAlksAccess,
+		TemplateFields:              templateFields,
+		MaxSessionDurationInSeconds: maxSessionDurationInSeconds}
+
+	resp, err := client.CreateIamRoleWithOptions(roleName, roleType, options)
 	if err != nil {
 		return diag.FromErr(err)
 	}
