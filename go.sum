@@ -40,6 +40,8 @@ github.com/Cox-Automotive/alks-go v0.0.0-20220204185347-3eb3a57f4a8e h1:7NtH5BFw
 github.com/Cox-Automotive/alks-go v0.0.0-20220204185347-3eb3a57f4a8e/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
 github.com/Cox-Automotive/alks-go v0.0.0-20220204233541-ba8ac1a4fbb6 h1:uL+oMMRaAvQxw/ETTuiD8vzftU8hA6zvFqUDCVnPmTA=
 github.com/Cox-Automotive/alks-go v0.0.0-20220204233541-ba8ac1a4fbb6/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
+github.com/Cox-Automotive/alks-go v0.0.0-20220218164749-e4de33286d92 h1:skXr8jFqk0BXpcCOPXGk+aQsgHRLkhKDZZVyAv3cFPc=
+github.com/Cox-Automotive/alks-go v0.0.0-20220218164749-e4de33286d92/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.2 h1:0S/Yg6LYmFJ5stwQeRp6EeOcCbj7xiqQSdNelsXvaqE=
 github.com/agext/levenshtein v1.2.2/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
