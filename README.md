@@ -11,6 +11,7 @@ This provider is for creating and modifying IAM roles via the ALKS API.
     * This tool is best suited for users with an `Admin` role
     * With an `IAMAdmin|LabAdmin` role, you can create roles and attach policies, but you can't create other infrastructure.
 * Works with [Terraform](https://www.terraform.io/) version `0.10.0` or newer.
+    * [ALKS TFP - Supported Versions Matrix](https://registry.terraform.io/providers/Cox-Automotive/alks/latest/docs#supported-versions)
 
 ## Building from Source
 
