@@ -53,7 +53,7 @@ func TestValidRoleName_NameTooShort(t *testing.T) {
 	name := ""
 	warn, err := validRoleName(name, "")
 	if len(warn) != 0 || len(err) != 2 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected 2 validation errors")
 	}
 }
 
@@ -61,7 +61,7 @@ func TestValidRoleName_NameMaxLength(t *testing.T) {
 	name := "0123456789012345678901234567890123456789012345678901234567890123"
 	warn, err := validRoleName(name, "")
 	if len(warn) != 0 || len(err) != 0 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected no validation errors")
 	}
 }
 
@@ -69,7 +69,7 @@ func TestValidRoleName_NameTooLong(t *testing.T) {
 	name := "01234567890123456789012345678901234567890123456789012345678901234"
 	warn, err := validRoleName(name, "")
 	if len(warn) != 0 || len(err) != 1 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected 1 validation error")
 	}
 }
 
@@ -77,7 +77,7 @@ func TestValidRoleName_NameInvalidChar(t *testing.T) {
 	name := "name!!!!@#$%^&*()-="
 	warn, err := validRoleName(name, "")
 	if len(warn) != 0 || len(err) != 1 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected 1 validation error")
 	}
 }
 
@@ -85,7 +85,7 @@ func TestValidRolePrefix_NamePrefixTooShort(t *testing.T) {
 	prefix := ""
 	warn, err := validRolePrefix(prefix, "")
 	if len(warn) != 0 || len(err) != 2 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected 2 validation errors")
 	}
 }
 
@@ -93,7 +93,7 @@ func TestValidRolePrefix_NamePrefixMaxLength(t *testing.T) {
 	prefix := "01234567890123456789012345678901234567"
 	warn, err := validRolePrefix(prefix, "")
 	if len(warn) != 0 || len(err) != 0 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected no validation errors")
 	}
 }
 
@@ -101,7 +101,7 @@ func TestValidRolePrefix_NamePrefixTooLong(t *testing.T) {
 	prefix := "012345678901234567890123456789012345678"
 	warn, err := validRolePrefix(prefix, "")
 	if len(warn) != 0 || len(err) != 1 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected 1 validation error")
 	}
 }
 
@@ -109,6 +109,6 @@ func TestValidRolePrefix_NamePrefixInvalidChar(t *testing.T) {
 	prefix := "name!!!!@#$%^&*()-="
 	warn, err := validRolePrefix(prefix, "")
 	if len(warn) != 0 || len(err) != 1 {
-		t.Fatalf("expected an error")
+		t.Fatalf("expected 1 validation error")
 	}
 }
