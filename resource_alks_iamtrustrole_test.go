@@ -80,6 +80,22 @@ func TestAccAlksIamTrustRole_NameAndNamePrefixConflict(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamTrustRole_NameTooLong(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamTrustRoleConfigNameTooLong,
+				ExpectError: regexp.MustCompile(".* expected length of name to be in the range \\(1 - 64\\).*"),
+			},
+		},
+	})
+}
+
 const testAccCheckAlksIamTrustRoleConfigBasic = `
 	resource "alks_iamrole" "foo" {
 		name = "foo"
@@ -135,5 +151,19 @@ const testAccCheckAlksIamTrustRoleConfigNameAndNamePrefixConflict = `
 		name_prefix = "alks_test_acc_"
 		type = "Inner Account"
 		trust_arn = "${alks_iamrole.nameprefixconflict_role.arn}"
+	}
+`
+
+const testAccCheckAlksIamTrustRoleConfigNameTooLong= `
+	resource "alks_iamrole" "nametoolong_role" {
+		name_prefix = "alks_test_acc_"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+
+	resource "alks_iamtrustrole" "nametoolong_trustrole" {
+		name = "nameandnametoolongggggggggggggggggggggggggggggggggggggggggggggggg"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.nametoolong_role.arn}"
 	}
 `
