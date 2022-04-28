@@ -73,6 +73,7 @@ func Provider() *schema.Provider {
 				DefaultFunc: schema.EnvDefaultFunc("Role", nil),
 			},
 			"assume_role": assumeRoleSchema(),
+			"default_tags": defaultTagsSchema(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -120,6 +121,31 @@ func assumeRoleSchema() *schema.Schema {
 		},
 	}
 }
+
+func defaultTagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeList,
+		Optional: true,
+		MaxItems: 1,
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"tags": {
+					Type:     schema.TypeMap,
+					Required: true,
+					Elem:     schema.TypeString,
+				},
+			},
+		},
+	}
+}
+
+// func tagsSchema() *schema.Schema {
+// 	return &schema.Schema{
+// 		Type:     schema.TypeMap,
+// 		Required: true,
+// 		Elem:     schema.TypeString,
+// 	}
+// }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
