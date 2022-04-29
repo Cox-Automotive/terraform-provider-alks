@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
@@ -72,7 +73,7 @@ func Provider() *schema.Provider {
 				Description: "The role which you'd like to retrieve credentials for.",
 				DefaultFunc: schema.EnvDefaultFunc("Role", nil),
 			},
-			"assume_role": assumeRoleSchema(),
+			"assume_role":  assumeRoleSchema(),
 			"default_tags": defaultTagsSchema(),
 		},
 
@@ -124,28 +125,22 @@ func assumeRoleSchema() *schema.Schema {
 
 func defaultTagsSchema() *schema.Schema {
 	return &schema.Schema{
-		Type:     schema.TypeList,
-		Optional: true,
-		MaxItems: 1,
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Configuration block with settings to default resource tags across all resources.",
 		Elem: &schema.Resource{
 			Schema: map[string]*schema.Schema{
 				"tags": {
-					Type:     schema.TypeMap,
-					Required: true,
-					Elem:     schema.TypeString,
+					Type:        schema.TypeMap,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Description: "Resource tags to default across all resources",
 				},
 			},
 		},
 	}
 }
-
-// func tagsSchema() *schema.Schema {
-// 	return &schema.Schema{
-// 		Type:     schema.TypeMap,
-// 		Required: true,
-// 		Elem:     schema.TypeString,
-// 	}
-// }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 
