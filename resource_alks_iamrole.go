@@ -94,22 +94,32 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 		templateFields[k] = v.(string)
 	}
 
-	var include int
+	var include bool
 	if incDefPol {
-		include = 1
+		include = true
 	}
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
+
+	defaultTags := providerStruct.defaultTags
+	// client := meta.(*alks.Client)
+
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
 
-	options := alks.CreateIamRoleOptions{IncDefPols: include,
-		AlksAccess:                  enableAlksAccess,
-		TemplateFields:              templateFields,
-		MaxSessionDurationInSeconds: maxSessionDurationInSeconds}
+	options := &alks.CreateIamRoleOptions{
+		RoleName:                    &roleName,
+		RoleType:                    &roleType,
+		IncludeDefaultPolicies:      &include,
+		AlksAccess:                  &enableAlksAccess,
+		TemplateFields:              &templateFields,
+		MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
+		Tags:                        defaultTags,
+	}
 
-	resp, err := client.CreateIamRoleWithOptions(roleName, roleType, options)
+	resp, err := client.CreateIamRole(options)
 	if err != nil {
 		return diag.FromErr(err)
 	}

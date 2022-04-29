@@ -4,6 +4,7 @@ import (
 	"context"
 	"log"
 
+	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -154,6 +155,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		Profile:   d.Get("profile").(string),
 		Account:   d.Get("account").(string),
 		Role:      d.Get("role").(string),
+		// DefaultTags: expandProviderDefaultTags(d.Get("default_tags").([]interface{})),
 	}
 
 	assumeRoleList := d.Get("assume_role").(*schema.Set).List()
@@ -171,12 +173,46 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diag.FromErr(err)
 	}
 	config.CredsFilename = credsPath
+	defaultTags := expandProviderDefaultTags(d.Get("default_tags").([]interface{}))
 
 	c, err := config.Client()
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
 
+	alksClient := &AlksClient{}
+	alksClient.client = c
+	if defaultTags != nil {
+		alksClient.defaultTags = defaultTags
+	}
+
 	log.Println("[INFO] Initializing ALKS client")
-	return c, diags
+	return alksClient, diags
+	// return c, diags
+}
+
+func expandProviderDefaultTags(l []interface{}) *[]alks.Tag {
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	m := l[0].(map[string]interface{})
+	tagSlice := []alks.Tag{}
+	if tagMap, ok := m["tags"].(map[string]interface{}); ok {
+		for key, value := range tagMap {
+			tag := alks.Tag{}
+			tag.Key = key
+			str, ok := value.(string)
+			if ok {
+				tag.Value = str
+			}
+			tagSlice = append(tagSlice, tag)
+		}
+	}
+	return &tagSlice
+}
+
+type AlksClient struct {
+	client      *alks.Client
+	defaultTags *[]alks.Tag
 }
