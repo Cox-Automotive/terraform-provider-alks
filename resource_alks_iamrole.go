@@ -75,6 +75,12 @@ func resourceAlksIamRole() *schema.Resource {
 				Default:  3600,
 				Optional: true,
 			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Elem:     schema.TypeString,
+				ForceNew: false,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -88,10 +94,18 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
 	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
+	var rawTags = d.Get("tags").(map[string]interface{})
 
 	templateFields := make(map[string]string)
 	for k, v := range rawTemplateFields {
 		templateFields[k] = v.(string)
+	}
+
+	tags := []*alks.Tag{}
+	for k, v := range rawTags {
+		kp := &k
+		vp := &v
+		tags = append(tags, &alks.Tag{Key: kp, Value: vp})
 	}
 
 	var include int
@@ -104,12 +118,17 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	options := alks.CreateIamRoleOptions{IncDefPols: include,
-		AlksAccess:                  enableAlksAccess,
-		TemplateFields:              templateFields,
-		MaxSessionDurationInSeconds: maxSessionDurationInSeconds}
+	options := &alks.CreateIamRoleOptions{
+		RoleName:                    &roleName,
+		RoleType:                    &roleType,
+		IncludeDefaultPolicies:      &include,
+		AlksAccess:                  &enableAlksAccess,
+		TemplateFields:              &templateFields,
+		MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
+		Tags:                        &tags,
+	}
 
-	resp, err := client.CreateIamRoleWithOptions(roleName, roleType, options)
+	resp, err := client.CreateIamRole(options)
 	if err != nil {
 		return diag.FromErr(err)
 	}
