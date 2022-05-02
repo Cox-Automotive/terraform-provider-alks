@@ -107,13 +107,14 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
 	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
+	var tags = getTags(d)
 
 	templateFields := make(map[string]string)
 	for k, v := range rawTemplateFields {
 		templateFields[k] = v.(string)
 	}
 
-	var include bool
+	var include int
 	if incDefPol {
 		include = true
 	}
@@ -128,15 +129,10 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	options := &alks.CreateIamRoleOptions{
-		RoleName:                    &roleName,
-		RoleType:                    &roleType,
-		IncludeDefaultPolicies:      &include,
-		AlksAccess:                  &enableAlksAccess,
-		TemplateFields:              &templateFields,
-		MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
-		Tags:                        defaultTags,
-	}
+	options := alks.CreateIamRoleOptions{IncDefPols: include,
+		AlksAccess:                  enableAlksAccess,
+		TemplateFields:              templateFields,
+		MaxSessionDurationInSeconds: maxSessionDurationInSeconds}
 
 	resp, err := client.CreateIamRole(options)
 	if err != nil {
@@ -191,7 +187,6 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
-	_ = d.Set("tags_all", foundRole.tags)
 
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.
@@ -210,6 +205,13 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 	if d.HasChange("enable_alks_access") {
 		// try updating enable_alks_access
 		if err := updateAlksAccess(d, meta); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
+	if d.HasChange("tags") {
+		// try updating enable_alks_access
+		if err := updateIamTags(d, meta); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -240,6 +242,35 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 		}
 	}
 	return nil
+}
+
+func updateIamTags(d *schema.ResourceData, meta interface{}) error {
+	client := meta.(*alks.Client)
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
+
+	tags := getTags(d)
+	roleName := NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
+	options := alks.UpdateIamRoleRequest{
+		RoleName: &roleName,
+		Tags:     &tags,
+	}
+
+	if _, err := client.UpdateIamRole(&options); err != nil {
+		return err
+	}
+	return nil
+}
+
+func getTags(d *schema.ResourceData) []alks.Tag {
+	rawTags := d.Get("tags").(map[string]interface{})
+	tags := []alks.Tag{}
+	for k, v := range rawTags {
+		tag := alks.Tag{Key: k, Value: v.(string)}
+		tags = append(tags, tag)
+	}
+	return tags
 }
 
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
