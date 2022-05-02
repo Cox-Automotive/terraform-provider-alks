@@ -197,24 +197,10 @@ func expandProviderDefaultTags(l []interface{}) *[]alks.Tag {
 	}
 
 	m := l[0].(map[string]interface{})
-	tagSlice := []alks.Tag{}
-	if tagMap, ok := m["tags"].(map[string]interface{}); ok {
-		for key, value := range tagMap {
-			tag := alks.Tag{}
-			tag.Key = key
-			str, ok := value.(string)
-			if ok {
-				tag.Value = str
-			}
-			tagSlice = append(tagSlice, tag)
-		}
-	}
+	tagSlice := tagMapToSlice(m["tags"].(map[string]interface{}))
+
 	return &tagSlice
 }
-
-// func (tags *[]alks.Tag) removeDefaultTagsConfigFromAllTags(defaultTags *[]alks.Tag) *[]alks.Tag {
-
-// }
 
 type AlksClient struct {
 	client      *alks.Client

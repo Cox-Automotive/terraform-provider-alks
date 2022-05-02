@@ -107,14 +107,14 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
 	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
-	var tags = getTags(d)
+	var tags = tagMapToSlice(d.Get("tags").(map[string]interface{}))
 
 	templateFields := make(map[string]string)
 	for k, v := range rawTemplateFields {
 		templateFields[k] = v.(string)
 	}
 
-	var include int
+	include := false
 	if incDefPol {
 		include = true
 	}
@@ -122,17 +122,23 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
-	defaultTags := providerStruct.defaultTags
+	defaultTags := *providerStruct.defaultTags
+	allTags := combineTagsWithDefault(tags, defaultTags)
 	//  client := meta.(*alks.Client)
 
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
 
-	options := alks.CreateIamRoleOptions{IncDefPols: include,
-		AlksAccess:                  enableAlksAccess,
-		TemplateFields:              templateFields,
-		MaxSessionDurationInSeconds: maxSessionDurationInSeconds}
+	options := &alks.CreateIamRoleOptions{
+		RoleName:                    &roleName,
+		RoleType:                    &roleType,
+		IncludeDefaultPolicies:      &include,
+		AlksAccess:                  &enableAlksAccess,
+		TemplateFields:              &templateFields,
+		MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
+		Tags:                        &allTags,
+	}
 
 	resp, err := client.CreateIamRole(options)
 	if err != nil {
@@ -168,6 +174,8 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
+	defaultTags := *providerStruct.defaultTags
+
 	// Check if role exists.
 	if d.Id() == "" || d.Id() == "none" {
 		return nil
@@ -187,6 +195,17 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
+
+	allTags := foundRole.Tags
+	roleSpecificTags := removeDefaultTags(tagSliceToMap(allTags), defaultTags)
+
+	if err := d.Set("tags", tagSliceToMap(roleSpecificTags)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("tags_all", tagSliceToMap(allTags)); err != nil {
+		return diag.FromErr(err)
+	}
 
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.
@@ -209,7 +228,7 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	if d.HasChange("tags") {
+	if d.HasChange("tags_all") {
 		// try updating enable_alks_access
 		if err := updateIamTags(d, meta); err != nil {
 			return diag.FromErr(err)
@@ -245,12 +264,14 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 }
 
 func updateIamTags(d *schema.ResourceData, meta interface{}) error {
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
+
 	if err := validateIAMEnabled(client); err != nil {
 		return err
 	}
 
-	tags := getTags(d)
+	tags := tagMapToSlice(d.Get("tags_all").(map[string]interface{}))
 	roleName := NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
 	options := alks.UpdateIamRoleRequest{
 		RoleName: &roleName,
@@ -263,14 +284,43 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func getTags(d *schema.ResourceData) []alks.Tag {
-	rawTags := d.Get("tags").(map[string]interface{})
+//Combines tags defined on an individual resource with the default tags listed on the provider block
+//Resource specific tags will overwrite default tags
+func combineTagsWithDefault(tags []alks.Tag, defaultTags []alks.Tag) []alks.Tag {
+	defaultTagsMap := tagSliceToMap(defaultTags)
+
+	for _,t := range tags {
+		defaultTagsMap[t.Key] = t.Value
+	}
+	allTags := tagMapToSlice(defaultTagsMap)
+
+	return allTags
+}
+
+//Removes default tags from a map of role specific + default tags
+func removeDefaultTags(allTags map[string]interface{}, defalutTags []alks.Tag) []alks.Tag {
+	for _,t := range defalutTags {
+		delete(allTags, t.Key)
+	}
+
+	return tagMapToSlice(allTags)
+}
+
+func tagMapToSlice(tagMap map[string]interface{}) []alks.Tag {
 	tags := []alks.Tag{}
-	for k, v := range rawTags {
+	for k, v := range tagMap {
 		tag := alks.Tag{Key: k, Value: v.(string)}
 		tags = append(tags, tag)
 	}
 	return tags
+}
+
+func tagSliceToMap(tagSlice []alks.Tag) map[string]interface{} {
+	tagMap := make(map[string]interface{})
+	for _, t := range tagSlice {
+		tagMap[t.Key] = t.Value
+	}
+	return tagMap
 }
 
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {

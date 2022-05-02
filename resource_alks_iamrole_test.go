@@ -68,6 +68,10 @@ func TestAccAlksIamRole_Tags(t *testing.T) {
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
 				),
 			},
 			{
@@ -80,6 +84,10 @@ func TestAccAlksIamRole_Tags(t *testing.T) {
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey3", "testValue3"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
 				),
 			},
 		},
@@ -215,6 +223,29 @@ const testAccCheckAlksIamRoleConfigUpdateBasic = `
 		enable_alks_access = true
 		max_session_duration_in_seconds = 3600
 	}
+`
+const testAccCheckAlksIamRoleCreateWithTags = `
+resource "alks_iamrole" "foo" {
+  name = "bar430"
+  type = "Amazon EC2"
+	  include_default_policies = false
+  }
+  tags = {
+	  testKey1 = "testValue1"
+	  testKey2 = "testValue2"
+  }
+`
+
+const testAccCheckAlksIamRoleUpdateWithTags = `
+resource "alks_iamrole" "foo" {
+  name = "bar430"
+  type = "Amazon EC2"
+	  include_default_policies = false
+  }
+  tags = {
+	  testKey3 = "testValue3"
+	  testKey2 = "testValue2"
+  }
 `
 
 const testAccCheckAlksIamRoleConfigUpdateNoMaxDuration = `
