@@ -8,29 +8,33 @@ import (
 	"strings"
 )
 
+// Tag struct is used to represent a AWS Tag
+type Tag struct {
+	Key   string `json:"key"`
+	Value string `json:"value"`
+}
+
 type CreateIamRoleOptions struct {
-	IncDefPols                  int
-	AlksAccess                  bool
-	TemplateFields              map[string]string
-	MaxSessionDurationInSeconds int
+	RoleName                    *string
+	RoleType                    *string
+	IncludeDefaultPolicies      *bool
+	AlksAccess                  *bool
+	TrustArn                    *string
+	TemplateFields              *map[string]string
+	MaxSessionDurationInSeconds *int
+	Tags                        *[]Tag
 }
 
 // IamRoleRequest is used to represent a new IAM Role request.
 type IamRoleRequest struct {
 	RoleName                    string            `json:"roleName"`
-	RoleType                    string            `json:"roleType"`
-	IncDefPols                  int               `json:"includeDefaultPolicy"`
-	AlksAccess                  bool              `json:"enableAlksAccess"`
+	RoleType                    string            `json:"roleType,omitempty"`
+	IncDefPols                  int               `json:"includeDefaultPolicy,omitempty"`
+	AlksAccess                  bool              `json:"enableAlksAccess,omitempty"`
+	TrustArn                    string            `json:"trustArn,omitempty"`
 	TemplateFields              map[string]string `json:"templateFields,omitempty"`
-	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds"`
-}
-
-// IamTrustRoleRequest is used to represent a new IAM Trust Role request.
-type IamTrustRoleRequest struct {
-	RoleName   string `json:"roleName"`
-	RoleType   string `json:"roleType"`
-	TrustArn   string `json:"trustArn"`
-	AlksAccess bool   `json:"enableAlksAccess"`
+	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds,omitempty"`
+	Tags                        []Tag             `json:"tags,omitempty"`
 }
 
 // IamRoleResponse is used to represent a a IAM Role.
@@ -56,6 +60,7 @@ type GetIamRoleResponse struct {
 	RoleAddedToIP bool   `json:"addedRoleToInstanceProfile"`
 	Exists        bool   `json:"roleExists"`
 	AlksAccess    bool   `json:"machineIdentity"`
+	Tags          []Tag  `json:"tags"`
 }
 
 // GetRoleRequest is used to represent a request for details about
@@ -103,24 +108,74 @@ type MachineIdentityResponse struct {
 	MachineIdentityArn string `json:"machineIdentityArn"`
 }
 
-// CreateIamRoleWithOptions will create a new IAM role on AWS. If no error is returned
-// then you will receive a IamRoleResponse object representing the new role.
-func (c *Client) CreateIamRoleWithOptions(roleName, roleType string, options CreateIamRoleOptions) (*IamRoleResponse, error) {
-	log.Printf("[INFO] Creating IAM role: %s", roleName)
-
-	iam := IamRoleRequest{
-		roleName,
-		roleType,
-		options.IncDefPols,
-		options.AlksAccess,
-		options.TemplateFields,
-		options.MaxSessionDurationInSeconds,
+// Creates a new IamRoleRequest object from options
+func NewIamRoleRequest(options *CreateIamRoleOptions) (*IamRoleRequest, error) {
+	if options.RoleName == nil {
+		return nil, fmt.Errorf("RoleName option must not be nil")
 	}
+
+	if options.RoleType == nil {
+		return nil, fmt.Errorf("RoleType option must not be nil")
+	}
+
+	iam := &IamRoleRequest{
+		RoleName: *options.RoleName,
+		RoleType: *options.RoleType,
+	}
+	if options.IncludeDefaultPolicies != nil && *options.IncludeDefaultPolicies {
+		iam.IncDefPols = 1
+	} else {
+		iam.IncDefPols = 0
+	}
+
+	if options.AlksAccess != nil {
+		iam.AlksAccess = *options.AlksAccess
+	} else {
+		iam.AlksAccess = false
+	}
+
+	if options.TemplateFields != nil {
+		iam.TemplateFields = *options.TemplateFields
+	} else {
+		iam.TemplateFields = nil
+	}
+
+	if options.TrustArn != nil {
+		iam.TrustArn = *options.TrustArn
+	} else {
+		iam.TrustArn = ""
+	}
+
+	if options.MaxSessionDurationInSeconds != nil {
+		iam.MaxSessionDurationInSeconds = *options.MaxSessionDurationInSeconds
+	} else {
+		iam.MaxSessionDurationInSeconds = 3600
+	}
+
+	if options.Tags != nil {
+		iam.Tags = *options.Tags
+	} else {
+		iam.Tags = nil
+	}
+
+	return iam, nil
+}
+
+// CreateIamRole will create a new IAM role in AWS. If no error is returned
+// then you will receive a IamRoleResponse object representing the new role.
+func (c *Client) CreateIamRole(options *CreateIamRoleOptions) (*IamRoleResponse, error) {
+	request, err := NewIamRoleRequest(options)
+
+	if err != nil {
+		return nil, err
+	}
+
+	log.Printf("[INFO] Creating IAM role: %s", request.RoleName)
 
 	b, err := json.Marshal(struct {
 		IamRoleRequest
 		AccountDetails
-	}{iam, c.AccountDetails})
+	}{*request, c.AccountDetails})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create role JSON: %s", err)
@@ -154,39 +209,15 @@ func (c *Client) CreateIamRoleWithOptions(roleName, roleType string, options Cre
 	return cr, nil
 }
 
-func (c *Client) CreateIamRole(roleName, roleType string, templateFields map[string]string, includeDefaultPolicies, enableAlksAccess bool) (*IamRoleResponse, error) {
-
-	var include int
-	if includeDefaultPolicies {
-		include = 1
-	}
-
-	options := CreateIamRoleOptions{
-		IncDefPols:                  include,
-		AlksAccess:                  enableAlksAccess,
-		TemplateFields:              templateFields,
-		MaxSessionDurationInSeconds: 3600,
-	}
-
-	return c.CreateIamRoleWithOptions(roleName, roleType, options)
-}
-
 // CreateIamTrustRole will create a new IAM trust role on AWS. If no error is returned
 // then you will receive a IamRoleResponse object representing the new role.
-func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn string, enableAlksAccess bool) (*IamRoleResponse, error) {
-	log.Printf("[INFO] Creating IAM trust role: %s", roleName)
-
-	iam := IamTrustRoleRequest{
-		roleName,
-		roleType,
-		trustArn,
-		enableAlksAccess,
-	}
+func (c *Client) CreateIamTrustRole(options *CreateIamRoleOptions) (*IamRoleResponse, error) {
+	request, err := NewIamRoleRequest(options)
 
 	b, err := json.Marshal(struct {
-		IamTrustRoleRequest
+		IamRoleRequest
 		AccountDetails
-	}{iam, c.AccountDetails})
+	}{*request, c.AccountDetails})
 
 	if err != nil {
 		return nil, fmt.Errorf("Error encoding IAM create trust role JSON: %s", err)
@@ -218,6 +249,70 @@ func (c *Client) CreateIamTrustRole(roleName string, roleType string, trustArn s
 	}
 
 	return cr, nil
+}
+
+type UpdateIamRoleRequest struct {
+	RoleName *string `json:"roleName"`
+	Tags     *[]Tag  `json:"tags"`
+}
+
+type UpdateIamRoleResponse struct {
+	BaseResponse
+	RoleArn         *string `json:"roleArn"`
+	RoleName        *string `json:"roleName"`
+	BasicAuth       *bool   `json:"basicAuthUsed"`
+	Exists          *bool   `json:"roleExists"`
+	RoleIPArn       *string `json:"instanceProfileArn"`
+	MachineIdentity *bool   `json:"isMachineIdentity"`
+	Tags            *[]Tag  `json:"tags"`
+}
+
+/* UpdateIamRole adds resource tags to an existing IAM role.
+ */
+func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleResponse, error) {
+	if e := options.updateIamRoleValidate(); e != nil {
+		return nil, e
+	}
+	log.Printf("[INFO] update IAM role %s with Tags: %v", *options.RoleName, *options.Tags)
+
+	b, e := json.Marshal(struct {
+		UpdateIamRoleRequest
+		AccountDetails
+	}{*options, c.AccountDetails})
+	if e != nil {
+		return nil, e
+	}
+	req, e := c.NewRequest(b, "PATCH", "/role/")
+	if e != nil {
+		return nil, e
+	}
+	resp, e := c.http.Do(req)
+	if e != nil {
+		return nil, e
+	}
+
+	respObj := &UpdateIamRoleResponse{}
+	if e = decodeBody(resp, respObj); e != nil {
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf("error parsing update role response: [%s] %s", reqID, e)
+		}
+		return nil, fmt.Errorf("error parsing update role response: %s", e)
+	}
+	if respObj.RequestFailed() {
+		return nil, fmt.Errorf("error from update IAM role request: [%s] %s", respObj.RequestID, strings.Join(respObj.GetErrors(), ", "))
+	}
+
+	return respObj, nil
+}
+
+func (req *UpdateIamRoleRequest) updateIamRoleValidate() error {
+	if req.RoleName == nil {
+		return fmt.Errorf("roleName option must not be nil")
+	}
+	if req.Tags == nil {
+		return fmt.Errorf("tags option must not be nil")
+	}
+	return nil
 }
 
 // DeleteIamRole will delete an existing IAM role from AWS. If no error is returned

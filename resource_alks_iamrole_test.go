@@ -95,10 +95,10 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
 		Steps: []resource.TestStep{
 			{
-				Config: testAccCheckAlksIamRoleConfigBasic,
+				Config: testAccCheckAlksIamRoleConfigCreateNoMaxDuration,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "nar420"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -110,7 +110,7 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigUpdateNoMaxDuration,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "nar420"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -209,7 +209,7 @@ const testAccCheckAlksIamRoleConfigBasic = `
 
 const testAccCheckAlksIamRoleConfigUpdateBasic = `
 	resource "alks_iamrole" "foo" {
-		name = "bar420"
+		name = "bar430"
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
@@ -217,9 +217,46 @@ const testAccCheckAlksIamRoleConfigUpdateBasic = `
 	}
 `
 
+const testAccCheckAlksIamRoleCreateWithTags = `
+	resource "alks_iamrole" "foo" {
+		name = "Car420"
+		type = "Amazon EC2"
+		include_default_policies = false
+		enable_alks_access = true
+		max_session_duration_in_seconds = 3600
+		tags = {
+			"tag-key-one" = "tag-value-one"
+			"tag-key-two" = "value-key-two"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleUpdateWithTags = `
+	resource "alks_iamrole" "foo" {
+		name = "Car420"
+		type = "Amazon EC2"
+		include_default_policies = false
+		enable_alks_access = true
+		max_session_duration_in_seconds = 3600
+		tags = {
+			"tag-key-one" = "tag-value-one"
+			"tag-key-two" = "value-key-two"
+			"tag-key-three" = "value-key-three"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleConfigCreateNoMaxDuration = `
+  resource "alks_iamrole" "foo" {
+    name = "nar420"
+    type = "Amazon EC2"
+		include_default_policies = false
+	}
+`
+
 const testAccCheckAlksIamRoleConfigUpdateNoMaxDuration = `
 	resource "alks_iamrole" "foo" {
-		name = "bar420"
+		name = "nar420"
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
