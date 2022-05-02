@@ -31,13 +31,13 @@ func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ALKS_URL"); v == "" {
 		t.Fatal("ALKS_URL must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALKS_ACCESS_KEY_ID"); v == "" {
+	if v := os.Getenv("AWS_ACCESS_KEY_ID"); v == "" {
 		t.Fatal("ALKS_ACCESS_KEY_ID must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALKS_SECRET_ACCESS_KEY"); v == "" {
+	if v := os.Getenv("AWS_SECRET_ACCESS_KEY"); v == "" {
 		t.Fatal("ALKS_SECRET_ACCESS_KEY must be set for acceptance tests")
 	}
-	if v := os.Getenv("ALKS_SESSION_TOKEN"); v == "" {
+	if v := os.Getenv("AWS_SESSION_TOKEN"); v == "" {
 		t.Fatal("ALKS_SESSION_TOKEN must be set for acceptance tests")
 	}
 }
