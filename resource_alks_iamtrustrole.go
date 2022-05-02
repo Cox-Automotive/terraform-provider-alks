@@ -76,6 +76,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
+	tags := getTags(d)
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {
@@ -85,7 +86,14 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var resp *alks.IamRoleResponse
 	err := resource.RetryContext(ctx, 2*time.Minute, func() *resource.RetryError {
 		var err error
-		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
+		options := &alks.CreateIamRoleOptions{
+			RoleName:   &roleName,
+			RoleType:   &roleType,
+			TrustArn:   &trustArn,
+			AlksAccess: &enableAlksAccess,
+			Tags:       &tags,
+		}
+		resp, err = client.CreateIamTrustRole(options)
 		if err != nil {
 			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
 				return resource.NonRetryableError(err)
