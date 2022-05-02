@@ -2,8 +2,9 @@ package main
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
@@ -24,8 +25,8 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "This is the AWS access key. It must be provided, but it can also be sourced from the ALKS_ACCESS_KEY_ID or AWS_ACCESS_KEY_ID environment variable.",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"ALKS_ACCESS_KEY_ID",
 					"AWS_ACCESS_KEY_ID",
+					"ALKS_ACCESS_KEY_ID",
 				}, nil),
 			},
 			"secret_key": {
@@ -33,8 +34,8 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "This is the AWS secret key. It must be provided, but it can also be sourced from the ALKS_SECRET_ACCESS_KEY or AWS_SECRET_ACCESS_KEY environment variable",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"ALKS_SECRET_ACCESS_KEY",
 					"AWS_SECRET_ACCESS_KEY",
+					"ALKS_SECRET_ACCESS_KEY",
 				}, nil),
 			},
 			"token": {
@@ -42,8 +43,8 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "This is the AWS session token. It must be provided, but it can also be sourced from the ALKS_SESSION_TOKEN or AWS_SESSION_TOKEN environment variable",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"ALKS_SESSION_TOKEN",
 					"AWS_SESSION_TOKEN",
+					"ALKS_SESSION_TOKEN",
 				}, nil),
 			},
 			"profile": {
