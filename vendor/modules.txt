@@ -8,7 +8,7 @@ cloud.google.com/go/internal/trace
 cloud.google.com/go/internal/version
 # cloud.google.com/go/storage v1.10.0
 cloud.google.com/go/storage
-# github.com/Cox-Automotive/alks-go v0.0.0-20220429202951-085c873654ea
+# github.com/Cox-Automotive/alks-go v0.0.0-20220502192728-623c28f3b92b
 ## explicit
 github.com/Cox-Automotive/alks-go
 # github.com/agext/levenshtein v1.2.2

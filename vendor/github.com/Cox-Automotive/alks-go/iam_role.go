@@ -8,6 +8,7 @@ import (
 	"strings"
 )
 
+// Tag struct is used to represent a AWS Tag
 type Tag struct {
 	Key   string `json:"key"`
 	Value string `json:"value"`
@@ -59,6 +60,7 @@ type GetIamRoleResponse struct {
 	RoleAddedToIP bool   `json:"addedRoleToInstanceProfile"`
 	Exists        bool   `json:"roleExists"`
 	AlksAccess    bool   `json:"machineIdentity"`
+	Tags          []Tag  `json:"tags"`
 }
 
 // GetRoleRequest is used to represent a request for details about
