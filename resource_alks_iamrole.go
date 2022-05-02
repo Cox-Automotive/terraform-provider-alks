@@ -101,9 +101,9 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 		templateFields[k] = v.(string)
 	}
 
-	var include int
+	include := false
 	if incDefPol {
-		include = 1
+		include = true
 	}
 
 	client := meta.(*alks.Client)
