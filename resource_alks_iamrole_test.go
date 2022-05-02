@@ -68,6 +68,8 @@ func TestAccAlksIamRole_Tags(t *testing.T) {
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.tag-key-one", "tag-value-one"),
 				),
 			},
 			{
@@ -80,6 +82,8 @@ func TestAccAlksIamRole_Tags(t *testing.T) {
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.tag-key-three", "tag-value-three"),
 				),
 			},
 		},
@@ -226,7 +230,7 @@ const testAccCheckAlksIamRoleCreateWithTags = `
 		max_session_duration_in_seconds = 3600
 		tags = {
 			"tag-key-one" = "tag-value-one"
-			"tag-key-two" = "value-key-two"
+			"tag-key-two" = "tag-value-two"
 		}
 	}
 `
@@ -240,8 +244,8 @@ const testAccCheckAlksIamRoleUpdateWithTags = `
 		max_session_duration_in_seconds = 3600
 		tags = {
 			"tag-key-one" = "tag-value-one"
-			"tag-key-two" = "value-key-two"
-			"tag-key-three" = "value-key-three"
+			"tag-key-two" = "tag-value-two"
+			"tag-key-three" = "tag-value-three"
 		}
 	}
 `

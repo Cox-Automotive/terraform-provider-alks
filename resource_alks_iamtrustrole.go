@@ -65,6 +65,12 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
+			"tags": {
+				Type:     schema.TypeMap,
+				Elem:     schema.TypeString,
+				ForceNew: false,
+				Optional: true,
+			},
 		},
 	}
 }
@@ -76,7 +82,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
-	tags := getTags(d)
+	var tags = getTags(d)
 
 	client := meta.(*alks.Client)
 	if err := validateIAMEnabled(client); err != nil {

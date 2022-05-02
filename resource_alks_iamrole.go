@@ -166,6 +166,10 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		return nil
 	}
 
+	tags := map[string]string{}
+	for _, v := range foundRole.Tags {
+		tags[v.Key] = v.Value
+	}
 	log.Printf("[INFO] alks_iamrole.id %v", d.Id())
 
 	_ = d.Set("name", foundRole.RoleName)
@@ -173,7 +177,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
-	_ = d.Set("tags", foundRole.Tags)
+	_ = d.Set("tags", tags)
 
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.
@@ -251,13 +255,15 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 }
 
 func getTags(d *schema.ResourceData) []alks.Tag {
-	rawTags := d.Get("tags").(map[string]interface{})
-	tags := []alks.Tag{}
-	for k, v := range rawTags {
-		tag := alks.Tag{Key: k, Value: v.(string)}
-		tags = append(tags, tag)
+	if rawTags := d.Get("tags").(map[string]interface{}); rawTags != nil {
+		tags := []alks.Tag{}
+		for k, v := range rawTags {
+			tag := alks.Tag{Key: k, Value: v.(string)}
+			tags = append(tags, tag)
+		}
+		return tags
 	}
-	return tags
+	return nil
 }
 
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
