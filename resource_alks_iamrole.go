@@ -173,6 +173,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
+	_ = d.Set("tags", foundRole.Tags)
 
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.
@@ -243,19 +244,18 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 		Tags:     &tags,
 	}
 
-	if _, err := alks.UpdateIamRole(&options); err != nil {
+	if _, err := client.UpdateIamRole(&options); err != nil {
 		return err
 	}
 	return nil
 }
 
-func getTags(d *schema.ResourceData) []Tag {
+func getTags(d *schema.ResourceData) []alks.Tag {
 	rawTags := d.Get("tags").(map[string]interface{})
 	tags := []alks.Tag{}
 	for k, v := range rawTags {
-		kp := &k
-		vp := &v
-		tags = append(tags, alks.Tag{Key: kp, Value: vp})
+		tag := alks.Tag{Key: k, Value: v.(string)}
+		tags = append(tags, tag)
 	}
 	return tags
 }
