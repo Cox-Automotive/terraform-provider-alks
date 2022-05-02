@@ -75,7 +75,26 @@ func resourceAlksIamRole() *schema.Resource {
 				Default:  3600,
 				Optional: true,
 			},
+			"tags": TagsSchema(),
+			"tags_all": TagsSchemaComputed(),
 		},
+	}
+}
+
+func TagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeMap,
+		Optional: true,
+		Elem:     &schema.Schema{Type: schema.TypeString},
+	}
+}
+
+func TagsSchemaComputed() *schema.Schema {
+	return &schema.Schema{
+		Type:     schema.TypeMap,
+		Optional: true,
+		Computed: true,
+		Elem:     &schema.Schema{Type: schema.TypeString},
 	}
 }
 
@@ -103,7 +122,7 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	client := providerStruct.client
 
 	defaultTags := providerStruct.defaultTags
-	// client := meta.(*alks.Client)
+	//  client := meta.(*alks.Client)
 
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
@@ -150,7 +169,8 @@ func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta
 func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Read")
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 
 	// Check if role exists.
 	if d.Id() == "" || d.Id() == "none" {
@@ -171,6 +191,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
+	_ = d.Set("tags_all", foundRole.tags)
 
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.

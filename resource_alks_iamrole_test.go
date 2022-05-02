@@ -23,7 +23,7 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -35,7 +35,7 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -62,7 +62,7 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -74,7 +74,7 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigUpdateNoMaxDuration,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -152,7 +152,7 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		log.Printf("[INFO] its this %v", role)
-		if role.RoleName != "bar420" {
+		if role.RoleName != "bar430" {
 			return fmt.Errorf("Bad name: %s", role.RoleName)
 		}
 		if role.RoleType != "Amazon EC2" {
@@ -165,7 +165,7 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 
 const testAccCheckAlksIamRoleConfigBasic = `
   resource "alks_iamrole" "foo" {
-    name = "bar420"
+    name = "bar430"
     type = "Amazon EC2"
 		include_default_policies = false
 	}
@@ -173,7 +173,7 @@ const testAccCheckAlksIamRoleConfigBasic = `
 
 const testAccCheckAlksIamRoleConfigUpdateBasic = `
 	resource "alks_iamrole" "foo" {
-		name = "bar420"
+		name = "bar430"
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
@@ -183,7 +183,7 @@ const testAccCheckAlksIamRoleConfigUpdateBasic = `
 
 const testAccCheckAlksIamRoleConfigUpdateNoMaxDuration = `
 	resource "alks_iamrole" "foo" {
-		name = "bar420"
+		name = "bar430"
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
