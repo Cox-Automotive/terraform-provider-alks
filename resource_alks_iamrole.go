@@ -75,9 +75,10 @@ func resourceAlksIamRole() *schema.Resource {
 				Default:  3600,
 				Optional: true,
 			},
-			"tags": TagsSchema(),
+			"tags":     TagsSchema(),
 			"tags_all": TagsSchemaComputed(),
 		},
+		CustomizeDiff: SetTagsDiff,
 	}
 }
 
@@ -100,7 +101,7 @@ func TagsSchemaComputed() *schema.Schema {
 
 func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
-
+	fmt.Printf("In Role Create\n")
 	var roleName = NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
@@ -122,7 +123,10 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
-	defaultTags := *providerStruct.defaultTags
+	defaultTags := []alks.Tag{}
+	if (*providerStruct).defaultTags != nil {
+		defaultTags = (*providerStruct).defaultTags
+	}
 	allTags := combineTagsWithDefault(tags, defaultTags)
 	//  client := meta.(*alks.Client)
 
@@ -156,7 +160,8 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Delete")
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
@@ -170,11 +175,11 @@ func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Read")
-
+	fmt.Printf("In Role Read\n")
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
-	defaultTags := *providerStruct.defaultTags
+	defaultTags := providerStruct.defaultTags
 
 	// Check if role exists.
 	if d.Id() == "" || d.Id() == "none" {
@@ -197,6 +202,9 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
 
 	allTags := foundRole.Tags
+	for _, t := range allTags {
+		fmt.Printf("Read Tag: %s\n", t.Key)
+	}
 	roleSpecificTags := removeDefaultTags(tagSliceToMap(allTags), defaultTags)
 
 	if err := d.Set("tags", tagSliceToMap(roleSpecificTags)); err != nil {
@@ -217,6 +225,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Update")
+	fmt.Printf("In Role Update\n")
 
 	// enable partial state mode
 	d.Partial(true)
@@ -243,7 +252,8 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	var alksAccess = d.Get("enable_alks_access").(bool)
 	var roleArn = d.Get("arn").(string)
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
 		return err
 	}
@@ -264,6 +274,7 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 }
 
 func updateIamTags(d *schema.ResourceData, meta interface{}) error {
+	fmt.Printf("In updateIamTags\n")
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
@@ -289,7 +300,7 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 func combineTagsWithDefault(tags []alks.Tag, defaultTags []alks.Tag) []alks.Tag {
 	defaultTagsMap := tagSliceToMap(defaultTags)
 
-	for _,t := range tags {
+	for _, t := range tags {
 		defaultTagsMap[t.Key] = t.Value
 	}
 	allTags := tagMapToSlice(defaultTagsMap)
@@ -299,7 +310,7 @@ func combineTagsWithDefault(tags []alks.Tag, defaultTags []alks.Tag) []alks.Tag 
 
 //Removes default tags from a map of role specific + default tags
 func removeDefaultTags(allTags map[string]interface{}, defalutTags []alks.Tag) []alks.Tag {
-	for _,t := range defalutTags {
+	for _, t := range defalutTags {
 		delete(allTags, t.Key)
 	}
 
@@ -321,6 +332,35 @@ func tagSliceToMap(tagSlice []alks.Tag) map[string]interface{} {
 		tagMap[t.Key] = t.Value
 	}
 	return tagMap
+}
+
+func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	defaultTags := meta.(*AlksClient).defaultTags
+
+	resourceTags := tagMapToSlice(diff.Get("tags").(map[string]interface{}))
+
+	allTags := combineTagsWithDefault(resourceTags, defaultTags)
+
+	// To ensure "tags_all" is correctly computed, we explicitly set the attribute diff
+	// when the merger of resource-level tags onto provider-level tags results in n > 0 tags,
+	// otherwise we mark the attribute as "Computed" only when their is a known diff (excluding an empty map)
+	// or a change for "tags_all".
+
+	if len(allTags) > 0 {
+		if err := diff.SetNew("tags_all", tagSliceToMap(allTags)); err != nil {
+			return fmt.Errorf("error setting new tags_all diff: %w", err)
+		}
+	} else if len(diff.Get("tags_all").(map[string]interface{})) > 0 {
+		if err := diff.SetNewComputed("tags_all"); err != nil {
+			return fmt.Errorf("error setting tags_all to computed: %w", err)
+		}
+	} else if diff.HasChange("tags_all") {
+		if err := diff.SetNewComputed("tags_all"); err != nil {
+			return fmt.Errorf("error setting tags_all to computed: %w", err)
+		}
+	}
+
+	return nil
 }
 
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {

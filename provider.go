@@ -191,7 +191,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	// return c, diags
 }
 
-func expandProviderDefaultTags(l []interface{}) *[]alks.Tag {
+func expandProviderDefaultTags(l []interface{}) []alks.Tag {
 	if len(l) == 0 || l[0] == nil {
 		return nil
 	}
@@ -199,10 +199,10 @@ func expandProviderDefaultTags(l []interface{}) *[]alks.Tag {
 	m := l[0].(map[string]interface{})
 	tagSlice := tagMapToSlice(m["tags"].(map[string]interface{}))
 
-	return &tagSlice
+	return tagSlice
 }
 
 type AlksClient struct {
 	client      *alks.Client
-	defaultTags *[]alks.Tag
+	defaultTags []alks.Tag //Not making this a pointer because I was having to check everywhere if it was nil
 }
