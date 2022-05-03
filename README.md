@@ -48,7 +48,7 @@ go mod download github.com/Cox-Automotive/alks-go
 go mod vendor
 go mod tidy
 ```
-At this point, the dependancy should reflect the state of alks-go in master
+At this point, the dependency should reflect the state of alks-go's master branch
 ## Documentation
 
 Documentation and examples can be found on the [Terraform website](https://registry.terraform.io/providers/Cox-Automotive/alks/latest/docs).
