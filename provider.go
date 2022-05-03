@@ -79,9 +79,9 @@ func Provider() *schema.Provider {
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
-			"alks_iamrole": resourceAlksIamRole(),
-			// "alks_iamtrustrole": resourceAlksIamTrustRole(),
-			"alks_ltk": resourceAlksLtk(),
+			"alks_iamrole":      resourceAlksIamRole(),
+			"alks_iamtrustrole": resourceAlksIamTrustRole(),
+			"alks_ltk":          resourceAlksLtk(),
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
