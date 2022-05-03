@@ -1,6 +1,7 @@
 package main
 
 import (
+	"regexp"
 	"testing"
 
 	"github.com/Cox-Automotive/alks-go"
@@ -40,6 +41,61 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamTrustRole_NamePrefix(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlksIamTrustRoleConfigNamePrefix,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.nameprefix_trustrole", "name_prefix", "alks_test_acc_"),
+					resource.TestMatchResourceAttr(
+						"alks_iamtrustrole.nameprefix_trustrole", "name", regexp.MustCompile("alks_test_acc_[0-9]{26}")),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.nameprefix_trustrole", "type", "Inner Account"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamTrustRole_NameAndNamePrefixConflict(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamTrustRoleConfigNameAndNamePrefixConflict,
+				ExpectError: regexp.MustCompile(".*\"name\": conflicts with name_prefix.*"),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamTrustRole_NameTooLong(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamTrustRoleConfigNameTooLong,
+				ExpectError: regexp.MustCompile(".* expected length of name to be in the range \\(1 - 64\\).*"),
+			},
+		},
+	})
+}
+
 const testAccCheckAlksIamTrustRoleConfigBasic = `
 	resource "alks_iamrole" "foo" {
 		name = "foo"
@@ -66,5 +122,48 @@ const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
 		type = "Inner Account"
 		trust_arn = "${alks_iamrole.foo.arn}"
 		enable_alks_access = true
+	}
+`
+
+const testAccCheckAlksIamTrustRoleConfigNamePrefix = `
+	resource "alks_iamrole" "nameprefix_role" {
+		name_prefix = "alks_test_acc_"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+
+	resource "alks_iamtrustrole" "nameprefix_trustrole" {
+		name_prefix = "alks_test_acc_"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.nameprefix_role.arn}"
+	}
+`
+
+const testAccCheckAlksIamTrustRoleConfigNameAndNamePrefixConflict = `
+	resource "alks_iamrole" "nameprefixconflict_role" {
+		name_prefix = "alks_test_acc_"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+
+	resource "alks_iamtrustrole" "nameprefixconflict_trustrole" {
+        name = "alks_test_acc"
+		name_prefix = "alks_test_acc_"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.nameprefixconflict_role.arn}"
+	}
+`
+
+const testAccCheckAlksIamTrustRoleConfigNameTooLong= `
+	resource "alks_iamrole" "nametoolong_role" {
+		name_prefix = "alks_test_acc_"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+
+	resource "alks_iamtrustrole" "nametoolong_trustrole" {
+		name = "nameandnametoolongggggggggggggggggggggggggggggggggggggggggggggggg"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.nametoolong_role.arn}"
 	}
 `

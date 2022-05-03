@@ -25,9 +25,20 @@ func resourceAlksIamTrustRole() *schema.Resource {
 		MigrateState:  migrateState,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name_prefix"},
+				ValidateFunc:  ValidRoleName,
+			},
+			"name_prefix": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name"},
+				ValidateFunc:  ValidRolePrefix,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -63,7 +74,7 @@ func resourceAlksIamTrustRole() *schema.Resource {
 func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Trust Role Create")
 
-	var roleName = d.Get("name").(string)
+	var roleName = NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)

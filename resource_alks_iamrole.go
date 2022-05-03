@@ -24,9 +24,20 @@ func resourceAlksIamRole() *schema.Resource {
 		MigrateState:  migrateState,
 		Schema: map[string]*schema.Schema{
 			"name": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name_prefix"},
+				ValidateFunc:  ValidRoleName,
+			},
+			"name_prefix": {
+				Type:          schema.TypeString,
+				Optional:      true,
+				Computed:      true,
+				ForceNew:      true,
+				ConflictsWith: []string{"name"},
+				ValidateFunc:  ValidRolePrefix,
 			},
 			"type": {
 				Type:     schema.TypeString,
@@ -73,7 +84,7 @@ func resourceAlksIamRole() *schema.Resource {
 func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
 
-	var roleName = d.Get("name").(string)
+	var roleName = NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
@@ -148,6 +159,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	log.Printf("[INFO] alks_iamrole.id %v", d.Id())
 
 	_ = d.Set("name", foundRole.RoleName)
+	_ = d.Set("name_prefix", NamePrefixFromName(foundRole.RoleName))
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
