@@ -30,7 +30,7 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"name_prefix"},
-				ValidateFunc: validRoleName,
+				ValidateFunc:  ValidRoleName,
 			},
 			"name_prefix": {
 				Type:          schema.TypeString,
@@ -38,7 +38,7 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Computed:      true,
 				ForceNew:      true,
 				ConflictsWith: []string{"name"},
-				ValidateFunc: validRolePrefix,
+				ValidateFunc:  ValidRolePrefix,
 			},
 			"type": {
 				Type:     schema.TypeString,
