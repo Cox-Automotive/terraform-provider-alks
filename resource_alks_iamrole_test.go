@@ -140,6 +140,50 @@ func TestAccAlksIamRole_DefaultTags(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamRole_DefaultTagsEmpty(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithEmptyDefault,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithDefaultTagsEmpty,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 	var resp alks.IamRoleResponse
 
@@ -288,6 +332,40 @@ const testAccCheckAlksIamRoleCreateWithTagsWithDefault = `
 		default_tags {
 			tags = {
 				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleCreateWithTagsWithEmptyDefault = `
+	provider "alks" {
+		default_tags {
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+const testAccCheckAlksIamRoleCreateWithTagsWithDefaultTagsEmpty = `
+	provider "alks" {
+		default_tags {
+			tags = {
+
 			}
 		}
 	}

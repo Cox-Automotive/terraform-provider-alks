@@ -13,7 +13,7 @@ import (
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() *schema.Provider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"url": {
 				Type:        schema.TypeString,
@@ -90,6 +90,7 @@ func Provider() *schema.Provider {
 
 		ConfigureContextFunc: providerConfigure,
 	}
+	return provider
 }
 
 func assumeRoleSchema() *schema.Schema {
@@ -144,7 +145,6 @@ func defaultTagsSchema() *schema.Schema {
 }
 
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
-
 	var diags diag.Diagnostics
 
 	config := Config{

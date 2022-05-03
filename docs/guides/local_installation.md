@@ -48,7 +48,7 @@ mkdir -p ~/.terraform.d/plugins &&
 
 ```sh
 mkdir -p ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.5/darwin_amd64 &&
-      curl -Ls https://api.github.com/repos/Cox-Automotive/terraform-provider-alks/releases | jq -r --arg release "v2.0.5" --arg arch "$(uname -s | tr A-Z a-z)" '.[] | select(.tag_name | contains($release)) | .assets[]| select(.browser_download_url | contains($arch)) | select(.browser_download_url | contains("amd64")) | .browser_download_url' |
+      curl -Ls https://api.github.com/repos/Cox-Automotive/terraform-provider-alks/releases | jq -r --arg release "v2.1.1" --arg arch "$(uname -s | tr A-Z a-z)" '.[] | select(.tag_name | contains($release)) | .assets[]| select(.browser_download_url | contains($arch)) | select(.browser_download_url | contains("amd64")) | .browser_download_url' |
             xargs -n 1 curl -Lo ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.5/darwin_amd64/terraform-provider-alks.zip &&
       pushd ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.5/darwin_amd64 &&
       unzip ~/.terraform.d/plugins/Cox-Automotive/engineering-enablement/alks/2.0.5/darwin_amd64/terraform-provider-alks.zip -d terraform-provider-alks-tmp &&

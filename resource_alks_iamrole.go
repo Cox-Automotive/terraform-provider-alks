@@ -84,7 +84,6 @@ func resourceAlksIamRole() *schema.Resource {
 
 func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
-	fmt.Printf("In Role Create\n")
 	var roleName = NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
@@ -158,7 +157,6 @@ func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Read")
-	fmt.Printf("In Role Read\n")
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
@@ -185,9 +183,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
 
 	allTags := foundRole.Tags
-	for _, t := range allTags {
-		fmt.Printf("Read Tag: %s\n", t.Key)
-	}
+
 	roleSpecificTags := removeDefaultTags(tagSliceToMap(allTags), defaultTags)
 
 	if err := d.Set("tags", tagSliceToMap(roleSpecificTags)); err != nil {
@@ -208,7 +204,6 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 
 func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Update")
-	fmt.Printf("In Role Update\n")
 
 	// enable partial state mode
 	d.Partial(true)
@@ -257,7 +252,6 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 }
 
 func updateIamTags(d *schema.ResourceData, meta interface{}) error {
-	fmt.Printf("In updateIamTags\n")
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
@@ -277,8 +271,6 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 	}
 	return nil
 }
-
-
 
 func migrateState(version int, state *terraform.InstanceState, meta interface{}) (*terraform.InstanceState, error) {
 	switch version {

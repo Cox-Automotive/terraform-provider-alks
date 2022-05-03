@@ -28,9 +28,15 @@ func TagsSchemaComputed() *schema.Schema {
 //Removes default tags from a map of role specific + default tags
 func removeDefaultTags(allTags map[string]interface{}, defalutTags []alks.Tag) []alks.Tag {
 	for _, t := range defalutTags {
-		delete(allTags, t.Key)
-	}
+		//If the key and value of a tag returned from the role exists in the defaultTags list
+		//We will assume it was set as a default tag and remove it from role specific tag list
+		if val, ok := allTags[t.Key]; ok {
+			if val == t.Value {
+				delete(allTags, t.Key)
+			}
+		}
 
+	}
 	return tagMapToSlice(allTags)
 }
 
