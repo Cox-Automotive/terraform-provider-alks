@@ -155,7 +155,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		Profile:   d.Get("profile").(string),
 		Account:   d.Get("account").(string),
 		Role:      d.Get("role").(string),
-		// DefaultTags: expandProviderDefaultTags(d.Get("default_tags").([]interface{})),
 	}
 
 	assumeRoleList := d.Get("assume_role").(*schema.Set).List()
@@ -188,7 +187,6 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 
 	log.Println("[INFO] Initializing ALKS client")
 	return alksClient, diags
-	// return c, diags
 }
 
 func expandProviderDefaultTags(l []interface{}) []alks.Tag {

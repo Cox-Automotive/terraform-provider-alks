@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/Cox-Automotive/alks-go"
 	"log"
 	"strings"
 
