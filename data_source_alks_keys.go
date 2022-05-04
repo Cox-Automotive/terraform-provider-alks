@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"log"
 	"strings"
+
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
 func dataSourceAlksKeys() *schema.Resource {
@@ -38,7 +38,8 @@ func dataSourceAlksKeys() *schema.Resource {
 func dataSourceAlksKeysRead(d *schema.ResourceData, meta interface{}) error {
 	log.Printf("[INFO] ALKS Keys Data Source Read")
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	resp, err := client.CreateIamSession()
 
 	if err != nil {
