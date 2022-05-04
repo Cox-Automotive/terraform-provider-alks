@@ -130,6 +130,22 @@ func TestAccIAMRole_NameAndNamePrefixConflict(t *testing.T) {
 	})
 }
 
+func TestAccIAMRole_NameTooLong(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamRoleConfigNameTooLong,
+				ExpectError: regexp.MustCompile(".* expected length of name to be in the range \\(1 - 64\\).*"),
+			},
+		},
+	})
+}
+
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		client := testAccProvider.Meta().(*alks.Client)
@@ -201,6 +217,14 @@ const testAccCheckAlksIamRoleConfigNameAndNamePrefixConflict = `
   resource "alks_iamrole" "nameandnameprefixconflict" {
     name = "test-role"
     name_prefix = "alks_test_acc_"
+    type = "Amazon EC2"
+		include_default_policies = false
+	}
+`
+
+const testAccCheckAlksIamRoleConfigNameTooLong = `
+  resource "alks_iamrole" "nametoolong" {
+    name = "nameandnametoolongggggggggggggggggggggggggggggggggggggggggggggggg"
     type = "Amazon EC2"
 		include_default_policies = false
 	}
