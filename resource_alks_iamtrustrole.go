@@ -67,7 +67,10 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
+			"tags":     TagsSchema(),
+			"tags_all": TagsSchemaComputed(),
 		},
+		CustomizeDiff: SetTagsDiff,
 	}
 }
 
@@ -78,16 +81,34 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
+	var tags = tagMapToSlice(d.Get("tags").(map[string]interface{}))
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
+
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
 
+	defaultTags := []alks.Tag{}
+	if (*providerStruct).defaultTags != nil {
+		defaultTags = (*providerStruct).defaultTags
+	}
+
+	allTags := combineTagsWithDefault(tags, defaultTags)
+
 	var resp *alks.IamRoleResponse
 	err := resource.RetryContext(ctx, 2*time.Minute, func() *resource.RetryError {
 		var err error
-		resp, err = client.CreateIamTrustRole(roleName, roleType, trustArn, enableAlksAccess)
+		options := &alks.CreateIamRoleOptions{
+			RoleName:   &roleName,
+			RoleType:   &roleType,
+			TrustArn:   &trustArn,
+			AlksAccess: &enableAlksAccess,
+			Tags:       &allTags,
+		}
+
+		resp, err = client.CreateIamTrustRole(options)
 		if err != nil {
 			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
 				return resource.NonRetryableError(err)

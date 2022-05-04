@@ -32,7 +32,8 @@ func TestAlksLTKCreate(t *testing.T) {
 
 func testAlksLtkDestroy(ltk *alks.CreateLongTermKeyResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*alks.Client)
+		providerStruct := testAccProvider.Meta().(*AlksClient)
+		client := providerStruct.client
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "alks_ltk" {

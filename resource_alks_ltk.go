@@ -2,10 +2,11 @@ package main
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
 
-	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+
+	// "github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -47,7 +48,8 @@ func resourceAlksLtkCreate(ctx context.Context, d *schema.ResourceData, meta int
 
 	var iamUsername = d.Get("iam_username").(string)
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
@@ -70,7 +72,8 @@ func resourceAlksLtkCreate(ctx context.Context, d *schema.ResourceData, meta int
 func resourceAlksLtkRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS LTK User Read")
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 
 	// Check if role exists.
 	if d.Id() == "" || d.Id() == "none" {
@@ -95,7 +98,8 @@ func resourceAlksLtkRead(ctx context.Context, d *schema.ResourceData, meta inter
 func resourceAlksLtkDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS LTK User Delete")
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}

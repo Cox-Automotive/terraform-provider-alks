@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
-	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"log"
+
+	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/mitchellh/go-homedir"
@@ -11,7 +13,7 @@ import (
 
 // Provider returns a terraform.ResourceProvider.
 func Provider() *schema.Provider {
-	return &schema.Provider{
+	provider := &schema.Provider{
 		Schema: map[string]*schema.Schema{
 			"url": {
 				Type:        schema.TypeString,
@@ -24,8 +26,8 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "This is the AWS access key. It must be provided, but it can also be sourced from the ALKS_ACCESS_KEY_ID or AWS_ACCESS_KEY_ID environment variable.",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"ALKS_ACCESS_KEY_ID",
 					"AWS_ACCESS_KEY_ID",
+					"ALKS_ACCESS_KEY_ID",
 				}, nil),
 			},
 			"secret_key": {
@@ -33,8 +35,8 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "This is the AWS secret key. It must be provided, but it can also be sourced from the ALKS_SECRET_ACCESS_KEY or AWS_SECRET_ACCESS_KEY environment variable",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"ALKS_SECRET_ACCESS_KEY",
 					"AWS_SECRET_ACCESS_KEY",
+					"ALKS_SECRET_ACCESS_KEY",
 				}, nil),
 			},
 			"token": {
@@ -42,8 +44,8 @@ func Provider() *schema.Provider {
 				Optional:    true,
 				Description: "This is the AWS session token. It must be provided, but it can also be sourced from the ALKS_SESSION_TOKEN or AWS_SESSION_TOKEN environment variable",
 				DefaultFunc: schema.MultiEnvDefaultFunc([]string{
-					"ALKS_SESSION_TOKEN",
 					"AWS_SESSION_TOKEN",
+					"ALKS_SESSION_TOKEN",
 				}, nil),
 			},
 			"profile": {
@@ -72,7 +74,8 @@ func Provider() *schema.Provider {
 				Description: "The role which you'd like to retrieve credentials for.",
 				DefaultFunc: schema.EnvDefaultFunc("Role", nil),
 			},
-			"assume_role": assumeRoleSchema(),
+			"assume_role":  assumeRoleSchema(),
+			"default_tags": defaultTagsSchema(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -87,6 +90,7 @@ func Provider() *schema.Provider {
 
 		ConfigureContextFunc: providerConfigure,
 	}
+	return provider
 }
 
 func assumeRoleSchema() *schema.Schema {
@@ -121,8 +125,26 @@ func assumeRoleSchema() *schema.Schema {
 	}
 }
 
-func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
+func defaultTagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Configuration block with settings to default resource tags across all resources.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"tags": {
+					Type:        schema.TypeMap,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Description: "Resource tags to default across all resources",
+				},
+			},
+		},
+	}
+}
 
+func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
 	config := Config{
@@ -150,12 +172,35 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		return nil, diag.FromErr(err)
 	}
 	config.CredsFilename = credsPath
+	defaultTags := expandProviderDefaultTags(d.Get("default_tags").([]interface{}))
 
 	c, err := config.Client()
 	if err != nil {
 		return nil, diag.FromErr(err)
 	}
 
+	alksClient := &AlksClient{}
+	alksClient.client = c
+	if defaultTags != nil {
+		alksClient.defaultTags = defaultTags
+	}
+
 	log.Println("[INFO] Initializing ALKS client")
-	return c, diags
+	return alksClient, diags
+}
+
+func expandProviderDefaultTags(l []interface{}) []alks.Tag {
+	if len(l) == 0 || l[0] == nil {
+		return nil
+	}
+
+	m := l[0].(map[string]interface{})
+	tagSlice := tagMapToSlice(m["tags"].(map[string]interface{}))
+
+	return tagSlice
+}
+
+type AlksClient struct {
+	client      *alks.Client
+	defaultTags []alks.Tag //Not making this a pointer because I was having to check everywhere if it was nil
 }
