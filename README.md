@@ -37,7 +37,7 @@ export AWS_SECRET_ACCESS_KEY=<key_from_alks_web>
 export AWS_SESSION_TOKEN=<token_from_alks_web>
 export AWS_DEFAULT_REGION=us-east-1
 ```
-If an error stating `Role already exists with the same name: <role-name>` is encountered during testing (errored out tests do not initiate resource tare down), navigate to the AWS console of the Labs account from ALKSWeb and manually delete the IAM role listed in the error.
+If an error stating `Role already exists with the same name: <role-name>` is encountered during testing (errored out tests do not initiate resource tear down), navigate to the AWS console of the Labs account from ALKSWeb and manually delete the IAM role listed in the error.
 
 If you need any additional dependencies while developing, add the dependency by running `go get <dependency>` and then add it to the vendor folder by running `go mod vendor`.
 
