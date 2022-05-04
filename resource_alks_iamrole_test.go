@@ -23,19 +23,20 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "include_default_policies", "false"),
 				),
 			},
+
 			{
 				// update the resource
 				Config: testAccCheckAlksIamRoleConfigUpdateBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -44,6 +45,139 @@ func TestAccAlksIamRole_Basic(t *testing.T) {
 						"alks_iamrole.foo", "enable_alks_access", "true"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "max_session_duration_in_seconds", "3600"),
+				),
+			},
+		},
+	})
+}
+func TestAccAlksIamRole_Tags(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTags,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleUpdateWithTags,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey3", "testValue3"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamRole_DefaultTags(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithDefault,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey1", "defaultTagValue1"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleUpdateWithTagsWithDefault,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey3", "testValue3"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey2", "defaultTagValue2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamRole_DefaultTagsEmpty(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithEmptyDefault,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithDefaultTagsEmpty,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
 				),
 			},
 		},
@@ -62,7 +196,7 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigBasic,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -74,7 +208,7 @@ func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 				Config: testAccCheckAlksIamRoleConfigUpdateNoMaxDuration,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
-						"alks_iamrole.foo", "name", "bar420"),
+						"alks_iamrole.foo", "name", "bar430"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "type", "Amazon EC2"),
 					resource.TestCheckResourceAttr(
@@ -148,7 +282,8 @@ func TestAccIAMRole_NameTooLong(t *testing.T) {
 
 func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
-		client := testAccProvider.Meta().(*alks.Client)
+		providerStruct := testAccProvider.Meta().(*AlksClient)
+		client := providerStruct.client
 
 		for _, rs := range s.RootModule().Resources {
 			if rs.Type != "alks_iamrole" && rs.Type != "alks_iamtrustrole" {
@@ -168,7 +303,7 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.TestCheckFunc {
 	return func(s *terraform.State) error {
 		log.Printf("[INFO] its this %v", role)
-		if role.RoleName != "bar420" {
+		if role.RoleName != "bar430" {
 			return fmt.Errorf("Bad name: %s", role.RoleName)
 		}
 		if role.RoleType != "Amazon EC2" {
@@ -181,7 +316,7 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 
 const testAccCheckAlksIamRoleConfigBasic = `
   resource "alks_iamrole" "foo" {
-    name = "bar420"
+    name = "bar430"
     type = "Amazon EC2"
 		include_default_policies = false
 	}
@@ -189,17 +324,111 @@ const testAccCheckAlksIamRoleConfigBasic = `
 
 const testAccCheckAlksIamRoleConfigUpdateBasic = `
 	resource "alks_iamrole" "foo" {
-		name = "bar420"
+		name = "bar430"
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true
 		max_session_duration_in_seconds = 3600
 	}
 `
+const testAccCheckAlksIamRoleCreateWithTags = `
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleCreateWithTagsWithDefault = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleCreateWithTagsWithEmptyDefault = `
+	provider "alks" {
+		default_tags {
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+const testAccCheckAlksIamRoleCreateWithTagsWithDefaultTagsEmpty = `
+	provider "alks" {
+		default_tags {
+			tags = {
+
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+const testAccCheckAlksIamRoleUpdateWithTagsWithDefault = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey2 = "defaultTagValue2"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey3 = "testValue3"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleUpdateWithTags = `
+resource "alks_iamrole" "foo" {
+	name = "bar430"
+	type = "Amazon EC2"
+	include_default_policies = false
+	tags = {
+		testKey3 = "testValue3"
+		testKey2 = "testValue2"
+	}
+}
+`
 
 const testAccCheckAlksIamRoleConfigUpdateNoMaxDuration = `
 	resource "alks_iamrole" "foo" {
-		name = "bar420"
+		name = "bar430"
 		type = "Amazon EC2"
 		include_default_policies = false
 		enable_alks_access = true

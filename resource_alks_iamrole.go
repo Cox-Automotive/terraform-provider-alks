@@ -77,41 +77,58 @@ func resourceAlksIamRole() *schema.Resource {
 				Default:  3600,
 				Optional: true,
 			},
+			"tags":     TagsSchema(),
+			"tags_all": TagsSchemaComputed(),
 		},
+		CustomizeDiff: SetTagsDiff,
 	}
 }
 
 func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
-
 	var roleName = NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
 	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
 	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
+	var tags = tagMapToSlice(d.Get("tags").(map[string]interface{}))
 
 	templateFields := make(map[string]string)
 	for k, v := range rawTemplateFields {
 		templateFields[k] = v.(string)
 	}
 
-	var include int
+	include := false
 	if incDefPol {
-		include = 1
+		include = true
 	}
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
+
+	defaultTags := []alks.Tag{}
+	if (*providerStruct).defaultTags != nil {
+		defaultTags = (*providerStruct).defaultTags
+	}
+	allTags := combineTagsWithDefault(tags, defaultTags)
+	//  client := meta.(*alks.Client)
+
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
 
-	options := alks.CreateIamRoleOptions{IncDefPols: include,
-		AlksAccess:                  enableAlksAccess,
-		TemplateFields:              templateFields,
-		MaxSessionDurationInSeconds: maxSessionDurationInSeconds}
+	options := &alks.CreateIamRoleOptions{
+		RoleName:                    &roleName,
+		RoleType:                    &roleType,
+		IncludeDefaultPolicies:      &include,
+		AlksAccess:                  &enableAlksAccess,
+		TemplateFields:              &templateFields,
+		MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
+		Tags:                        &allTags,
+	}
 
-	resp, err := client.CreateIamRoleWithOptions(roleName, roleType, options)
+	resp, err := client.CreateIamRole(options)
 	if err != nil {
 		return diag.FromErr(err)
 	}
@@ -127,7 +144,8 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Delete")
 
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
 	}
@@ -141,8 +159,10 @@ func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta
 
 func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Read")
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 
-	client := meta.(*alks.Client)
+	defaultTags := providerStruct.defaultTags
 
 	// Check if role exists.
 	if d.Id() == "" || d.Id() == "none" {
@@ -163,6 +183,18 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
+
+	allTags := foundRole.Tags
+
+	roleSpecificTags := removeDefaultTags(tagSliceToMap(allTags), defaultTags)
+
+	if err := d.Set("tags", tagSliceToMap(roleSpecificTags)); err != nil {
+		return diag.FromErr(err)
+	}
+
+	if err := d.Set("tags_all", tagSliceToMap(allTags)); err != nil {
+		return diag.FromErr(err)
+	}
 
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.
@@ -185,6 +217,13 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
+	if d.HasChange("tags_all") {
+		// try updating enable_alks_access
+		if err := updateIamTags(d, meta); err != nil {
+			return diag.FromErr(err)
+		}
+	}
+
 	d.Partial(false)
 
 	return resourceAlksIamRoleRead(ctx, d, meta)
@@ -193,7 +232,8 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	var alksAccess = d.Get("enable_alks_access").(bool)
 	var roleArn = d.Get("arn").(string)
-	client := meta.(*alks.Client)
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
 		return err
 	}
@@ -209,6 +249,27 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 		if err != nil {
 			return err
 		}
+	}
+	return nil
+}
+
+func updateIamTags(d *schema.ResourceData, meta interface{}) error {
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
+
+	if err := validateIAMEnabled(client); err != nil {
+		return err
+	}
+
+	tags := tagMapToSlice(d.Get("tags_all").(map[string]interface{}))
+	roleName := NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
+	options := alks.UpdateIamRoleRequest{
+		RoleName: &roleName,
+		Tags:     &tags,
+	}
+
+	if _, err := client.UpdateIamRole(&options); err != nil {
+		return err
 	}
 	return nil
 }
