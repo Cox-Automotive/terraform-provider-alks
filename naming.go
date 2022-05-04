@@ -1,8 +1,13 @@
 package main
 
 import (
+	"regexp"
+
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/validation"
 )
+
+const MaxRoleLen = 64
 
 // NameWithPrefix returns in order:
 // the name if non-empty,
@@ -31,3 +36,14 @@ func NamePrefixFromName(name string) *string {
 
 	return &namePrefix
 }
+
+// Validate Role name based on https://docs.aws.amazon.com/IAM/latest/APIReference/API_CreateRole.html
+var ValidRoleName = validation.All(
+	validation.StringLenBetween(1, MaxRoleLen),
+	validation.StringMatch(regexp.MustCompile(`^[\w+=,.@-]+$`), "must match [\\w+=,.@-]"),
+)
+
+var ValidRolePrefix = validation.All(
+	validation.StringLenBetween(1, MaxRoleLen-resource.UniqueIDSuffixLength),
+	validation.StringMatch(regexp.MustCompile(`^[\w+=,.@-]+$`), "must match [\\w+=,.@-]"),
+)
