@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	// "log"
+	"log"
 	"regexp"
 	"testing"
 
@@ -409,19 +409,19 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 	}
 }
 
-// func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.TestCheckFunc {
-// 	return func(s *terraform.State) error {
-// 		log.Printf("[INFO] its this %v", role)
-// 		if role.RoleName != "bar430" {
-// 			return fmt.Errorf("Bad name: %s", role.RoleName)
-// 		}
-// 		if role.RoleType != "Amazon EC2" {
-// 			return fmt.Errorf("Bad type: %s", role.RoleType)
-// 		}
+func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		log.Printf("[INFO] its this %v", role)
+		if role.RoleName != "bar430" {
+			return fmt.Errorf("Bad name: %s", role.RoleName)
+		}
+		if role.RoleType != "Amazon EC2" {
+			return fmt.Errorf("Bad type: %s", role.RoleType)
+		}
 
-// 		return nil
-// 	}
-// }
+		return nil
+	}
+}
 
 const testAccCheckAlksIamRoleConfigBasic = `
   resource "alks_iamrole" "foo" {
