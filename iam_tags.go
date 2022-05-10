@@ -3,10 +3,17 @@ package main
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+type TagMap map[string]interface{}
+type IgnoreTags struct {
+	Keys        TagMap
+	KeyPrefixes TagMap
+}
 
 func TagsSchema() *schema.Schema {
 	return &schema.Schema{
@@ -26,21 +33,21 @@ func TagsSchemaComputed() *schema.Schema {
 }
 
 //Removes default tags from a map of role specific + default tags
-func removeDefaultTags(allTags map[string]interface{}, defalutTags []alks.Tag) []alks.Tag {
-	for _, t := range defalutTags {
+func removeDefaultTags(allTags TagMap, defalutTags TagMap) TagMap {
+	for k, v := range defalutTags {
 		//If the key and value of a tag returned from the role exists in the defaultTags list
 		//We will assume it was set as a default tag and remove it from role specific tag list
-		if val, ok := allTags[t.Key]; ok {
-			if val == t.Value {
-				delete(allTags, t.Key)
+		if val, ok := allTags[k]; ok {
+			if val == v {
+				delete(allTags, k)
 			}
 		}
 
 	}
-	return tagMapToSlice(allTags)
+	return allTags
 }
 
-func tagMapToSlice(tagMap map[string]interface{}) []alks.Tag {
+func tagMapToSlice(tagMap TagMap) []alks.Tag {
 	tags := []alks.Tag{}
 	for k, v := range tagMap {
 		tag := alks.Tag{Key: k, Value: v.(string)}
@@ -49,33 +56,21 @@ func tagMapToSlice(tagMap map[string]interface{}) []alks.Tag {
 	return tags
 }
 
-func tagSliceToMap(tagSlice []alks.Tag) map[string]interface{} {
-	tagMap := make(map[string]interface{})
+func tagSliceToMap(tagSlice []alks.Tag) TagMap {
+	tagMap := make(TagMap)
 	for _, t := range tagSlice {
 		tagMap[t.Key] = t.Value
 	}
 	return tagMap
 }
 
-//Combines tags defined on an individual resource with the default tags listed on the provider block
-//Resource specific tags will overwrite default tags
-func combineTagsWithDefault(tags []alks.Tag, defaultTags []alks.Tag) []alks.Tag {
-	defaultTagsMap := tagSliceToMap(defaultTags)
-
-	for _, t := range tags {
-		defaultTagsMap[t.Key] = t.Value
-	}
-	allTags := tagMapToSlice(defaultTagsMap)
-
-	return allTags
-}
-
 func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
 	defaultTags := meta.(*AlksClient).defaultTags
-
-	resourceTags := tagMapToSlice(diff.Get("tags").(map[string]interface{}))
-
-	allTags := combineTagsWithDefault(resourceTags, defaultTags)
+	ignoredTags := meta.(*AlksClient).ignoreTags
+	resourceTags := (diff.Get("tags")).(map[string]interface{})
+	//default tag values will be overwritten by resource values if key exists in both maps
+	allTags := combineTagMaps(defaultTags, resourceTags)
+	allTags = removeIgnoredTags(allTags, *ignoredTags)
 
 	// To ensure "tags_all" is correctly computed, we explicitly set the attribute diff
 	// when the merger of resource-level tags onto provider-level tags results in n > 0 tags,
@@ -83,7 +78,7 @@ func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{})
 	// or a change for "tags_all".
 
 	if len(allTags) > 0 {
-		if err := diff.SetNew("tags_all", tagSliceToMap(allTags)); err != nil {
+		if err := diff.SetNew("tags_all", allTags); err != nil {
 			return fmt.Errorf("error setting new tags_all diff: %w", err)
 		}
 	} else if len(diff.Get("tags_all").(map[string]interface{})) > 0 {
@@ -97,4 +92,51 @@ func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{})
 	}
 
 	return nil
+}
+
+func getExternalyManagedTags(roleTags TagMap, ignoredTags IgnoreTags) TagMap {
+	externalTags := TagMap{}
+	//Loop Through ignored keys and ignored key prefixes, checking if a tag exists that should be ignored
+	for k := range ignoredTags.Keys {
+		if val, ok := roleTags[k]; ok {
+			externalTags[k] = val.(string)
+		}
+	}
+
+	for p := range ignoredTags.KeyPrefixes {
+		for k, v := range roleTags {
+			if strings.HasPrefix(k, p) {
+				externalTags[k] = v.(string)
+			}
+		}
+	}
+	return externalTags
+}
+
+//Combine two tag maps.  Values in map2 will overwrite values in map1 if they exist in both maps
+func combineTagMaps(map1 TagMap, map2 TagMap) TagMap {
+	LocalMap := TagMap{}
+
+	for k, v := range map1 {
+		LocalMap[k] = v
+	}
+	for k, v := range map2 {
+		LocalMap[k] = v
+	}
+
+	return LocalMap
+}
+
+func removeIgnoredTags(allTags TagMap, ignoredTags IgnoreTags) TagMap {
+	for k := range allTags {
+		if _, ok := ignoredTags.Keys[k]; ok {
+			delete(allTags, k)
+		}
+		for kp := range ignoredTags.KeyPrefixes {
+			if strings.HasPrefix(k, kp) {
+				delete(allTags, k)
+			}
+		}
+	}
+	return allTags
 }
