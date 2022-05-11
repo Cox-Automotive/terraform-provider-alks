@@ -274,7 +274,7 @@ func TestAccAlksIamRole_IgnoreTags(t *testing.T) {
 						return
 					}
 				},
-				Config:   testAccCheckAlksIamRoleUpdateTwoWithTagsWithIgnoredTags,
+				Config:   testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags,
 				PlanOnly: true, //This PlanOnly ensures there are no changes happening on this step.  Any changes will cause the test to error out because of uncompleted plan
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
@@ -558,30 +558,8 @@ const testAccCheckAlksIamRoleCreateWithTagsWithIgnoreTags = `
 		}
 	}
 `
-const testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags = `
-	provider "alks" {
-		default_tags {
-			tags = {
-				defaultTagKey1 = "defaultTagValue1"
-			}
-		}
-		ignore_tags {
-			keys = ["ignoreFullKey"]
-			key_prefixes = ["ignorePrefix"]
-		}
-	}
-	resource "alks_iamrole" "foo" {
-		name = "bar430"
-		type = "Amazon EC2"
-		include_default_policies = false
-		tags = {
-			testKey1 = "testValue1"
-			testKey2 = "testValue2"
-		}
-	}
-`
 
-const testAccCheckAlksIamRoleUpdateTwoWithTagsWithIgnoredTags = `
+const testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags = `
 	provider "alks" {
 		default_tags {
 			tags = {
