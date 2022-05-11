@@ -194,8 +194,6 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-
-
 	// TODO: In the future, our API or tags need to dynamically grab these values.
 	//  Till then, all imports require a destroy + create.
 	//_ = d.Set("type", foundrole.RoleType)
@@ -275,10 +273,9 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 
 	//Tags includes default tags, role specific tags, and tags that exist externally on the role itself and are specified in ignored_tags
 	tags := tagMapToSlice(combineTagMaps(internalTags, externalTags))
-	roleName := NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
-	
+
 	options := alks.UpdateIamRoleRequest{
-		RoleName: &roleName,
+		RoleName: &foundRole.RoleName,
 		Tags:     &tags,
 	}
 
