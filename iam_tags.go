@@ -32,6 +32,36 @@ func TagsSchemaComputed() *schema.Schema {
 	}
 }
 
+func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
+	defaultTags := meta.(*AlksClient).defaultTags
+	ignoredTags := meta.(*AlksClient).ignoreTags
+	resourceTags := (diff.Get("tags")).(map[string]interface{})
+	//default tag values will be overwritten by resource values if key exists in both maps
+	allTags := combineTagMaps(defaultTags, resourceTags)
+	localTags := removeIgnoredTags(allTags, *ignoredTags)
+
+	// To ensure "tags_all" is correctly computed, we explicitly set the attribute diff
+	// when the merger of resource-level tags onto provider-level tags results in n > 0 tags,
+	// otherwise we mark the attribute as "Computed" only when their is a known diff (excluding an empty map)
+	// or a change for "tags_all".
+
+	if len(localTags) > 0 {
+		if err := diff.SetNew("tags_all", localTags); err != nil {
+			return fmt.Errorf("error setting new tags_all diff: %w", err)
+		}
+	} else if len(diff.Get("tags_all").(map[string]interface{})) > 0 {
+		if err := diff.SetNewComputed("tags_all"); err != nil {
+			return fmt.Errorf("error setting tags_all to computed: %w", err)
+		}
+	} else if diff.HasChange("tags_all") {
+		if err := diff.SetNewComputed("tags_all"); err != nil {
+			return fmt.Errorf("error setting tags_all to computed: %w", err)
+		}
+	}
+
+	return nil
+}
+
 //Removes default tags from a map of role specific + default tags
 func removeDefaultTags(allTags TagMap, defaultTags TagMap) TagMap {
 	for k, v := range defaultTags {
@@ -45,6 +75,27 @@ func removeDefaultTags(allTags TagMap, defaultTags TagMap) TagMap {
 
 	}
 	return allTags
+}
+
+func removeIgnoredTags(allTags TagMap, ignoredTags IgnoreTags) TagMap {
+	localMap := TagMap{}
+	for k, v := range allTags {
+		localMap[k] = v.(string)
+	}
+
+	for k := range allTags {
+		if _, ok := ignoredTags.Keys[k]; ok {
+			delete(localMap, k)
+		} else {
+			for kp := range ignoredTags.KeyPrefixes {
+				if strings.HasPrefix(k, kp) {
+					delete(localMap, k)
+				}
+			}
+		}
+
+	}
+	return localMap
 }
 
 func tagMapToSlice(tagMap TagMap) []alks.Tag {
@@ -62,36 +113,6 @@ func tagSliceToMap(tagSlice []alks.Tag) TagMap {
 		tagMap[t.Key] = t.Value
 	}
 	return tagMap
-}
-
-func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{}) error {
-	defaultTags := meta.(*AlksClient).defaultTags
-	ignoredTags := meta.(*AlksClient).ignoreTags
-	resourceTags := (diff.Get("tags")).(map[string]interface{})
-	//default tag values will be overwritten by resource values if key exists in both maps
-	allTags := combineTagMaps(defaultTags, resourceTags)
-	allTags = removeIgnoredTags(allTags, *ignoredTags)
-
-	// To ensure "tags_all" is correctly computed, we explicitly set the attribute diff
-	// when the merger of resource-level tags onto provider-level tags results in n > 0 tags,
-	// otherwise we mark the attribute as "Computed" only when their is a known diff (excluding an empty map)
-	// or a change for "tags_all".
-
-	if len(allTags) > 0 {
-		if err := diff.SetNew("tags_all", allTags); err != nil {
-			return fmt.Errorf("error setting new tags_all diff: %w", err)
-		}
-	} else if len(diff.Get("tags_all").(map[string]interface{})) > 0 {
-		if err := diff.SetNewComputed("tags_all"); err != nil {
-			return fmt.Errorf("error setting tags_all to computed: %w", err)
-		}
-	} else if diff.HasChange("tags_all") {
-		if err := diff.SetNewComputed("tags_all"); err != nil {
-			return fmt.Errorf("error setting tags_all to computed: %w", err)
-		}
-	}
-
-	return nil
 }
 
 func getExternalyManagedTags(roleTags TagMap, ignoredTags IgnoreTags) TagMap {
@@ -125,18 +146,4 @@ func combineTagMaps(map1 TagMap, map2 TagMap) TagMap {
 	}
 
 	return LocalMap
-}
-
-func removeIgnoredTags(allTags TagMap, ignoredTags IgnoreTags) TagMap {
-	for k := range allTags {
-		if _, ok := ignoredTags.Keys[k]; ok {
-			delete(allTags, k)
-		}
-		for kp := range ignoredTags.KeyPrefixes {
-			if strings.HasPrefix(k, kp) {
-				delete(allTags, k)
-			}
-		}
-	}
-	return allTags
 }

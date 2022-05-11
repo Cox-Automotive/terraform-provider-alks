@@ -44,6 +44,34 @@ func TestRemoveDefaultTags(t *testing.T) {
 	}
 }
 
+func TestRemoveIgnoredTags(t *testing.T) {
+	cases := []struct {
+		allTags     TagMap
+		ignoredTags IgnoreTags
+		expected    TagMap
+	}{
+		{
+			allTags: TagMap{
+				"Key1":           "Value1",
+				"Key2":           "Value2",
+				"KeyPrefix:Key3": "Value3",
+			},
+			ignoredTags: IgnoreTags{
+				Keys:        TagMap{"Key1": ""},
+				KeyPrefixes: TagMap{"KeyPrefix:": ""},
+			},
+			expected: TagMap{"Key2": "Value2"},
+		},
+	}
+
+	for _, c := range cases {
+		tagMap := removeIgnoredTags(c.allTags, c.ignoredTags)
+		if !reflect.DeepEqual(tagMap, c.expected) {
+			t.Fatalf("Error matching output and expected: %#v vs %#v", tagMap, c.expected)
+		}
+	}
+}
+
 func TestTagMapToSlice(t *testing.T) {
 	cases := []struct {
 		tagMap   TagMap
@@ -84,21 +112,52 @@ func TestTagSliceToMap(t *testing.T) {
 	}
 }
 
-func TestCombineMaps(t *testing.T) {
+func TestGetExternalyManagedTags(t *testing.T) {
 	cases := []struct {
-		defaultTagSlice  TagMap
-		resourceTagSlice TagMap
-		expected         TagMap
+		roleTags    TagMap
+		ignoredTags IgnoreTags
+		expected    TagMap
 	}{
 		{
-			defaultTagSlice:  TagMap{"defaultKey1": "defaultValue1"},
-			resourceTagSlice: TagMap{"defaultKey1": "resourceValue1"},
-			expected:         TagMap{"defaultKey1": "resourceValue1"},
+			roleTags: TagMap{
+				"Key1":           "Value1",
+				"Key2":           "Value2",
+				"KeyPrefix:Key3": "Value3",
+			},
+			ignoredTags: IgnoreTags{
+				Keys:        TagMap{"Key1": ""},
+				KeyPrefixes: TagMap{"KeyPrefix:": ""},
+			},
+			expected: TagMap{
+				"Key1":           "Value1",
+				"KeyPrefix:Key3": "Value3",
+			},
 		},
 	}
 
 	for _, c := range cases {
-		tagMap := combineTagMaps(c.defaultTagSlice, c.resourceTagSlice)
+		tagMap := getExternalyManagedTags(c.roleTags, c.ignoredTags)
+		if !reflect.DeepEqual(tagMap, c.expected) {
+			t.Fatalf("Error matching output and expected: %#v vs %#v", tagMap, c.expected)
+		}
+	}
+}
+
+func TestCombineMaps(t *testing.T) {
+	cases := []struct {
+		defaultTagMap  TagMap
+		resourceTagMap TagMap
+		expected       TagMap
+	}{
+		{
+			defaultTagMap:  TagMap{"defaultKey1": "defaultValue1"},
+			resourceTagMap: TagMap{"defaultKey1": "resourceValue1"},
+			expected:       TagMap{"defaultKey1": "resourceValue1"},
+		},
+	}
+
+	for _, c := range cases {
+		tagMap := combineTagMaps(c.defaultTagMap, c.resourceTagMap)
 		if !reflect.DeepEqual(tagMap, c.expected) {
 			t.Fatalf("Error matching output and expected: %#v vs %#v", tagMap, c.expected)
 		}

@@ -182,13 +182,13 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
 
 	allTags := tagSliceToMap(foundRole.Tags)
-	allTags = removeIgnoredTags(allTags, *ignoreTags)
+	localTags := removeIgnoredTags(allTags, *ignoreTags)
 
-	if err := d.Set("tags_all", allTags); err != nil {
+	if err := d.Set("tags_all", localTags); err != nil {
 		return diag.FromErr(err)
 	}
 
-	roleSpecificTags := removeDefaultTags(allTags, defaultTags)
+	roleSpecificTags := removeDefaultTags(localTags, defaultTags)
 
 	if err := d.Set("tags", roleSpecificTags); err != nil {
 		return diag.FromErr(err)
