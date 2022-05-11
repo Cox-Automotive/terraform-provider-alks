@@ -135,13 +135,13 @@ func getExternalyManagedTags(roleTags TagMap, ignoredTags IgnoreTags) TagMap {
 }
 
 //Combine two tag maps.  Values in map2 will overwrite values in map1 if they exist in both maps
-func combineTagMaps(map1 TagMap, map2 TagMap) TagMap {
+func combineTagMaps(baseMap TagMap, mergeMap TagMap) TagMap {
 	LocalMap := TagMap{}
 
-	for k, v := range map1 {
+	for k, v := range baseMap {
 		LocalMap[k] = v
 	}
-	for k, v := range map2 {
+	for k, v := range mergeMap {
 		LocalMap[k] = v
 	}
 
