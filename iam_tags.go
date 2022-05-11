@@ -33,8 +33,8 @@ func TagsSchemaComputed() *schema.Schema {
 }
 
 //Removes default tags from a map of role specific + default tags
-func removeDefaultTags(allTags TagMap, defalutTags TagMap) TagMap {
-	for k, v := range defalutTags {
+func removeDefaultTags(allTags TagMap, defaultTags TagMap) TagMap {
+	for k, v := range defaultTags {
 		//If the key and value of a tag returned from the role exists in the defaultTags list
 		//We will assume it was set as a default tag and remove it from role specific tag list
 		if val, ok := allTags[k]; ok {
