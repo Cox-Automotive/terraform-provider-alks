@@ -9,48 +9,76 @@ import (
 
 func TestRemoveDefaultTags(t *testing.T) {
 	cases := []struct {
-		allTagsMap       map[string]interface{}
-		defaultTagsSlice []alks.Tag
-		expected         []alks.Tag
+		allTagsMap    TagMap
+		defaultTagMap TagMap
+		expected      TagMap
 	}{
 		{
-			allTagsMap: map[string]interface{}{
+			allTagsMap: TagMap{
 				"resourceKey1": "resourceValue1",
 				"defaultKey1":  "defaultValue1",
 			},
-			defaultTagsSlice: []alks.Tag{{Key: "defaultKey1", Value: "defaultValue1"}},
-			expected:         []alks.Tag{{Key: "resourceKey1", Value: "resourceValue1"}},
+			defaultTagMap: TagMap{"defaultKey1": "defaultValue1"},
+			expected:      TagMap{"resourceKey1": "resourceValue1"},
 		},
 		{
-			allTagsMap: map[string]interface{}{
+			allTagsMap: TagMap{
 				"defaultKey2": "defaultValue2",
 				"defaultKey1": "resourceValue2",
 			},
-			defaultTagsSlice: []alks.Tag{
-				{Key: "defaultKey2", Value: "defaultValue2"},
-				{Key: "defaultKey1", Value: "defaultValue2"},
+			defaultTagMap: TagMap{
+				"defaultKey2": "defaultValue2",
+				"defaultKey1": "defaultValue2",
 			},
-			expected: []alks.Tag{
-				{Key: "defaultKey1", Value: "resourceValue2"}, //Should not remove this key.  We are assuming that if the key matches one in default but not the value, that the default key was overwritten on purpose in the role definition and shouldnt be removed
+			expected: TagMap{
+				"defaultKey1": "resourceValue2", //Should not remove this key.  We are assuming that if the key matches one in default but not the value, that the default key was overwritten on purpose in the role definition and shouldnt be removed
 			},
 		},
 	}
 
 	for _, c := range cases {
-		resourceTagsSlice := removeDefaultTags(c.allTagsMap, c.defaultTagsSlice)
+		resourceTagsSlice := removeDefaultTags(c.allTagsMap, c.defaultTagMap)
 		if !reflect.DeepEqual(resourceTagsSlice, c.expected) {
 			t.Fatalf("Error matching output and expected: %#v vs %#v", resourceTagsSlice, c.expected)
 		}
 	}
 }
 
+func TestRemoveIgnoredTags(t *testing.T) {
+	cases := []struct {
+		allTags     TagMap
+		ignoredTags IgnoreTags
+		expected    TagMap
+	}{
+		{
+			allTags: TagMap{
+				"Key1":           "Value1",
+				"Key2":           "Value2",
+				"KeyPrefix:Key3": "Value3",
+			},
+			ignoredTags: IgnoreTags{
+				Keys:        TagMap{"Key1": ""},
+				KeyPrefixes: TagMap{"KeyPrefix:": ""},
+			},
+			expected: TagMap{"Key2": "Value2"},
+		},
+	}
+
+	for _, c := range cases {
+		tagMap := removeIgnoredTags(c.allTags, c.ignoredTags)
+		if !reflect.DeepEqual(tagMap, c.expected) {
+			t.Fatalf("Error matching output and expected: %#v vs %#v", tagMap, c.expected)
+		}
+	}
+}
+
 func TestTagMapToSlice(t *testing.T) {
 	cases := []struct {
-		tagMap   map[string]interface{}
+		tagMap   TagMap
 		expected []alks.Tag
 	}{
 		{
-			tagMap: map[string]interface{}{
+			tagMap: TagMap{
 				"key1": "value1",
 			},
 			expected: []alks.Tag{{Key: "key1", Value: "value1"}},
@@ -68,11 +96,11 @@ func TestTagMapToSlice(t *testing.T) {
 func TestTagSliceToMap(t *testing.T) {
 	cases := []struct {
 		tagSlice []alks.Tag
-		expected map[string]interface{}
+		expected TagMap
 	}{
 		{
 			tagSlice: []alks.Tag{{Key: "defaultKey1", Value: "defaultValue1"}},
-			expected: map[string]interface{}{"defaultKey1": "defaultValue1"},
+			expected: TagMap{"defaultKey1": "defaultValue1"},
 		},
 	}
 
@@ -84,23 +112,54 @@ func TestTagSliceToMap(t *testing.T) {
 	}
 }
 
-func TestCombineTagsWithDefault(t *testing.T) {
+func TestGetExternalyManagedTags(t *testing.T) {
 	cases := []struct {
-		defaultTagSlice  []alks.Tag
-		resourceTagSlice []alks.Tag
-		expected         []alks.Tag
+		roleTags    TagMap
+		ignoredTags IgnoreTags
+		expected    TagMap
 	}{
 		{
-			defaultTagSlice:  []alks.Tag{{Key: "defaultKey1", Value: "defaultValue1"}},
-			resourceTagSlice: []alks.Tag{{Key: "defaultKey1", Value: "resourceValue1"}},
-			expected:         []alks.Tag{{Key: "defaultKey1", Value: "resourceValue1"}},
+			roleTags: TagMap{
+				"Key1":           "Value1",
+				"Key2":           "Value2",
+				"KeyPrefix:Key3": "Value3",
+			},
+			ignoredTags: IgnoreTags{
+				Keys:        TagMap{"Key1": ""},
+				KeyPrefixes: TagMap{"KeyPrefix:": ""},
+			},
+			expected: TagMap{
+				"Key1":           "Value1",
+				"KeyPrefix:Key3": "Value3",
+			},
 		},
 	}
 
 	for _, c := range cases {
-		tagSlice := combineTagsWithDefault(c.resourceTagSlice, c.defaultTagSlice)
-		if !reflect.DeepEqual(tagSlice, c.expected) {
-			t.Fatalf("Error matching output and expected: %#v vs %#v", tagSlice, c.expected)
+		tagMap := getExternalyManagedTags(c.roleTags, c.ignoredTags)
+		if !reflect.DeepEqual(tagMap, c.expected) {
+			t.Fatalf("Error matching output and expected: %#v vs %#v", tagMap, c.expected)
+		}
+	}
+}
+
+func TestCombineMaps(t *testing.T) {
+	cases := []struct {
+		defaultTagMap  TagMap
+		resourceTagMap TagMap
+		expected       TagMap
+	}{
+		{
+			defaultTagMap:  TagMap{"defaultKey1": "defaultValue1"},
+			resourceTagMap: TagMap{"defaultKey1": "resourceValue1"},
+			expected:       TagMap{"defaultKey1": "resourceValue1"},
+		},
+	}
+
+	for _, c := range cases {
+		tagMap := combineTagMaps(c.defaultTagMap, c.resourceTagMap)
+		if !reflect.DeepEqual(tagMap, c.expected) {
+			t.Fatalf("Error matching output and expected: %#v vs %#v", tagMap, c.expected)
 		}
 	}
 }

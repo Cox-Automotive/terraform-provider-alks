@@ -3,6 +3,15 @@
 #
 provider "alks" {
   url = "https://alks.foo.com/rest"
+  default_tags { # All resources created by this provider will have these tags
+    tags = {
+      "ci:id" = "ABC1234" #If you have a colon in the key, it must be in quotes
+    }
+  }
+  ignore_tags { # These tags are considered external and will not be tracked or removed by the provider
+    keys = ["ignoreTagsWithThisKey"]
+    key_prefixes = ["ignoreKeysWithThisPrefx"]
+  }
 }
 
 # Second ALKS provider, for an account I have access to.
@@ -38,6 +47,9 @@ resource "alks_iamrole" "test_role" {
   type                     = "AWS CodeBuild"
   include_default_policies = false
   enable_alks_access       = true
+  tags = {
+    roleTagKey = "RoleTagValue"
+  }
 }
 
 resource "alks_iamrole" "test_dynamic_role" {

@@ -184,6 +184,115 @@ func TestAccAlksIamRole_DefaultTagsEmpty(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamRole_IgnoreTagsEmpty(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithEmptyIgnore,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleUpdateWithTagsWithEmptyIgnore,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey1", "defaultTagValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamRole_IgnoreTags(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithIgnoreTags,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey1", "defaultTagValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.testKey2", "testValue2"),
+				),
+			},
+			{
+				//Add tags externally.  These should not trigger an update because they are excluded by ignore_tags
+				PreConfig: func() {
+					client := testAccProvider.Meta().(*AlksClient).client
+					tags := TagMap{
+						"defaultTagKey1":        "defaultTagValue1",
+						"testKey2":              "testValue2",
+						"ignorePrefix:testKey1": "testValue1",
+						"ignoreFullKey":         "testValue1",
+					}
+					roleName := "bar430"
+
+					tagSlice := tagMapToSlice(tags)
+					options := alks.UpdateIamRoleRequest{
+						RoleName: &roleName,
+						Tags:     &tagSlice,
+					}
+					if _, err := client.UpdateIamRole(&options); err != nil {
+						fmt.Printf("Error in UpdateRole from test")
+						return
+					}
+				},
+				Config:   testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags,
+				PlanOnly: true, //This PlanOnly ensures there are no changes happening on this step.  Any changes will cause the test to error out because of uncompleted plan
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "type", "Amazon EC2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey1", "defaultTagValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccAlksIamRole_NoMaxDuration(t *testing.T) {
 	var resp alks.IamRoleResponse
 
@@ -391,6 +500,82 @@ const testAccCheckAlksIamRoleCreateWithTagsWithDefaultTagsEmpty = `
 		include_default_policies = false
 		tags = {
 			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleCreateWithTagsWithEmptyIgnore = `
+	provider "alks" {
+		ignore_tags {
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+const testAccCheckAlksIamRoleUpdateWithTagsWithEmptyIgnore = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+		ignore_tags {
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleCreateWithTagsWithIgnoreTags = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+		ignore_tags {
+			keys = ["ignoreFullKey"]
+			key_prefixes = ["ignorePrefix"]
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
 			testKey2 = "testValue2"
 		}
 	}

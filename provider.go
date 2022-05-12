@@ -76,6 +76,7 @@ func Provider() *schema.Provider {
 			},
 			"assume_role":  assumeRoleSchema(),
 			"default_tags": defaultTagsSchema(),
+			"ignore_tags":  ignoreTagsSchema(),
 		},
 
 		ResourcesMap: map[string]*schema.Resource{
@@ -144,6 +145,33 @@ func defaultTagsSchema() *schema.Schema {
 	}
 }
 
+func ignoreTagsSchema() *schema.Schema {
+	return &schema.Schema{
+		Type:        schema.TypeList,
+		Optional:    true,
+		MaxItems:    1,
+		Description: "Configuration block with settings to ignore resource tags across all resources.",
+		Elem: &schema.Resource{
+			Schema: map[string]*schema.Schema{
+				"keys": {
+					Type:        schema.TypeSet,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Set:         schema.HashString,
+					Description: "Resource tag keys to ignore across all resources.",
+				},
+				"key_prefixes": {
+					Type:        schema.TypeSet,
+					Optional:    true,
+					Elem:        &schema.Schema{Type: schema.TypeString},
+					Set:         schema.HashString,
+					Description: "Resource tag key prefixes to ignore across all resources.",
+				},
+			},
+		},
+	}
+}
+
 func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}, diag.Diagnostics) {
 	var diags diag.Diagnostics
 
@@ -173,6 +201,7 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 	}
 	config.CredsFilename = credsPath
 	defaultTags := expandProviderDefaultTags(d.Get("default_tags").([]interface{}))
+	ignoreTags := expandProviderIgnoreTags(d.Get("ignore_tags").([]interface{}))
 
 	c, err := config.Client()
 	if err != nil {
@@ -185,22 +214,58 @@ func providerConfigure(ctx context.Context, d *schema.ResourceData) (interface{}
 		alksClient.defaultTags = defaultTags
 	}
 
+	if ignoreTags != nil {
+		alksClient.ignoreTags = ignoreTags
+	}
+
 	log.Println("[INFO] Initializing ALKS client")
 	return alksClient, diags
 }
 
-func expandProviderDefaultTags(l []interface{}) []alks.Tag {
+func expandProviderDefaultTags(l []interface{}) TagMap {
+	defaultTags := TagMap{}
 	if len(l) == 0 || l[0] == nil {
-		return nil
+		return defaultTags
 	}
 
 	m := l[0].(map[string]interface{})
-	tagSlice := tagMapToSlice(m["tags"].(map[string]interface{}))
 
-	return tagSlice
+	return m["tags"].(map[string]interface{})
+}
+
+func expandProviderIgnoreTags(l []interface{}) *IgnoreTags {
+
+	ignoreTags := &IgnoreTags{
+		Keys:        TagMap{},
+		KeyPrefixes: TagMap{},
+	}
+
+	if len(l) == 0 || l[0] == nil {
+		return ignoreTags
+	}
+
+	m := l[0].(map[string]interface{})
+
+	//Aws runs these through a set similar to commented out code below, but given that it's a map, I dont see how there could be duplicates
+
+	if v, ok := m["keys"].(*schema.Set); ok {
+		for _, key := range v.List() {
+			ignoreTags.Keys[key.(string)] = ""
+		}
+	}
+
+	if v, ok := m["key_prefixes"].(*schema.Set); ok {
+		for _, KeyPrefix := range v.List() {
+			ignoreTags.KeyPrefixes[KeyPrefix.(string)] = ""
+		}
+	}
+
+	return ignoreTags
+
 }
 
 type AlksClient struct {
 	client      *alks.Client
-	defaultTags []alks.Tag //Not making this a pointer because I was having to check everywhere if it was nil
+	defaultTags TagMap //Not making this a pointer because I was having to check everywhere if it was nil
+	ignoreTags  *IgnoreTags
 }
