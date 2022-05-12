@@ -102,6 +102,41 @@ provider "alks" {
 }
 ```
 
+### Tags
+You can specify tags to add to all of your roles created with ALKS by using the `default_tags` block in the provider configuration.  You can also choose to ignore existing tags on a resource by including tag keys or key prefixes in the `ignore_tags` block.  These ignored tags will not show up on Terraform Plans or Applys, and will not be removed from the resource by Terraform. 
+
+You may also specify tags on individual roles using the `tags` block.
+
+Your ALKS configuration could look like this:
+
+```hcl
+provider "alks" {
+    url             ="https://alks.foo.com/rest"
+    version         = ">= 2.3.0
+    default_tags {
+      tags = {
+         "defaultTagKey" = "defaultTagValue"
+      }
+    }
+    ignore_tags {
+      keys = ["ignoreThisKey"]
+      key_prefixes = ["cai:", "coxauto:"]
+    }
+}
+
+resource "alks_iamrole" "test_role" {
+    name                     = "My_Test_Role"
+    type                     = "Amazon EC2"
+    include_default_policies = false
+    enable_alks_access       = false
+    tags                     = {
+      "roleSpecificTagKey" = "value"
+    }
+}
+```
+
+Note: Role specific tag values will overwrite default values if the key appears in both places.
+
 
 ### Multiple Provider Configuration
 
@@ -147,7 +182,7 @@ resource "alks_iamrole" "test_role_nonprod" {
 
 ## Argument Reference
 
-In addition to [generic `provider` arguments](https://www.terraform.io/docs/configuration/providers.html?_ga=2.182283811.562816692.1597670778-20010454.1565803281) (e.g. `alias` and `version`), the following arguments are supported in the AWS provider block:
+In addition to [generic `provider` arguments](https://www.terraform.io/docs/configuration/providers.html?_ga=2.182283811.562816692.1597670778-20010454.1565803281) (e.g. `alias` and `version`), the following arguments are supported in the ALKS provider block:
 
 * `url` - (Required) The URL to your ALKS server. Also read from ENV.ALKS_URL
 * `access_key` - (Optional) The access key from a valid STS session. Also read from ENV.ALKS_ACCESS_KEY_ID and ENV.AWS_ACCESS_KEY_ID.
@@ -160,6 +195,11 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
     * `session_name` - (Optional) The session name to provide to AWS when creating STS credentials. Please see the AWS SDK documentation for more information.
     * `external_id` - (Optional) The external identifier to provide to AWS when creating STS credentials. Please see the AWS SDK documentation for more information.
     * `policy` - (Optional) This specifies additional policy restrictions to apply to the resulting STS credentials beyond any existing inline or managed policies. Please see the AWS SDK documentation for more information.
+* `default_tags` - (Optional) This block can hold a block of tags to add to all roles created by this provider
+    * `tags` - (Optional) Block of key value pairs to add to all roles
+* `ignore_tags` - (Optional) Can contain a list of tag keys or key prefixes to exclude from `terraform plan` and `terraform apply`.  This is for tags added outside of the alks provider that are managed externally
+    * `keys` - (Optional) List of keys to ignore
+    * `key_prefixes` - (Optional) List of key prefixes to ignore. Any key starting with a string in this list will be ignored. 
 
 ---
 ### Supported Versions
