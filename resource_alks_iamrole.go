@@ -92,7 +92,7 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
 	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
-	var tags = tagMapToSlice(d.Get("tags").(map[string]interface{}))
+	var tags = d.Get("tags").(map[string]interface{})
 
 	templateFields := make(map[string]string)
 	for k, v := range rawTemplateFields {
@@ -107,12 +107,8 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 
-	defaultTags := []alks.Tag{}
-	if (*providerStruct).defaultTags != nil {
-		defaultTags = (*providerStruct).defaultTags
-	}
-	allTags := combineTagsWithDefault(tags, defaultTags)
-	//  client := meta.(*alks.Client)
+	//Role Specific tags will overwrite default tags if value is defined in both maps
+	allTags := tagMapToSlice(combineTagMaps(providerStruct.defaultTags, tags))
 
 	if err := validateIAMEnabled(client); err != nil {
 		return diag.FromErr(err)
@@ -163,6 +159,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	client := providerStruct.client
 
 	defaultTags := providerStruct.defaultTags
+	ignoreTags := providerStruct.ignoreTags
 
 	// Check if role exists.
 	if d.Id() == "" || d.Id() == "none" {
@@ -184,15 +181,16 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
 
-	allTags := foundRole.Tags
+	allTags := tagSliceToMap(foundRole.Tags)
+	localTags := removeIgnoredTags(allTags, *ignoreTags)
 
-	roleSpecificTags := removeDefaultTags(tagSliceToMap(allTags), defaultTags)
-
-	if err := d.Set("tags", tagSliceToMap(roleSpecificTags)); err != nil {
+	if err := d.Set("tags_all", localTags); err != nil {
 		return diag.FromErr(err)
 	}
 
-	if err := d.Set("tags_all", tagSliceToMap(allTags)); err != nil {
+	roleSpecificTags := removeDefaultTags(localTags, defaultTags)
+
+	if err := d.Set("tags", roleSpecificTags); err != nil {
 		return diag.FromErr(err)
 	}
 
@@ -261,10 +259,23 @@ func updateIamTags(d *schema.ResourceData, meta interface{}) error {
 		return err
 	}
 
-	tags := tagMapToSlice(d.Get("tags_all").(map[string]interface{}))
-	roleName := NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
+	//Do a read to get existing tags.  If any of those are in ignore_tags, then they are externally managed
+	//and they should be included in the update so they don't get removed.
+	foundRole, err := client.GetIamRole(d.Id())
+
+	if err != nil {
+		return err
+	}
+
+	existingTags := tagSliceToMap(foundRole.Tags)
+	externalTags := getExternalyManagedTags(existingTags, *providerStruct.ignoreTags)
+	internalTags := d.Get("tags_all").(map[string]interface{})
+
+	//Tags includes default tags, role specific tags, and tags that exist externally on the role itself and are specified in ignored_tags
+	tags := tagMapToSlice(combineTagMaps(internalTags, externalTags))
+
 	options := alks.UpdateIamRoleRequest{
-		RoleName: &roleName,
+		RoleName: &foundRole.RoleName,
 		Tags:     &tags,
 	}
 

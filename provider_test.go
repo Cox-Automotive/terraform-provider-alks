@@ -27,7 +27,6 @@ func TestProvider_impl(t *testing.T) {
 	var _ = Provider()
 }
 
-
 func testAccPreCheck(t *testing.T) {
 	if v := os.Getenv("ALKS_URL"); v == "" {
 		t.Fatal("ALKS_URL must be set for acceptance tests")
@@ -42,5 +41,3 @@ func testAccPreCheck(t *testing.T) {
 		t.Fatal("AWS_SESSION_TOKEN must be set for acceptance tests")
 	}
 }
-
-

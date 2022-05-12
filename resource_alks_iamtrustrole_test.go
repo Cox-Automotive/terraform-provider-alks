@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"regexp"
+
 	"testing"
 
 	"github.com/Cox-Automotive/alks-go"
@@ -115,6 +117,67 @@ func TestAccAlksIamTrustRole_DefaultTags(t *testing.T) {
 						"alks_iamtrustrole.bar", "tags.testKey3", "testValue3"),
 					resource.TestCheckResourceAttr(
 						"alks_iamtrustrole.bar", "tags_all.defaultTagKey2", "defaultTagValue2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamTrustRole_IgnoreTags(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleTrustCreateWithTagsWithIgnoreTags,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "name", "bar"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "type", "Inner Account"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "tags_all.defaultTagKey1", "defaultTagValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "tags_all.testKey2", "testValue2"),
+				),
+			},
+			{
+				//Add tags externally.  These should not trigger an update because they are excluded by ignore_tags
+				PreConfig: func() {
+					client := testAccProvider.Meta().(*AlksClient).client
+					tags := TagMap{
+						"defaultTagKey1":        "defaultTagValue1",
+						"testKey2":              "testValue2",
+						"ignorePrefix:testKey1": "testValue1",
+						"ignoreFullKey":         "testValue1",
+					}
+					roleName := "bar"
+
+					tagSlice := tagMapToSlice(tags)
+					options := alks.UpdateIamRoleRequest{
+						RoleName: &roleName,
+						Tags:     &tagSlice,
+					}
+					if _, err := client.UpdateIamRole(&options); err != nil {
+						fmt.Printf("Error in UpdateRole from test")
+						return
+					}
+				},
+				Config:   testAccCheckAlksIamRoleUpdateTrustWithTagsWithIgnoredTags,
+				PlanOnly: true, //This PlanOnly ensures there are no changes happening on this step.  Any changes will cause the test to error out because of uncompleted plan
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "name", "bar"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "type", "Inner Account"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "tags_all.defaultTagKey1", "defaultTagValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "tags.testKey2", "testValue2"),
 				),
 			},
 		},
@@ -317,7 +380,7 @@ const testAccCheckAlksIamTrustRoleConfigNameAndNamePrefixConflict = `
 	}
 `
 
-const testAccCheckAlksIamTrustRoleConfigNameTooLong= `
+const testAccCheckAlksIamTrustRoleConfigNameTooLong = `
 	resource "alks_iamrole" "nametoolong_role" {
 		name_prefix = "alks_test_acc_"
 		type = "Amazon EC2"
@@ -328,5 +391,55 @@ const testAccCheckAlksIamTrustRoleConfigNameTooLong= `
 		name = "nameandnametoolongggggggggggggggggggggggggggggggggggggggggggggggg"
 		type = "Inner Account"
 		trust_arn = "${alks_iamrole.nametoolong_role.arn}"
+	}
+`
+
+const testAccCheckAlksIamRoleTrustCreateWithTagsWithIgnoreTags = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+		tags = {
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleUpdateTrustWithTagsWithIgnoredTags = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+		ignore_tags {
+			keys = ["ignoreFullKey"]
+			key_prefixes = ["ignorePrefix"]
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+		tags = {
+			testKey2 = "testValue2"
+		}
 	}
 `

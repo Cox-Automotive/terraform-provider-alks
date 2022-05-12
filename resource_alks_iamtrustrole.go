@@ -81,7 +81,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var roleType = d.Get("type").(string)
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
-	var tags = tagMapToSlice(d.Get("tags").(map[string]interface{}))
+	var tags = d.Get("tags").(map[string]interface{})
 
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
@@ -90,12 +90,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 		return diag.FromErr(err)
 	}
 
-	defaultTags := []alks.Tag{}
-	if (*providerStruct).defaultTags != nil {
-		defaultTags = (*providerStruct).defaultTags
-	}
-
-	allTags := combineTagsWithDefault(tags, defaultTags)
+	allTags := tagMapToSlice(combineTagMaps(providerStruct.defaultTags, tags))
 
 	var resp *alks.IamRoleResponse
 	err := resource.RetryContext(ctx, 2*time.Minute, func() *resource.RetryError {
