@@ -47,6 +47,20 @@ resource "alks_iamrole" "test_dynamic_role" {
 }
 ```
 
+### ALKS IAM Role Creation With Tags
+
+```hcl
+resource "alks_iamrole" "test_role" {
+    name                     = "My_Test_Role"
+    type                     = "Amazon EC2"
+    include_default_policies = false
+    enable_alks_access       = false
+    tags                     = {
+        "tagKey" = "tagValue"
+    } 
+}
+```
+
 ## Argument Reference
 
 The following arguments are supported:
@@ -60,6 +74,7 @@ The following arguments are supported:
 * `ip_arn` - (Computed) If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
 * `enable_alks_access` - (Optional) If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role. Note: This enables **machine identity** capability.
 * `template_fields` - (Optional) If present, will submit template field data to ALKS.  Note: This will generate an error if the role type does not support template fields.
+* `tags` - (Optional) If present, will add specified tags onto role. 
 
 ## Import
 
