@@ -111,27 +111,26 @@ Your ALKS configuration could look like this:
 
 ```hcl
 provider "alks" {
-    url             ="https://alks.foo.com/rest"
-    version         = ">= 2.3.0
-    default_tags {
-      tags = {
-         "defaultTagKey" = "defaultTagValue"
-      }
+  url     = "https://alks.foo.com/rest"
+  version = ">= 2.3.0"
+  default_tags {
+    tags = {
+      "defaultTagKey" = "defaultTagValue"
     }
-    ignore_tags {
-      keys = ["ignoreThisKey"]
-      key_prefixes = ["cai:", "coxauto:"]
-    }
+  }
+  ignore_tags {
+    keys         = ["ignoreThisKey"]
+    key_prefixes = ["cai:", "coxauto:"]
+  }
 }
-
 resource "alks_iamrole" "test_role" {
-    name                     = "My_Test_Role"
-    type                     = "Amazon EC2"
-    include_default_policies = false
-    enable_alks_access       = false
-    tags                     = {
-      "roleSpecificTagKey" = "value"
-    }
+  name                     = "My_Test_Role"
+  type                     = "Amazon EC2"
+  include_default_policies = false
+  enable_alks_access       = false
+  tags = {
+    "roleSpecificTagKey" = "value"
+  }
 }
 ```
 
