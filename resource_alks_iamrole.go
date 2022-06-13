@@ -40,9 +40,16 @@ func resourceAlksIamRole() *schema.Resource {
 				ValidateFunc:  ValidRolePrefix,
 			},
 			"type": {
-				Type:     schema.TypeString,
-				Required: true,
-				ForceNew: true,
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"trust_policy", "type"},
+			},
+			"trust_policy": {
+				Type:         schema.TypeString,
+				Optional:     true,
+				ForceNew:     true,
+				ExactlyOneOf: []string{"trust_policy", "type"},
 			},
 			"include_default_policies": {
 				Type:     schema.TypeBool,
