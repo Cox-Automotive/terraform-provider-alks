@@ -44,13 +44,13 @@ func resourceAlksIamRole() *schema.Resource {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ExactlyOneOf: []string{"trust_policy", "type"},
+				ExactlyOneOf: []string{"assume_role_policy", "type"},
 			},
-			"trust_policy": {
+			"assume_role_policy": {
 				Type:         schema.TypeString,
 				Optional:     true,
 				ForceNew:     true,
-				ExactlyOneOf: []string{"trust_policy", "type"},
+				ExactlyOneOf: []string{"assume_role_policy", "type"},
 			},
 			"include_default_policies": {
 				Type:     schema.TypeBool,
@@ -134,7 +134,7 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 		roleTypeString := roleType.(string)
 		options.RoleType = &roleTypeString
 	} else {
-		trustPolicyString := d.Get("trust_policy").(string)
+		trustPolicyString := d.Get("assume_role_policy").(string)
 
 		trustPolicy := new(map[string]interface{})
 

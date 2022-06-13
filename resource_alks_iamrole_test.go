@@ -706,7 +706,7 @@ const testAccCheckAlksIamRoleWithOnlyTrustPolicyPresent = `
 	resource "alks_iamrole" "both_type_and_trust_policy" {
 		name                     = "both_type_and_trust_policy"
 		include_default_policies = false
-		trust_policy             = jsonencode({
+		assume_role_policy       = jsonencode({
 			Version = "2012-10-17",
 			Statement = [
 				{
