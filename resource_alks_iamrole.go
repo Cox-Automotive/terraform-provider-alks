@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 
@@ -94,7 +95,6 @@ func resourceAlksIamRole() *schema.Resource {
 func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Create")
 	var roleName = NameWithPrefix(d.Get("name").(string), d.Get("name_prefix").(string))
-	var roleType = d.Get("type").(string)
 	var incDefPol = d.Get("include_default_policies").(bool)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var rawTemplateFields = d.Get("template_fields").(map[string]interface{})
@@ -123,12 +123,24 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	options := &alks.CreateIamRoleOptions{
 		RoleName:                    &roleName,
-		RoleType:                    &roleType,
 		IncludeDefaultPolicies:      &include,
 		AlksAccess:                  &enableAlksAccess,
 		TemplateFields:              &templateFields,
 		MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
 		Tags:                        &allTags,
+	}
+
+	if roleType, ok := d.GetOk("type"); ok {
+		roleTypeString := roleType.(string)
+		options.RoleType = &roleTypeString
+	} else {
+		trustPolicyString := d.Get("trust_policy").(string)
+
+		trustPolicy := new(map[string]interface{})
+
+		json.Unmarshal([]byte(trustPolicyString), trustPolicy)
+
+		options.TrustPolicy = trustPolicy
 	}
 
 	resp, err := client.CreateIamRole(options)
