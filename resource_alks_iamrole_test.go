@@ -423,6 +423,43 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 	}
 }
 
+func TestIAMRole_RoleTypeAndTrustPolicyBothPresent(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamRoleBothRoleTypeAndTrustPolicyPresent,
+				ExpectError: regexp.MustCompile(".*Error: ExactlyOne.*"),
+			},
+		},
+	})
+}
+
+func TestIAMRole_OnlyTrustPolicyPresent(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlksIamRoleWithOnlyTrustPolicyPresent,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.both_type_and_trust_policy", "name", "both_type_and_trust_policy"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.both_type_and_trust_policy", "include_default_policies", "false"),
+				),
+			},
+		},
+	})
+}
+
 const testAccCheckAlksIamRoleConfigBasic = `
   resource "alks_iamrole" "foo" {
     name = "bar430"
@@ -641,5 +678,46 @@ const testAccCheckAlksIamRoleConfigNameTooLong = `
     name = "nameandnametoolongggggggggggggggggggggggggggggggggggggggggggggggg"
     type = "Amazon EC2"
 		include_default_policies = false
+	}
+`
+
+const testAccCheckAlksIamRoleBothRoleTypeAndTrustPolicyPresent = `
+	resource "alks_iamrole" "both_type_and_trust_policy" {
+		name                     = "both_type_and_trust_policy"
+		include_default_policies = false
+		type                     = "Amazon EC2"
+		trust_policy             = jsonencode({
+			Version = "2012-10-17",
+			Statement = [
+				{
+					Action = "sts:AssumeRole",
+					Effect = "Allow",
+					Principal = {
+						Service = "databrew.amazonaws.com"
+					},
+					Sid = ""
+				}
+			]
+		})
+	}
+`
+
+const testAccCheckAlksIamRoleWithOnlyTrustPolicyPresent = `
+	resource "alks_iamrole" "both_type_and_trust_policy" {
+		name                     = "both_type_and_trust_policy"
+		include_default_policies = false
+		assume_role_policy       = jsonencode({
+			Version = "2012-10-17",
+			Statement = [
+				{
+					Action = "sts:AssumeRole",
+					Effect = "Allow",
+					Principal = {
+						Service = "databrew.amazonaws.com"
+					},
+					Sid = ""
+				}
+			]
+		})
 	}
 `

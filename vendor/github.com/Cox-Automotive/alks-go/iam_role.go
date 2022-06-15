@@ -17,6 +17,7 @@ type Tag struct {
 type CreateIamRoleOptions struct {
 	RoleName                    *string
 	RoleType                    *string
+	TrustPolicy                 *map[string]interface{}
 	IncludeDefaultPolicies      *bool
 	AlksAccess                  *bool
 	TrustArn                    *string
@@ -27,40 +28,43 @@ type CreateIamRoleOptions struct {
 
 // IamRoleRequest is used to represent a new IAM Role request.
 type IamRoleRequest struct {
-	RoleName                    string            `json:"roleName"`
-	RoleType                    string            `json:"roleType,omitempty"`
-	IncDefPols                  int               `json:"includeDefaultPolicy,omitempty"`
-	AlksAccess                  bool              `json:"enableAlksAccess,omitempty"`
-	TrustArn                    string            `json:"trustArn,omitempty"`
-	TemplateFields              map[string]string `json:"templateFields,omitempty"`
-	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds,omitempty"`
-	Tags                        []Tag             `json:"tags,omitempty"`
+	RoleName                    string                 `json:"roleName"`
+	RoleType                    string                 `json:"roleType,omitempty"`
+	TrustPolicy                 map[string]interface{} `json:"trustPolicy,omitempty"`
+	IncDefPols                  int                    `json:"includeDefaultPolicy,omitempty"`
+	AlksAccess                  bool                   `json:"enableAlksAccess,omitempty"`
+	TrustArn                    string                 `json:"trustArn,omitempty"`
+	TemplateFields              map[string]string      `json:"templateFields,omitempty"`
+	MaxSessionDurationInSeconds int                    `json:"maxSessionDurationInSeconds,omitempty"`
+	Tags                        []Tag                  `json:"tags,omitempty"`
 }
 
 // IamRoleResponse is used to represent a a IAM Role.
 type IamRoleResponse struct {
 	BaseResponse
-	RoleName                    string            `json:"roleName"`
-	RoleType                    string            `json:"roleType"`
-	RoleArn                     string            `json:"roleArn"`
-	RoleIPArn                   string            `json:"instanceProfileArn"`
-	RoleAddedToIP               bool              `json:"addedRoleToInstanceProfile"`
-	Exists                      bool              `json:"roleExists"`
-	TemplateFields              map[string]string `json:"templateFields,omitempty"`
-	MaxSessionDurationInSeconds int               `json:"maxSessionDurationInSeconds"`
+	RoleName                    string                 `json:"roleName"`
+	RoleType                    string                 `json:"roleType"`
+	TrustPolicy                 map[string]interface{} `json:"trustPolicy"`
+	RoleArn                     string                 `json:"roleArn"`
+	RoleIPArn                   string                 `json:"instanceProfileArn"`
+	RoleAddedToIP               bool                   `json:"addedRoleToInstanceProfile"`
+	Exists                      bool                   `json:"roleExists"`
+	TemplateFields              map[string]string      `json:"templateFields,omitempty"`
+	MaxSessionDurationInSeconds int                    `json:"maxSessionDurationInSeconds"`
 }
 
 // GetIamRoleResponse is used to represent a a IAM Role.
 type GetIamRoleResponse struct {
 	BaseResponse
-	RoleName      string `json:"roleName"`
-	RoleType      string `json:"roleType"`
-	RoleArn       string `json:"roleArn"`
-	RoleIPArn     string `json:"instanceProfileArn"`
-	RoleAddedToIP bool   `json:"addedRoleToInstanceProfile"`
-	Exists        bool   `json:"roleExists"`
-	AlksAccess    bool   `json:"machineIdentity"`
-	Tags          []Tag  `json:"tags"`
+	RoleName      string                 `json:"roleName"`
+	RoleType      string                 `json:"roleType"`
+	TrustPolicy   map[string]interface{} `json:"trustPolicy"`
+	RoleArn       string                 `json:"roleArn"`
+	RoleIPArn     string                 `json:"instanceProfileArn"`
+	RoleAddedToIP bool                   `json:"addedRoleToInstanceProfile"`
+	Exists        bool                   `json:"roleExists"`
+	AlksAccess    bool                   `json:"machineIdentity"`
+	Tags          []Tag                  `json:"tags"`
 }
 
 // GetRoleRequest is used to represent a request for details about
@@ -114,14 +118,24 @@ func NewIamRoleRequest(options *CreateIamRoleOptions) (*IamRoleRequest, error) {
 		return nil, fmt.Errorf("RoleName option must not be nil")
 	}
 
-	if options.RoleType == nil {
-		return nil, fmt.Errorf("RoleType option must not be nil")
+	trustPolicyExists := options.TrustPolicy != nil
+	roleTypeExists := options.RoleType != nil
+	if trustPolicyExists == roleTypeExists {
+		return nil, fmt.Errorf("Either RoleType or TrustPolicy must be included, but not both")
 	}
 
 	iam := &IamRoleRequest{
 		RoleName: *options.RoleName,
-		RoleType: *options.RoleType,
 	}
+
+	if roleTypeExists {
+		iam.RoleType = *options.RoleType
+	}
+
+	if trustPolicyExists {
+		iam.TrustPolicy = *options.TrustPolicy
+	}
+
 	if options.IncludeDefaultPolicies != nil && *options.IncludeDefaultPolicies {
 		iam.IncDefPols = 1
 	} else {

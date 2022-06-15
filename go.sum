@@ -36,6 +36,8 @@ github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03
 github.com/BurntSushi/xgb v0.0.0-20160522181843-27f122750802/go.mod h1:IVnqGOEym/WlBOVXweHU+Q+/VP0lqqI8lqeDx9IjBqo=
 github.com/Cox-Automotive/alks-go v0.0.0-20220502192728-623c28f3b92b h1:lTQ/h4MVJzOmrWk0a16zb9pUapImXFeTlQkO3vlZtUI=
 github.com/Cox-Automotive/alks-go v0.0.0-20220502192728-623c28f3b92b/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
+github.com/Cox-Automotive/alks-go v0.0.0-20220610194553-5bc77030a1ba h1:2a3ugAGVFcRPYNNeO3DVHlFDjhoWIgwOCOG+YTDaqaU=
+github.com/Cox-Automotive/alks-go v0.0.0-20220610194553-5bc77030a1ba/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
 github.com/agext/levenshtein v1.2.1/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
 github.com/agext/levenshtein v1.2.2 h1:0S/Yg6LYmFJ5stwQeRp6EeOcCbj7xiqQSdNelsXvaqE=
 github.com/agext/levenshtein v1.2.2/go.mod h1:JEDfjyjHDjOF/1e4FlBE/PkbqA9OfWu2ki2W0IB5558=
