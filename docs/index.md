@@ -120,7 +120,7 @@ provider "alks" {
   }
   ignore_tags {
     keys         = ["ignoreThisKey"]
-    key_prefixes = ["cai:", "coxauto:"]
+    key_prefixes = ["myTag1:", "SomeOtherTag:"]
   }
 }
 resource "alks_iamrole" "test_role" {
@@ -150,12 +150,12 @@ Note: This only works for accounts you have access to!
 ```tf
 # PROVIDER 1
 provider "alks" {
-  url = "https://alks.coxautoinc.com/rest"
+  url = "https://alks.foo.com/rest"
 }
 
 # PROVIDER 2
 provider "alks" {
-  url     = "https://alks.coxautoinc.com/rest"
+  url     = "https://alks.foo.com/rest"
   account = "<account No>"
   role    = "<role>"
   alias   = "second"
