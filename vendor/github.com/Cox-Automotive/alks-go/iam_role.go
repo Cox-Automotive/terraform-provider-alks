@@ -56,15 +56,16 @@ type IamRoleResponse struct {
 // GetIamRoleResponse is used to represent a a IAM Role.
 type GetIamRoleResponse struct {
 	BaseResponse
-	RoleName      string                 `json:"roleName"`
-	RoleType      string                 `json:"roleType"`
-	TrustPolicy   map[string]interface{} `json:"trustPolicy"`
-	RoleArn       string                 `json:"roleArn"`
-	RoleIPArn     string                 `json:"instanceProfileArn"`
-	RoleAddedToIP bool                   `json:"addedRoleToInstanceProfile"`
-	Exists        bool                   `json:"roleExists"`
-	AlksAccess    bool                   `json:"machineIdentity"`
-	Tags          []Tag                  `json:"tags"`
+	RoleName                    string                 `json:"roleName"`
+	RoleType                    string                 `json:"roleType"`
+	TrustPolicy                 map[string]interface{} `json:"trustPolicy"`
+	RoleArn                     string                 `json:"roleArn"`
+	RoleIPArn                   string                 `json:"instanceProfileArn"`
+	RoleAddedToIP               bool                   `json:"addedRoleToInstanceProfile"`
+	Exists                      bool                   `json:"roleExists"`
+	AlksAccess                  bool                   `json:"machineIdentity"`
+	Tags                        []Tag                  `json:"tags"`
+	MaxSessionDurationInSeconds int                    `json:"maxSessionDurationInSeconds"`
 }
 
 // GetRoleRequest is used to represent a request for details about
