@@ -67,6 +67,11 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
+			"max_session_duration_in_seconds": {
+				Type:     schema.TypeInt,
+				Default:  3600,
+				Optional: true,
+			},
 			"tags":     TagsSchema(),
 			"tags_all": TagsSchemaComputed(),
 		},

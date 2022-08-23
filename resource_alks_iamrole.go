@@ -8,6 +8,7 @@ import (
 
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
 )
@@ -47,14 +48,16 @@ func resourceAlksIamRole() *schema.Resource {
 				ExactlyOneOf: []string{"assume_role_policy", "type"},
 			},
 			"assume_role_policy": {
-				Type:         schema.TypeString,
-				Optional:     true,
-				ForceNew:     true,
-				ExactlyOneOf: []string{"assume_role_policy", "type"},
+				Type:             schema.TypeString,
+				Optional:         true,
+				ForceNew:         true,
+				ExactlyOneOf:     []string{"assume_role_policy", "type"},
+				DiffSuppressFunc: SuppressEquivalentTrustPolicyDiffs,
 			},
 			"include_default_policies": {
 				Type:     schema.TypeBool,
-				Required: true,
+				Optional: true,
+				Default:  false,
 				ForceNew: true,
 			},
 			"role_added_to_ip": {
@@ -88,7 +91,10 @@ func resourceAlksIamRole() *schema.Resource {
 			"tags":     TagsSchema(),
 			"tags_all": TagsSchemaComputed(),
 		},
-		CustomizeDiff: SetTagsDiff,
+		CustomizeDiff: customdiff.All(
+			SetTagsDiff,
+			trustPoliciesWithIncludeDefaultPolicies,
+		),
 	}
 }
 
@@ -199,6 +205,17 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	_ = d.Set("arn", foundRole.RoleArn)
 	_ = d.Set("ip_arn", foundRole.RoleIPArn)
 	_ = d.Set("enable_alks_access", foundRole.AlksAccess)
+	_ = d.Set("role_added_to_ip", foundRole.RoleAddedToIP)
+
+	var roleType = d.Get("type")
+	if (roleType == nil) || (roleType == "") {
+		jsonStrPolicy, err := json.Marshal(foundRole.TrustPolicy)
+		if err == nil {
+			_ = d.Set("assume_role_policy", string(jsonStrPolicy))
+		}
+		_ = d.Set("include_default_policies", false)
+	}
+	_ = d.Set("max_session_duration_in_seconds", foundRole.MaxSessionDurationInSeconds)
 
 	allTags := tagSliceToMap(foundRole.Tags)
 	localTags := removeIgnoredTags(allTags, *ignoreTags)

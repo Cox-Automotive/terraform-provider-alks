@@ -94,7 +94,7 @@ func TestAccAlksIamRole_Tags(t *testing.T) {
 	})
 }
 
-func TestAccAlksIamRole_DefaultTags(t *testing.T) {
+func TestAccAlksIamRole_DefaultTags_TrustPolicy(t *testing.T) {
 	var resp alks.IamRoleResponse
 
 	resource.Test(t, resource.TestCase{
@@ -104,7 +104,54 @@ func TestAccAlksIamRole_DefaultTags(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				// create resource with tags
-				Config: testAccCheckAlksIamRoleCreateWithTagsWithDefault,
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithDefault_TrustPolicy,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey1", "defaultTagValue1"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicy,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "include_default_policies", "false"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey3", "testValue3"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey2", "defaultTagValue2"),
+				),
+			},
+			{
+				ResourceName:      "alks_iamrole.foo",
+				ImportState:       true,
+				ImportStateVerify: true,
+			},
+		},
+	})
+}
+
+func TestAccAlksIamRole_DefaultTags_RoleType(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithTagsWithDefault_RoleType,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "name", "bar430"),
@@ -122,7 +169,7 @@ func TestAccAlksIamRole_DefaultTags(t *testing.T) {
 			},
 			{
 				// update resource with tags
-				Config: testAccCheckAlksIamRoleUpdateWithTagsWithDefault,
+				Config: testAccCheckAlksIamRoleUpdateWithTagsWithDefault_RoleType,
 				Check: resource.ComposeTestCheckFunc(
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "name", "bar430"),
@@ -423,7 +470,7 @@ func testAccCheckAlksIamRoleAttributes(role *alks.IamRoleResponse) resource.Test
 	}
 }
 
-func TestIAMRole_RoleTypeAndTrustPolicyBothPresent(t *testing.T) {
+func TestAccIAMRole_RoleTypeAndTrustPolicyBothPresent(t *testing.T) {
 	var resp alks.IamRoleResponse
 
 	resource.Test(t, resource.TestCase{
@@ -433,13 +480,29 @@ func TestIAMRole_RoleTypeAndTrustPolicyBothPresent(t *testing.T) {
 		Steps: []resource.TestStep{
 			{
 				Config:      testAccCheckAlksIamRoleBothRoleTypeAndTrustPolicyPresent,
-				ExpectError: regexp.MustCompile(".*Error: ExactlyOne.*"),
+				ExpectError: regexp.MustCompile(".*Error: Invalid combination.*"),
 			},
 		},
 	})
 }
 
-func TestIAMRole_OnlyTrustPolicyPresent(t *testing.T) {
+func TestAccIAMRole_TrustPolicyAndIncludeDefaultPoliciesTrue(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config:      testAccCheckAlksIamRoleTrustPolicyAndDefaultPoliciesTrue,
+				ExpectError: regexp.MustCompile(".*include_default_policies must be false or excluded if including an assume_role_policy.*"),
+			},
+		},
+	})
+}
+
+func TestAccIAMRole_OnlyTrustPolicyPresent(t *testing.T) {
 	var resp alks.IamRoleResponse
 
 	resource.Test(t, resource.TestCase{
@@ -455,6 +518,11 @@ func TestIAMRole_OnlyTrustPolicyPresent(t *testing.T) {
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.both_type_and_trust_policy", "include_default_policies", "false"),
 				),
+			},
+			{
+				ResourceName:      "alks_iamrole.both_type_and_trust_policy",
+				ImportState:       true,
+				ImportStateVerify: true,
 			},
 		},
 	})
@@ -489,7 +557,7 @@ const testAccCheckAlksIamRoleCreateWithTags = `
 	}
 `
 
-const testAccCheckAlksIamRoleCreateWithTagsWithDefault = `
+const testAccCheckAlksIamRoleCreateWithTagsWithDefault_RoleType = `
 	provider "alks" {
 		default_tags {
 			tags = {
@@ -500,6 +568,37 @@ const testAccCheckAlksIamRoleCreateWithTagsWithDefault = `
 	resource "alks_iamrole" "foo" {
 		name = "bar430"
 		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey2 = "testValue2"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleCreateWithTagsWithDefault_TrustPolicy = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+
+		name = "bar430"
+		assume_role_policy       = jsonencode({
+			Version = "2012-10-17",
+			Statement = [
+			{
+				Action    = "sts:AssumeRole",
+				Effect    = "Allow",
+				Principal = {
+				Service = "ec2.amazonaws.com"
+				}
+			}
+			]
+		})
 		include_default_policies = false
 		tags = {
 			testKey1 = "testValue1"
@@ -617,7 +716,7 @@ const testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags = `
 		}
 	}
 `
-const testAccCheckAlksIamRoleUpdateWithTagsWithDefault = `
+const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_RoleType = `
 	provider "alks" {
 		default_tags {
 			tags = {
@@ -628,6 +727,36 @@ const testAccCheckAlksIamRoleUpdateWithTagsWithDefault = `
 	resource "alks_iamrole" "foo" {
 		name = "bar430"
 		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey3 = "testValue3"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicy = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey2 = "defaultTagValue2"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		assume_role_policy       = jsonencode({
+			Version = "2012-10-17",
+			Statement = [
+			  {
+				Action    = "sts:AssumeRole",
+				Effect    = "Allow",
+				Principal = {
+				  Service = "ec2.amazonaws.com"
+				}
+			  }
+			]
+		  })
 		include_default_policies = false
 		tags = {
 			testKey1 = "testValue1"
@@ -686,7 +815,7 @@ const testAccCheckAlksIamRoleBothRoleTypeAndTrustPolicyPresent = `
 		name                     = "both_type_and_trust_policy"
 		include_default_policies = false
 		type                     = "Amazon EC2"
-		trust_policy             = jsonencode({
+		assume_role_policy             = jsonencode({
 			Version = "2012-10-17",
 			Statement = [
 				{
@@ -706,6 +835,25 @@ const testAccCheckAlksIamRoleWithOnlyTrustPolicyPresent = `
 	resource "alks_iamrole" "both_type_and_trust_policy" {
 		name                     = "both_type_and_trust_policy"
 		include_default_policies = false
+		assume_role_policy       = jsonencode({
+			Version = "2012-10-17",
+			Statement = [
+				{
+					Action = "sts:AssumeRole",
+					Effect = "Allow",
+					Principal = {
+						Service = "databrew.amazonaws.com"
+					},
+					Sid = ""
+				}
+			]
+		})
+	}
+`
+const testAccCheckAlksIamRoleTrustPolicyAndDefaultPoliciesTrue = `
+	resource "alks_iamrole" "both_type_and_trust_policy" {
+		name                     = "both_type_and_trust_policy"
+		include_default_policies = true
 		assume_role_policy       = jsonencode({
 			Version = "2012-10-17",
 			Statement = [
