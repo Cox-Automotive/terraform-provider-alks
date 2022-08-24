@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -15,32 +16,25 @@ type TrustPolicyDocument struct {
 }
 
 func SuppressEquivalentTrustPolicyDiffs(key string, old string, new string, d *schema.ResourceData) bool {
-	UnmarshalAndMarshal(&old, &new)
-	return old == new
+	oldPolicy, _ := UnmarshalAndMarshal([]byte(old))
+	newPolicy, _ := UnmarshalAndMarshal([]byte(new))
+
+	return bytes.Compare(oldPolicy,newPolicy) == 0
 }
 
 //Broken into seperate function to allow for returning of errors.
-func UnmarshalAndMarshal(oldPolicy *string, newPolicy *string) error {
-	policyOldIntermediate := TrustPolicyDocument{}
-	policyNewIntermediate := TrustPolicyDocument{}
-	if err := json.Unmarshal([]byte(*oldPolicy), &policyOldIntermediate); err != nil {
-		return fmt.Errorf("Error unmarshaling old trust policy: %s", err)
-	}
-	if err := json.Unmarshal([]byte(*newPolicy), &policyNewIntermediate); err != nil {
-		return fmt.Errorf("Error unmarshaling new trust policy: %s", err)
+func UnmarshalAndMarshal(policy []byte) ([]byte, error) {
+	unmarshaledPolicy := TrustPolicyDocument{}
+	if err := json.Unmarshal(policy, &unmarshaledPolicy); err != nil {
+		return nil, fmt.Errorf("Error unmarshaling trust policy: %s", err)
 	}
 
-	oldByteArray, err := json.Marshal(policyOldIntermediate)
+	marshaledPolicy, err := json.Marshal(unmarshaledPolicy)
 	if err != nil {
-		return fmt.Errorf("Error marshaling old trust policy: %s", err)
+		return nil, fmt.Errorf("Error marshaling trust policy: %s", err)
 	}
-	newByteArray, err := json.Marshal(policyNewIntermediate)
-	if err != nil {
-		return fmt.Errorf("Error marshaling new trust policy: %s", err)
-	}
-	*oldPolicy = string(oldByteArray)
-	*newPolicy = string(newByteArray)
-	return nil
+
+	return marshaledPolicy, nil
 }
 
 // Using a diff function is the currently accepted way to compare the configuration of two different attributes at plan time.
