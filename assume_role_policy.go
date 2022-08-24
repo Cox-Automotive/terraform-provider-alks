@@ -19,7 +19,7 @@ func SuppressEquivalentTrustPolicyDiffs(key string, old string, new string, d *s
 	oldPolicy, _ := UnmarshalAndMarshal([]byte(old))
 	newPolicy, _ := UnmarshalAndMarshal([]byte(new))
 
-	return bytes.Compare(oldPolicy,newPolicy) == 0
+	return bytes.Compare(oldPolicy, newPolicy) == 0
 }
 
 //Broken into seperate function to allow for returning of errors.
