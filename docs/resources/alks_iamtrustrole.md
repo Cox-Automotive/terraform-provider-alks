@@ -43,7 +43,7 @@ The following arguments are supported:
 * `ip_arn` - (Computed) If `role_added_to_ip` was `true` this will provide the ARN of the instance profile role.
 * `enable_alks_access` - (Optional) If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role. Note: This enables **machine identity** capability.
 * `tags` - (Optional) If present, will add specified tags onto role. 
-* `max_session_duration_in_seconds` - (Optional) If present, will set maximum duration for role 
+* `max_session_duration_in_seconds` - (Optional) If present, will set maximum duration for role. Change forces re-creation of resource.
 
 
 ## Import
