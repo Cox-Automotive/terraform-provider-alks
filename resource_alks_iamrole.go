@@ -87,6 +87,7 @@ func resourceAlksIamRole() *schema.Resource {
 				Type:     schema.TypeInt,
 				Default:  3600,
 				Optional: true,
+				ForceNew: true,
 			},
 			"tags":     TagsSchema(),
 			"tags_all": TagsSchemaComputed(),

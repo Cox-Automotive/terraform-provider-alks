@@ -100,7 +100,7 @@ The following arguments are supported:
 * `enable_alks_access` - (Optional) If `true`, allows ALKS calls to be made by instance profiles or Lambda functions making use of this role. Note: This enables **machine identity** capability.
 * `template_fields` - (Optional) If present, will submit template field data to ALKS.  Note: This will generate an error if the role type does not support template fields.
 * `tags` - (Optional) If present, will add specified tags onto role.
-* `max_session_duration_in_seconds` - (Optional) If present, will set maximum duration for role 
+* `max_session_duration_in_seconds` - (Optional) If present, will set maximum duration for role. Change forces re-creation of resource.
 
 ## Import
 
