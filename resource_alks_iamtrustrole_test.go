@@ -43,6 +43,29 @@ func TestAccAlksIamTrustRole_Basic(t *testing.T) {
 	})
 }
 
+func TestAccAlksIamTrustRole_MaxDuration(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				Config: testAccCheckAlksIamTrustRoleConfigMaxDurationCreate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "name", "bar"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "type", "Inner Account"),
+					resource.TestCheckResourceAttr(
+						"alks_iamtrustrole.bar", "max_session_duration_in_seconds", "7200"),
+				),
+			},
+		},
+	})
+}
+
 func TestAccAlksIamTrustRole_Tags(t *testing.T) {
 	var resp alks.IamRoleResponse
 
@@ -252,6 +275,20 @@ const testAccCheckAlksIamTrustRoleConfigBasic = `
 		trust_arn = "${alks_iamrole.foo.arn}"
 	}
 `
+const testAccCheckAlksIamTrustRoleConfigMaxDurationCreate = `
+	resource "alks_iamrole" "foo" {
+		name = "foo"
+		type = "Amazon EC2"
+		include_default_policies = false
+	}
+
+	resource "alks_iamtrustrole" "bar" {
+		name = "bar"
+		type = "Inner Account"
+		trust_arn = "${alks_iamrole.foo.arn}"
+		max_session_duration_in_seconds = 7200
+	}
+`
 
 const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
 	resource "alks_iamrole" "foo" {
@@ -267,6 +304,7 @@ const testAccCheckAlksIamTrustRoleConfigUpdateBasic = `
 		enable_alks_access = true
 	}
 `
+
 const testAccCheckAlksIamTrustRoleCreateWithTags = `
 	resource "alks_iamrole" "foo" {
 		name = "foo"

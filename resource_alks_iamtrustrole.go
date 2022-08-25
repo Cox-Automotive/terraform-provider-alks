@@ -67,6 +67,11 @@ func resourceAlksIamTrustRole() *schema.Resource {
 				Default:  false,
 				Optional: true,
 			},
+			"max_session_duration_in_seconds": {
+				Type:     schema.TypeInt,
+				Default:  3600,
+				Optional: true,
+			},
 			"tags":     TagsSchema(),
 			"tags_all": TagsSchemaComputed(),
 		},
@@ -82,6 +87,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var tags = d.Get("tags").(map[string]interface{})
+	var max_session_duration_in_seconds = d.Get("max_session_duration_in_seconds").(int)
 
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
@@ -95,14 +101,15 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var resp *alks.IamRoleResponse
 	err := resource.RetryContext(ctx, 2*time.Minute, func() *resource.RetryError {
 		var err error
-		options := &alks.CreateIamRoleOptions{
-			RoleName:   &roleName,
-			RoleType:   &roleType,
-			TrustArn:   &trustArn,
-			AlksAccess: &enableAlksAccess,
-			Tags:       &allTags,
-		}
 
+		options := &alks.CreateIamRoleOptions{
+			RoleName:                    &roleName,
+			RoleType:                    &roleType,
+			TrustArn:                    &trustArn,
+			AlksAccess:                  &enableAlksAccess,
+			Tags:                        &allTags,
+			MaxSessionDurationInSeconds: &max_session_duration_in_seconds,
+		}
 		resp, err = client.CreateIamTrustRole(options)
 		if err != nil {
 			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
