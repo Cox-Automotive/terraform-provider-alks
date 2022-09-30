@@ -196,6 +196,11 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 
 	if err != nil {
 		d.SetId("")
+		return diag.FromErr(err)
+	}
+
+	if foundRole.Exists != true {
+		d.SetId("")
 		return nil
 	}
 
