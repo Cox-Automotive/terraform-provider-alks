@@ -50,6 +50,32 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, error) {
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		iamErr := new(AlksError)
+		err = decodeBody(resp, &iamErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if iamErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, iamErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, iamErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	validate := new(IsIamEnabledResponse)
 	err = decodeBody(resp, validate)
 

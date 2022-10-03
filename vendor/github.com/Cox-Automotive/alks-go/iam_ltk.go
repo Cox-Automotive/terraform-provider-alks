@@ -89,6 +89,32 @@ func (c *Client) GetLongTermKeys() (*GetLongTermKeysResponse, error) {
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		keyErr := new(AlksError)
+		err = decodeBody(resp, &keyErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if keyErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, keyErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, keyErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	cr := new(GetLongTermKeysResponse)
 	err = decodeBody(resp, &cr)
 
@@ -140,6 +166,32 @@ func (c *Client) GetLongTermKey(iamUsername string) (*GetLongTermKeyResponse, er
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		keyErr := new(AlksError)
+		err = decodeBody(resp, &keyErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if keyErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, keyErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, keyErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	cr := new(GetLongTermKeyResponse)
 	err = decodeBody(resp, &cr)
 
@@ -180,6 +232,32 @@ func (c *Client) CreateLongTermKey(iamUsername string) (*CreateLongTermKeyRespon
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		keyErr := new(AlksError)
+		err = decodeBody(resp, &keyErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if keyErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, keyErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, keyErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	cr := new(CreateLongTermKeyResponse)
@@ -224,6 +302,32 @@ func (c *Client) DeleteLongTermKey(iamUsername string) (*DeleteLongTermKeyRespon
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		keyErr := new(AlksError)
+		err = decodeBody(resp, &keyErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if keyErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, keyErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, keyErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	cr := new(DeleteLongTermKeyResponse)

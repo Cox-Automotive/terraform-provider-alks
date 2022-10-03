@@ -24,6 +24,32 @@ func (c *Client) GetMyLoginRole() (*LoginRoleResponse, error) {
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		loginErr := new(AlksError)
+		err = decodeBody(resp, &loginErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if loginErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, loginErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, loginErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	lrr := new(LoginRoleResponse)
 	err = decodeBody(resp, &lrr)
 	if err != nil {
@@ -69,6 +95,32 @@ func (c *Client) GetLoginRole() (*LoginRoleResponse, error) {
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		loginErr := new(AlksError)
+		err = decodeBody(resp, &loginErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if loginErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, loginErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, loginErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	lrr := new(LoginRoleResponse)
