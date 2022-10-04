@@ -560,6 +560,9 @@ func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, error) {
 	}
 
 	if cr.RequestFailed() {
+		if resp.StatusCode == 404 {
+			return cr, fmt.Errorf("Error getting role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
+		}
 		return nil, fmt.Errorf("Error getting role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
 	}
 
