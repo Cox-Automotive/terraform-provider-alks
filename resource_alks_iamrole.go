@@ -199,7 +199,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		// We will log ther error and set id to "" and return nil, letting terraform decide how to handle role not found.
 		if foundRole != nil {
 			if foundRole.Exists != true {
-				log.Printf("[Error] %#v", err)
+				log.Printf("[Error] %s", err)
 				d.SetId("")
 				return nil
 			}
