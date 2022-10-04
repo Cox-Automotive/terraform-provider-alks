@@ -448,7 +448,10 @@ func testAccCheckAlksIamRoleDestroy(role *alks.IamRoleResponse) resource.TestChe
 
 			respz, err := client.GetIamRole(rs.Primary.ID)
 			if respz != nil {
-				return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
+				if respz.Exists == true {
+					return fmt.Errorf("Role still exists: %#v (%v)", respz, err)
+				}
+
 			}
 		}
 

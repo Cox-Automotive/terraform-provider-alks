@@ -189,6 +189,32 @@ func (c *Client) Durations() ([]int, error) {
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		durationErr := new(AlksError)
+		err = decodeBody(resp, &durationErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if durationErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, durationErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, durationErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	lrr := new(LoginRoleResponse)
 	err = decodeBody(resp, &lrr)
 	if err != nil {

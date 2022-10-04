@@ -195,8 +195,17 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 	foundRole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
+		// If 404 Role not found error, an error and a role with Exists field set to false will come back from alks-go
+		// We will log ther error and set id to "" and return nil, letting terraform decide how to handle role not found.
+		if foundRole != nil {
+			if foundRole.Exists != true {
+				log.Printf("[Error] %s", err)
+				d.SetId("")
+				return nil
+			}
+		}
 		d.SetId("")
-		return nil
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] alks_iamrole.id %v", d.Id())

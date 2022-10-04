@@ -14,6 +14,19 @@ type Tag struct {
 	Value string `json:"value"`
 }
 
+type AlksError struct {
+	StatusMessage string   `json:"statusMessage"`
+	Errors        []string `json:"errors"`
+	RequestId     string   `json:"requestId"`
+}
+
+var ErrorStringFull = "[%s] ALKS Error %d Msg: %s\n Contact the ALKS Team for assistance on Slack at #alks-client-support"
+var ErrorStringNoReqId = "ALKS Error %d Msg: %s\n Contact the ALKS Team for assistance on Slack at #alks-client-support"
+var ErrorStringOnlyCodeAndReqId = "[%s] ALKS Error %d\n Contact the ALKS Team for assistance on Slack at #alks-client-support"
+var ErrorStringOnlyCode = "ALKS Error %d\n Contact the ALKS Team for assistance on Slack at #alks-client-support"
+var ParseErrorReqId = "[%s] Error parsing ALKS Error response: %s"
+var ParseError = "Error parsing ALKS Error response: %s"
+
 type CreateIamRoleOptions struct {
 	RoleName                    *string
 	RoleType                    *string
@@ -205,6 +218,31 @@ func (c *Client) CreateIamRole(options *CreateIamRoleOptions) (*IamRoleResponse,
 	if err != nil {
 		return nil, err
 	}
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		createErr := new(AlksError)
+		err = decodeBody(resp, &createErr)
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if createErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, createErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, createErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
 
 	cr := new(IamRoleResponse)
 	err = decodeBody(resp, &cr)
@@ -248,6 +286,33 @@ func (c *Client) CreateIamTrustRole(options *CreateIamRoleOptions) (*IamRoleResp
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		trustErr := new(AlksError)
+		err = decodeBody(resp, &trustErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if trustErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, trustErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, trustErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	cr := new(IamRoleResponse)
 	err = decodeBody(resp, &cr)
 
@@ -285,33 +350,60 @@ type UpdateIamRoleResponse struct {
 /* UpdateIamRole adds resource tags to an existing IAM role.
  */
 func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleResponse, error) {
-	if e := options.updateIamRoleValidate(); e != nil {
-		return nil, e
+	if err := options.updateIamRoleValidate(); err != nil {
+		return nil, err
 	}
 	log.Printf("[INFO] update IAM role %s with Tags: %v", *options.RoleName, *options.Tags)
 
-	b, e := json.Marshal(struct {
+	b, err := json.Marshal(struct {
 		UpdateIamRoleRequest
 		AccountDetails
 	}{*options, c.AccountDetails})
-	if e != nil {
-		return nil, e
+	if err != nil {
+		return nil, err
 	}
-	req, e := c.NewRequest(b, "PATCH", "/role/")
-	if e != nil {
-		return nil, e
+	req, err := c.NewRequest(b, "PATCH", "/role/")
+	if err != nil {
+		return nil, err
 	}
-	resp, e := c.http.Do(req)
-	if e != nil {
-		return nil, e
+	resp, err := c.http.Do(req)
+	if err != nil {
+		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		updateErr := new(AlksError)
+		err = decodeBody(resp, &updateErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if updateErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, updateErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, updateErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	respObj := &UpdateIamRoleResponse{}
-	if e = decodeBody(resp, respObj); e != nil {
+	if err = decodeBody(resp, respObj); err != nil {
 		if reqID := GetRequestID(resp); reqID != "" {
-			return nil, fmt.Errorf("error parsing update role response: [%s] %s", reqID, e)
+			return nil, fmt.Errorf("error parsing update role response: [%s] %s", reqID, err)
 		}
-		return nil, fmt.Errorf("error parsing update role response: %s", e)
+		return nil, fmt.Errorf("error parsing update role response: %s", err)
 	}
 	if respObj.RequestFailed() {
 		return nil, fmt.Errorf("error from update IAM role request: [%s] %s", respObj.RequestID, strings.Join(respObj.GetErrors(), ", "))
@@ -354,6 +446,33 @@ func (c *Client) DeleteIamRole(id string) error {
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		delErr := new(AlksError)
+		err = decodeBody(resp, &delErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return fmt.Errorf(ParseError, err)
+		}
+
+		if delErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, delErr.Errors)
+			}
+
+			return fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, delErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	del := new(DeleteRoleResponse)
@@ -402,6 +521,33 @@ func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, error) {
 		return nil, err
 	}
 
+	if (resp.StatusCode < 200 || resp.StatusCode >= 300) && resp.StatusCode != 404 {
+		getErr := new(AlksError)
+		err = decodeBody(resp, &getErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if getErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, getErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, getErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	cr := new(GetIamRoleResponse)
 	err = decodeBody(resp, &cr)
 
@@ -414,11 +560,10 @@ func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, error) {
 	}
 
 	if cr.RequestFailed() {
+		if resp.StatusCode == 404 {
+			return cr, fmt.Errorf("Error getting role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
+		}
 		return nil, fmt.Errorf("Error getting role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", "))
-	}
-
-	if !cr.Exists {
-		return nil, fmt.Errorf("[%s] Role does not exist", cr.BaseResponse.RequestID)
 	}
 
 	// This is here because ALKS returns a string representation of a Java array
@@ -459,6 +604,33 @@ func (c *Client) AddRoleMachineIdentity(roleARN string) (*MachineIdentityRespons
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		addErr := new(AlksError)
+		err = decodeBody(resp, &addErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if addErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, addErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, addErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	cr := new(MachineIdentityResponse)
@@ -503,6 +675,33 @@ func (c *Client) DeleteRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 		return nil, err
 	}
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		delErr := new(AlksError)
+		err = decodeBody(resp, &delErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if delErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, delErr.Errors)
+			}
+
+			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, delErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+	}
+
 	dr := new(MachineIdentityResponse)
 	err = decodeBody(resp, &dr)
 
@@ -543,6 +742,33 @@ func (c *Client) SearchRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 	resp, err := c.http.Do(req)
 	if err != nil {
 		return nil, err
+	}
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		searchErr := new(AlksError)
+		err = decodeBody(resp, &searchErr)
+
+		if err != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+			}
+
+			return nil, fmt.Errorf(ParseError, err)
+		}
+
+		if searchErr.Errors != nil {
+			if reqID := GetRequestID(resp); reqID != "" {
+				return nil, fmt.Errorf("[%s] ALKS Error Code: %d Msg: %s\n Contact the ALKS Team for assistance on Slack at #alks-client-support", reqID, resp.StatusCode, searchErr.Errors)
+			}
+
+			return nil, fmt.Errorf("ALKS Error Code: %d Msg: %s\n Contact the ALKS Team for assistance on Slack at #alks-client-support", resp.StatusCode, searchErr.Errors)
+		}
+
+		if reqID := GetRequestID(resp); reqID != "" {
+			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+		}
+
+		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
 	}
 
 	sr := new(MachineIdentityResponse)
