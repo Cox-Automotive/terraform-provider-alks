@@ -101,7 +101,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 
 	var resp *alks.IamRoleResponse
 	err := resource.RetryContext(ctx, 2*time.Minute, func() *resource.RetryError {
-		var err error
+		var err *alks.AlksError
 
 		options := &alks.CreateIamRoleOptions{
 			RoleName:                    &roleName,
@@ -114,7 +114,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 		resp, err = client.CreateIamTrustRole(options)
 		if err != nil {
 			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
-				return resource.NonRetryableError(err)
+				return resource.NonRetryableError(err.Err)
 			}
 
 			// Amazon IAM utilizes an eventual consistency model:

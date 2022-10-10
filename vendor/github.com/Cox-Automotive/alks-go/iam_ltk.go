@@ -114,7 +114,7 @@ func (c *Client) GetLongTermKeys() (*GetLongTermKeysResponse, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		keyErr := new(AlksError)
+		keyErr := new(AlksResponseError)
 		err = decodeBody(resp, &keyErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
@@ -191,7 +191,7 @@ func (c *Client) GetLongTermKey(iamUsername string) (*GetLongTermKeyResponse, er
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		keyErr := new(AlksError)
+		keyErr := new(AlksResponseError)
 		err = decodeBody(resp, &keyErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
@@ -288,7 +288,7 @@ func (c *Client) CreateLongTermKey(options *CreateLongTermKeyOptions) (*CreateLo
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		keyErr := new(AlksError)
+		keyErr := new(AlksResponseError)
 		err = decodeBody(resp, &keyErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
@@ -358,7 +358,7 @@ func (c *Client) DeleteLongTermKey(iamUsername string) (*DeleteLongTermKeyRespon
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		keyErr := new(AlksError)
+		keyErr := new(AlksResponseError)
 		err = decodeBody(resp, &keyErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {

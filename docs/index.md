@@ -10,7 +10,7 @@ Use the navigation to the left to read about the available resources.
 # Configure the ALKS Terraform Provider
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = ">= 2.2.0"
+    version = ">= 2.6.0"
 }
 
 # Create an ALKS IAM role
@@ -35,7 +35,7 @@ Static credentials can be provided via an `access_key`, `secret_key` and `token`
 ```hcl
 provider "alks" {
     url        = "https://alks.foo.com/rest"
-    version    = ">= 2.2.0"
+    version    = ">= 2.6.0"
     access_key = "accesskey"
     secret_key = "secretkey"
     token      = "sessiontoken"
@@ -49,7 +49,7 @@ Terraform file:
 ```hcl
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = ">= 2.2.0"
+    version = ">= 2.6.0"
 }
 ```
 
@@ -68,7 +68,7 @@ You can use an AWS credentials file to specify your credentials. The default loc
 ```hcl
 provider "alks" {
     url                     = "https://alks.foo.com/rest"
-    version                 = ">= 2.2.0"
+    version                 = ">= 2.6.0"
     shared_credentials_file = "/Users/my_user/.aws/credentials"
     profile                 = "foo"
 }
@@ -86,7 +86,7 @@ Your ALKS provider block can look just like this:
 ```hcl
 provider "alks" {
     url     = "https://alks.foo.com/rest"
-    version = ">= 2.2.0"
+    version = ">= 2.6.0"
 }
 ```
 
@@ -95,7 +95,7 @@ Since Machine Identities work with Instance Profile Metadata directly, it can be
 ```hcl
 provider "alks" {
    url     = "https://alks.foo.com/rest"
-   version = ">= 2.2.0"
+   version = ">= 2.6.0"
    assume_role {
       role_arn = "arn:aws:iam::112233445566:role/acct-managed/JenkinsPRODAccountTrust"
    }

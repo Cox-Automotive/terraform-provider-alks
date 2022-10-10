@@ -190,7 +190,7 @@ func (c *Client) Durations() ([]int, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		durationErr := new(AlksError)
+		durationErr := new(AlksResponseError)
 		err = decodeBody(resp, &durationErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
