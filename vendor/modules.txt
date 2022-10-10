@@ -1,4 +1,4 @@
-# github.com/Cox-Automotive/alks-go v0.0.0-20221004204541-a25fb5c4f655
+# github.com/Cox-Automotive/alks-go v0.0.0-20221004204541-a25fb5c4f655 => /Users/Zachary.Elliott/code/alks-go
 ## explicit; go 1.16
 github.com/Cox-Automotive/alks-go
 # github.com/agext/levenshtein v1.2.2
@@ -370,3 +370,4 @@ google.golang.org/protobuf/types/known/anypb
 google.golang.org/protobuf/types/known/durationpb
 google.golang.org/protobuf/types/known/emptypb
 google.golang.org/protobuf/types/known/timestamppb
+# github.com/Cox-Automotive/alks-go => /Users/Zachary.Elliott/code/alks-go

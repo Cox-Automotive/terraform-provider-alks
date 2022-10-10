@@ -57,3 +57,5 @@ require (
 	google.golang.org/grpc v1.48.0 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
 )
+
+replace github.com/Cox-Automotive/alks-go => /Users/Zachary.Elliott/code/alks-go
