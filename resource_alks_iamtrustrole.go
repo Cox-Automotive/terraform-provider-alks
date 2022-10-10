@@ -101,7 +101,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 
 	var resp *alks.IamRoleResponse
 	err := resource.RetryContext(ctx, 2*time.Minute, func() *resource.RetryError {
-		var err error
+		var err *alks.AlksError
 
 		options := &alks.CreateIamRoleOptions{
 			RoleName:                    &roleName,
