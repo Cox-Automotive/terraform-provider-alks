@@ -51,7 +51,7 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		iamErr := new(AlksError)
+		iamErr := new(AlksResponseError)
 		err = decodeBody(resp, &iamErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
