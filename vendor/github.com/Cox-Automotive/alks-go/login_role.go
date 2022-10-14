@@ -25,7 +25,7 @@ func (c *Client) GetMyLoginRole() (*LoginRoleResponse, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		loginErr := new(AlksError)
+		loginErr := new(AlksResponseError)
 		err = decodeBody(resp, &loginErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
@@ -98,7 +98,7 @@ func (c *Client) GetLoginRole() (*LoginRoleResponse, error) {
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		loginErr := new(AlksError)
+		loginErr := new(AlksResponseError)
 		err = decodeBody(resp, &loginErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
