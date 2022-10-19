@@ -15,8 +15,8 @@ func TestSuppressEquivalentTrustPolicyDiffs(t *testing.T) {
 		{
 			policy1: string(`
 			{
-				"Version": "1234", 
-				"Id": "Something", 
+				"Version": "1234",
+				"Id": "Something",
 				"Statement": [
 					{
 						"Action": "sts:AssumeRole",
@@ -34,7 +34,7 @@ func TestSuppressEquivalentTrustPolicyDiffs(t *testing.T) {
 			policy2: string(`
 			{
 				"Id": "Something",
-				"Version": "1234", 
+				"Version": "1234",
 				"Statement": [
 					{
 						"Action": "sts:AssumeRole",
@@ -54,8 +54,8 @@ func TestSuppressEquivalentTrustPolicyDiffs(t *testing.T) {
 		{
 			policy1: string(`
 			{
-				"Version": "1234", 
-				"Id": "Something", 
+				"Version": "1234",
+				"Id": "Something",
 				"Statement": [
 					{
 						"Action": "sts:AssumeRole",
@@ -73,7 +73,7 @@ func TestSuppressEquivalentTrustPolicyDiffs(t *testing.T) {
 			policy2: string(`
 			{
 				"Id": "Something",
-				"Version": "1234", 
+				"Version": "1234",
 				"Statement": [
 					{
 						"Action": "sts:AssumeRole",
