@@ -76,6 +76,7 @@ func resourceAlksIamRole() *schema.Resource {
 				Type:     schema.TypeBool,
 				Default:  false,
 				Optional: true,
+				ForceNew: true,
 			},
 			"template_fields": {
 				Type:     schema.TypeMap,
@@ -260,7 +261,7 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 
 	if d.HasChange("tags_all") {
 		// try updating enable_alks_access
-		if err := updateIamTags(d, meta); err != nil {
+		if err := updateIamRoleTags(d, meta); err != nil {
 			return diag.FromErr(err)
 		}
 	}
@@ -294,7 +295,7 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	return nil
 }
 
-func updateIamTags(d *schema.ResourceData, meta interface{}) error {
+func updateIamRoleTags(d *schema.ResourceData, meta interface{}) error {
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 

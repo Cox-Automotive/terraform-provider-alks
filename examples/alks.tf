@@ -102,4 +102,7 @@ resource "aws_iam_role_policy_attachment" "sr-attach" {
 # CREATE LTK USER
 resource "alks_ltk" "ltk" {
   iam_username = "TEST-LTK-USER"
+  tags = {
+    TagKey = "TagValue"
+  }
 }

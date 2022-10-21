@@ -9,7 +9,7 @@ build:
 	go build -v -o examples/terraform-provider-alks -mod=vendor .
 
 test:
-	go test -v .
+	go test -timeout 1200s -v .
 
 plan:
 	@terraform plan
