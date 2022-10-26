@@ -94,7 +94,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	client := providerStruct.client
 
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(err.Err)
 	}
 
 	allTags := tagMapToSlice(combineTagMaps(providerStruct.defaultTags, tags))

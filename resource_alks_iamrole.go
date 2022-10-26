@@ -126,7 +126,7 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 	allTags := tagMapToSlice(combineTagMaps(providerStruct.defaultTags, tags))
 
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(err.Err)
 	}
 
 	options := &alks.CreateIamRoleOptions{
@@ -170,7 +170,7 @@ func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(err.Err)
 	}
 
 	if err := client.DeleteIamRole(d.Id()); err != nil {
@@ -203,7 +203,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(err)
+		return diag.FromErr(err.Err)
 	}
 
 	log.Printf("[INFO] alks_iamrole.id %v", d.Id())
@@ -277,7 +277,7 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return err.Err
 	}
 	// create the machine identity
 	if alksAccess {
@@ -300,7 +300,7 @@ func updateIamRoleTags(d *schema.ResourceData, meta interface{}) error {
 	client := providerStruct.client
 
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return err.Err
 	}
 
 	//Do a read to get existing tags.  If any of those are in ignore_tags, then they are externally managed

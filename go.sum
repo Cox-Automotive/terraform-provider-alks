@@ -11,6 +11,10 @@ github.com/Cox-Automotive/alks-go v0.0.0-20221010204605-136b6e9b6530 h1:8j3NYoLn
 github.com/Cox-Automotive/alks-go v0.0.0-20221010204605-136b6e9b6530/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
 github.com/Cox-Automotive/alks-go v0.0.0-20221019181202-84b27abafb6b h1:9Ey7kdUL+/f5EY2KOpTawWMw4P7fhZxNmo8gXIuBQzw=
 github.com/Cox-Automotive/alks-go v0.0.0-20221019181202-84b27abafb6b/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
+github.com/Cox-Automotive/alks-go v0.0.0-20221025180450-2e58fb1fb8a5 h1:uUI/XCe1bc9nq3d6jK05TsxOmCf8sLLOX/L3guAYdtg=
+github.com/Cox-Automotive/alks-go v0.0.0-20221025180450-2e58fb1fb8a5/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
+github.com/Cox-Automotive/alks-go v0.0.0-20221025210209-c92be9283c74 h1:ceg7E2BWn1HNGUZx2K8XQ3uQjT3phYuoeSGUv8Rqcdc=
+github.com/Cox-Automotive/alks-go v0.0.0-20221025210209-c92be9283c74/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/cFDk=
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=

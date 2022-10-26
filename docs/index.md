@@ -16,7 +16,19 @@ provider "alks" {
 # Create an ALKS IAM role
 resource "alks_iamrole" "test_role" {
     name                     = "My_Test_Role"
-    type                     = "Amazon EC2"
+    assume_role_policy       = jsonencode({
+        Version = "2012-10-17",
+        Statement = [
+            {
+                Action = "sts:AssumeRole",
+                Effect = "Allow",
+                Principal = {
+                    Service = "ec2.amazonaws.com"
+                },
+                Sid = ""
+            }
+        ]
+    })
     include_default_policies = false
     enable_alks_access       = false
 }

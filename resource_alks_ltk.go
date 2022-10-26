@@ -65,7 +65,7 @@ func resourceAlksLtkCreate(ctx context.Context, d *schema.ResourceData, meta int
 		Tags:        &allTags,
 	}
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(err.Err)
 	}
 
 	resp, err := client.CreateIamUser(options)
@@ -155,7 +155,7 @@ func resourceAlksLtkDelete(ctx context.Context, d *schema.ResourceData, meta int
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err)
+		return diag.FromErr(err.Err)
 	}
 
 	if _, err := client.DeleteIamUser(d.Id()); err != nil {
@@ -170,7 +170,7 @@ func updateUserTags(d *schema.ResourceData, meta interface{}) error {
 	client := providerStruct.client
 
 	if err := validateIAMEnabled(client); err != nil {
-		return err
+		return err.Err
 	}
 
 	//Do a read to get existing tags.  If any of those are in ignore_tags, then they are externally managed
@@ -178,7 +178,7 @@ func updateUserTags(d *schema.ResourceData, meta interface{}) error {
 	resp, err := client.GetIamUser(d.Id())
 
 	if err != nil {
-		return err
+		return err.Err
 	}
 
 	existingTags := tagSliceToMap(resp.User.Tags)

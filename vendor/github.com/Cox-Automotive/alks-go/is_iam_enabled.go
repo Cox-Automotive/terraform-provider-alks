@@ -21,7 +21,7 @@ type IsIamEnabledResponse struct {
 }
 
 // IsIamEnabled will check if a MI, AccountDetails, or STS assumed role is IAM active or not.
-func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, error) {
+func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, *AlksError) {
 
 	if len(roleArn) > 1 {
 		log.Printf("[INFO] Is IAM enabled for MI: %s", roleArn)
@@ -37,17 +37,31 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, error) {
 	body, err := json.Marshal(iam)
 
 	if err != nil {
-		return nil, fmt.Errorf("error encoding IAM create role JSON: %s", err)
+		return nil, &AlksError{
+			StatusCode: 0,
+			RequestId:  "",
+			Err:        fmt.Errorf("error encoding IAM create role JSON: %s", err),
+		}
+
 	}
 
 	req, err := c.NewRequest(body, "POST", "/isIamEnabled")
 	if err != nil {
-		return nil, err
+		return nil, &AlksError{
+			StatusCode: 0,
+			RequestId:  "",
+			Err:        err,
+		}
 	}
 
 	resp, err := c.http.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, &AlksError{
+			StatusCode: resp.StatusCode,
+			RequestId:  "",
+			Err:        err,
+		}
+
 	}
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
@@ -55,25 +69,49 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, error) {
 		err = decodeBody(resp, &iamErr)
 		if err != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, fmt.Errorf(ParseErrorReqId, reqID, err)
+				return nil, &AlksError{
+					StatusCode: resp.StatusCode,
+					RequestId:  reqID,
+					Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				}
 			}
 
-			return nil, fmt.Errorf(ParseError, err)
+			return nil, &AlksError{
+				StatusCode: resp.StatusCode,
+				RequestId:  "",
+				Err:        fmt.Errorf(ParseError, err),
+			}
 		}
 
 		if iamErr.Errors != nil {
 			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, iamErr.Errors)
+				return nil, &AlksError{
+					StatusCode: resp.StatusCode,
+					RequestId:  reqID,
+					Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, iamErr.Errors),
+				}
 			}
 
-			return nil, fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, iamErr.Errors)
+			return nil, &AlksError{
+				StatusCode: resp.StatusCode,
+				RequestId:  "",
+				Err:        fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, iamErr.Errors),
+			}
 		}
 
 		if reqID := GetRequestID(resp); reqID != "" {
-			return nil, fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode)
+			return nil, &AlksError{
+				StatusCode: resp.StatusCode,
+				RequestId:  reqID,
+				Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			}
 		}
 
-		return nil, fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode)
+		return nil, &AlksError{
+			StatusCode: resp.StatusCode,
+			RequestId:  "",
+			Err:        fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode),
+		}
 	}
 
 	validate := new(IsIamEnabledResponse)
@@ -81,13 +119,25 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, error) {
 
 	if err != nil {
 		if reqID := GetRequestID(resp); reqID != "" {
-			return nil, fmt.Errorf("error parsing isIamEnabled response: [%s] %s", reqID, err)
+			return nil, &AlksError{
+				StatusCode: resp.StatusCode,
+				RequestId:  reqID,
+				Err:        fmt.Errorf("error parsing isIamEnabled response: [%s] %s", reqID, err),
+			}
 		}
 
-		return nil, fmt.Errorf("error parsing isIamEnabled response: %s", err)
+		return nil, &AlksError{
+			StatusCode: resp.StatusCode,
+			RequestId:  "",
+			Err:        fmt.Errorf("error parsing isIamEnabled response: %s", err),
+		}
 	}
 	if validate.RequestFailed() {
-		return nil, fmt.Errorf("error validating if IAM enabled: [%s] %s", validate.BaseResponse.RequestID, strings.Join(validate.GetErrors(), ", "))
+		return nil, &AlksError{
+			StatusCode: resp.StatusCode,
+			RequestId:  validate.BaseResponse.RequestID,
+			Err:        fmt.Errorf("error validating if IAM enabled: [%s] %s", validate.BaseResponse.RequestID, strings.Join(validate.GetErrors(), ", ")),
+		}
 	}
 
 	return validate, nil
