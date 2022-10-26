@@ -214,7 +214,7 @@ func generateNewClient(c *Config, client *alks.Client) (*alks.Client, error) {
 
 	newCreds, err := client.CreateIamSession()
 	if err != nil {
-		return nil, err.Err
+		return nil, err
 	}
 
 	newClient, _ := alks.NewSTSClient(c.URL, newCreds.AccessKey, newCreds.SecretKey, newCreds.SessionToken)
