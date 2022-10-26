@@ -1,4 +1,4 @@
-# github.com/Cox-Automotive/alks-go v0.0.0-20221026190610-eec2e9aedb00
+# github.com/Cox-Automotive/alks-go v0.0.0-20221026220646-c20da5c3cb3a
 ## explicit; go 1.16
 github.com/Cox-Automotive/alks-go
 # github.com/agext/levenshtein v1.2.2

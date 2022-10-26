@@ -94,7 +94,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	client := providerStruct.client
 
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	allTags := tagMapToSlice(combineTagMaps(providerStruct.defaultTags, tags))
@@ -114,7 +114,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 		resp, err = client.CreateIamTrustRole(options)
 		if err != nil {
 			if strings.Contains(err.Error(), "Role already exists") || strings.Contains(err.Error(), "Instance profile exists") {
-				return resource.NonRetryableError(err.Err)
+				return resource.NonRetryableError(err)
 			}
 
 			// Amazon IAM utilizes an eventual consistency model:

@@ -64,71 +64,41 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, *AlksError
 
 	}
 
+	reqID := GetRequestID(resp)
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		iamErr := new(AlksResponseError)
 		err = decodeBody(resp, &iamErr)
 		if err != nil {
-			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, &AlksError{
-					StatusCode: resp.StatusCode,
-					RequestId:  reqID,
-					Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
-				}
-			}
-
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
-				RequestId:  "",
+				RequestId:  reqID,
 				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
 		if iamErr.Errors != nil {
-			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, &AlksError{
-					StatusCode: resp.StatusCode,
-					RequestId:  reqID,
-					Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, iamErr.Errors),
-				}
-			}
-
-			return nil, &AlksError{
-				StatusCode: resp.StatusCode,
-				RequestId:  "",
-				Err:        fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, iamErr.Errors),
-			}
-		}
-
-		if reqID := GetRequestID(resp); reqID != "" {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, iamErr.Errors),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  "",
-			Err:        fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode),
+			RequestId:  reqID,
+			Err:        fmt.Errorf(GenericAlksError),
 		}
+
 	}
 
 	validate := new(IsIamEnabledResponse)
 	err = decodeBody(resp, validate)
 
 	if err != nil {
-		if reqID := GetRequestID(resp); reqID != "" {
-			return nil, &AlksError{
-				StatusCode: resp.StatusCode,
-				RequestId:  reqID,
-				Err:        fmt.Errorf("error parsing isIamEnabled response: [%s] %s", reqID, err),
-			}
-		}
-
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  "",
+			RequestId:  reqID,
 			Err:        fmt.Errorf("error parsing isIamEnabled response: %s", err),
 		}
 	}
@@ -136,7 +106,7 @@ func (c *Client) IsIamEnabled(roleArn string) (*IsIamEnabledResponse, *AlksError
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  validate.BaseResponse.RequestID,
-			Err:        fmt.Errorf("error validating if IAM enabled: [%s] %s", validate.BaseResponse.RequestID, strings.Join(validate.GetErrors(), ", ")),
+			Err:        fmt.Errorf("error validating if IAM enabled: %s", strings.Join(validate.GetErrors(), ", ")),
 		}
 	}
 

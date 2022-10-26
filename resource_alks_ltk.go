@@ -65,12 +65,12 @@ func resourceAlksLtkCreate(ctx context.Context, d *schema.ResourceData, meta int
 		Tags:        &allTags,
 	}
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	resp, err := client.CreateIamUser(options)
 	if err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(iamUsername)
@@ -103,11 +103,11 @@ func resourceAlksLtkRead(ctx context.Context, d *schema.ResourceData, meta inter
 		//If error is 404, UserNotFound, we log it and let terraform decide how to handle it.
 		//All other errors cause a failure
 		if err.StatusCode == 404 {
-			log.Printf("[Error] %s", err.Err)
+			log.Printf("[Error] %s", err)
 			d.SetId("")
 			return nil
 		}
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	log.Printf("[INFO] alks_ltk.id: %v", d.Id())
@@ -155,11 +155,11 @@ func resourceAlksLtkDelete(ctx context.Context, d *schema.ResourceData, meta int
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
 	if err := validateIAMEnabled(client); err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	if _, err := client.DeleteIamUser(d.Id()); err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -170,7 +170,7 @@ func updateUserTags(d *schema.ResourceData, meta interface{}) error {
 	client := providerStruct.client
 
 	if err := validateIAMEnabled(client); err != nil {
-		return err.Err
+		return err
 	}
 
 	//Do a read to get existing tags.  If any of those are in ignore_tags, then they are externally managed
@@ -178,7 +178,7 @@ func updateUserTags(d *schema.ResourceData, meta interface{}) error {
 	resp, err := client.GetIamUser(d.Id())
 
 	if err != nil {
-		return err.Err
+		return err
 	}
 
 	existingTags := tagSliceToMap(resp.User.Tags)
@@ -194,7 +194,7 @@ func updateUserTags(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if _, err := client.UpdateIamUser(&options); err != nil {
-		return err.Err
+		return err
 	}
 	return nil
 }

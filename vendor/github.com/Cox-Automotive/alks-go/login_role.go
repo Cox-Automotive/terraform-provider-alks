@@ -36,54 +36,33 @@ func (c *Client) GetMyLoginRole() (*LoginRoleResponse, *AlksError) {
 		}
 	}
 
+	reqID := GetRequestID(resp)
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		loginErr := new(AlksResponseError)
 		err = decodeBody(resp, &loginErr)
 		if err != nil {
-			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, &AlksError{
-					StatusCode: resp.StatusCode,
-					RequestId:  reqID,
-					Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
-				}
-			}
-
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
-				RequestId:  "",
+				RequestId:  reqID,
 				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
 		if loginErr.Errors != nil {
-			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, &AlksError{
-					StatusCode: resp.StatusCode,
-					RequestId:  reqID,
-					Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, loginErr.Errors),
-				}
-			}
-
-			return nil, &AlksError{
-				StatusCode: resp.StatusCode,
-				RequestId:  "",
-				Err:        fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, loginErr.Errors),
-			}
-		}
-
-		if reqID := GetRequestID(resp); reqID != "" {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, loginErr.Errors),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  "",
-			Err:        fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode),
+			RequestId:  reqID,
+			Err:        fmt.Errorf(GenericAlksError),
 		}
+
 	}
 
 	lrr := new(LoginRoleResponse)
@@ -93,7 +72,7 @@ func (c *Client) GetMyLoginRole() (*LoginRoleResponse, *AlksError) {
 			return nil, &AlksError{
 				StatusCode: 0,
 				RequestId:  reqID,
-				Err:        fmt.Errorf("Error parsing LoginRole response: [%s] %s", reqID, err),
+				Err:        fmt.Errorf("Error parsing LoginRole response: %s", err),
 			}
 		}
 
@@ -108,7 +87,7 @@ func (c *Client) GetMyLoginRole() (*LoginRoleResponse, *AlksError) {
 		return nil, &AlksError{
 			StatusCode: 0,
 			RequestId:  lrr.BaseResponse.RequestID,
-			Err:        fmt.Errorf("Error fetching role information: [%s] %s", lrr.BaseResponse.RequestID, strings.Join(lrr.GetErrors(), ", ")),
+			Err:        fmt.Errorf("Error fetching role information: %s", strings.Join(lrr.GetErrors(), ", ")),
 		}
 	}
 
@@ -161,70 +140,40 @@ func (c *Client) GetLoginRole() (*LoginRoleResponse, *AlksError) {
 		}
 	}
 
+	reqID := GetRequestID(resp)
+
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		loginErr := new(AlksResponseError)
 		err = decodeBody(resp, &loginErr)
 		if err != nil {
-			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, &AlksError{
-					StatusCode: resp.StatusCode,
-					RequestId:  reqID,
-					Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
-				}
-			}
-
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
-				RequestId:  "",
+				RequestId:  reqID,
 				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
 		if loginErr.Errors != nil {
-			if reqID := GetRequestID(resp); reqID != "" {
-				return nil, &AlksError{
-					StatusCode: resp.StatusCode,
-					RequestId:  reqID,
-					Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, loginErr.Errors),
-				}
-			}
-
-			return nil, &AlksError{
-				StatusCode: resp.StatusCode,
-				RequestId:  "",
-				Err:        fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, loginErr.Errors),
-			}
-		}
-
-		if reqID := GetRequestID(resp); reqID != "" {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, loginErr.Errors),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  "",
-			Err:        fmt.Errorf(ErrorStringOnlyCode, resp.StatusCode),
+			RequestId:  reqID,
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
 	lrr := new(LoginRoleResponse)
 	err = decodeBody(resp, &lrr)
 	if err != nil {
-		if reqID := GetRequestID(resp); reqID != "" {
-			return nil, &AlksError{
-				StatusCode: resp.StatusCode,
-				RequestId:  reqID,
-				Err:        fmt.Errorf("Error parsing LoginRole response: [%s] %s", reqID, err),
-			}
-		}
-
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  "",
+			RequestId:  reqID,
 			Err:        fmt.Errorf("Error parsing LoginRole response: %s", err),
 		}
 	}
@@ -233,7 +182,7 @@ func (c *Client) GetLoginRole() (*LoginRoleResponse, *AlksError) {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  lrr.BaseResponse.RequestID,
-			Err:        fmt.Errorf("Error fetching role information: [%s] %s", lrr.BaseResponse.RequestID, strings.Join(lrr.GetErrors(), ", ")),
+			Err:        fmt.Errorf("Error fetching role information: %s", strings.Join(lrr.GetErrors(), ", ")),
 		}
 	}
 

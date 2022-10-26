@@ -83,19 +83,12 @@ func (c *Client) GetAccounts() (*AccountsResponse, *AlksError) {
 
 	_accts := new(AccountsResponseInt)
 	err = decodeBody(resp, &_accts)
-
+	reqID := GetRequestID(resp)
 	if err != nil {
-		if reqID := GetRequestID(resp); reqID != "" {
-			return nil, &AlksError{
-				StatusCode: resp.StatusCode,
-				RequestId:  reqID,
-				Err:        fmt.Errorf("Error parsing get accounts response: [%s] %s", reqID, err),
-			}
-		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  "",
+			RequestId:  reqID,
 			Err:        fmt.Errorf("Error parsing get accounts response: %s", err),
 		}
 	}
@@ -104,7 +97,7 @@ func (c *Client) GetAccounts() (*AccountsResponse, *AlksError) {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  _accts.BaseResponse.RequestID,
-			Err:        fmt.Errorf("Error getting accounts : [%s] %s", _accts.BaseResponse.RequestID, strings.Join(_accts.GetErrors(), ", ")),
+			Err:        fmt.Errorf("Error getting accounts : %s", strings.Join(_accts.GetErrors(), ", ")),
 		}
 	}
 
@@ -192,7 +185,7 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf("Error parsing session create response: [%s] %s", reqID, err),
+				Err:        fmt.Errorf("Error parsing session create response: %s", err),
 			}
 		}
 
@@ -207,7 +200,7 @@ func (c *Client) CreateSession(sessionDuration int, useIAM bool) (*SessionRespon
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  sr.BaseResponse.RequestID,
-			Err:        fmt.Errorf("Error creating session: [%s] %s", sr.BaseResponse.RequestID, strings.Join(sr.GetErrors(), ", ")),
+			Err:        fmt.Errorf("Error creating session: %s", strings.Join(sr.GetErrors(), ", ")),
 		}
 	}
 
