@@ -20,6 +20,8 @@ type AlksResponseError struct {
 	RequestId     string   `json:"requestId"`
 }
 
+var AlksResponsErrorStrings = "ALKS Errors: %s \nContact the ALKS Team for assistance on Slack at #alks-client-support"
+var GenericAlksError = "ALKS Errors: Contact the ALKS Team for assistance on Slack at #alks-client-support"
 var ErrorStringFull = "[%s] ALKS Error %d Msg: %s\n Contact the ALKS Team for assistance on Slack at #alks-client-support"
 var ErrorStringNoReqId = "ALKS Error %d Msg: %s\n Contact the ALKS Team for assistance on Slack at #alks-client-support"
 var ErrorStringOnlyCodeAndReqId = "[%s] ALKS Error %d\n Contact the ALKS Team for assistance on Slack at #alks-client-support"

@@ -146,7 +146,7 @@ func (c *Client) GetIamUsers() (*GetIamUsersResponse, *AlksError) {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -154,14 +154,14 @@ func (c *Client) GetIamUsers() (*GetIamUsersResponse, *AlksError) {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(keyErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(keyErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -172,7 +172,7 @@ func (c *Client) GetIamUsers() (*GetIamUsersResponse, *AlksError) {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing GetLongTermKeysResponse: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing GetLongTermKeysResponse: %s", err),
 		}
 	}
 
@@ -221,7 +221,7 @@ func (c *Client) GetIamUser(iamUsername string) (*GetIamUserResponse, *AlksError
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -230,7 +230,7 @@ func (c *Client) GetIamUser(iamUsername string) (*GetIamUserResponse, *AlksError
 				return nil, &AlksError{
 					StatusCode: resp.StatusCode,
 					RequestId:  reqID,
-					Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, keyErr.Errors),
+					Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(keyErr.Errors, ", ")),
 				}
 			}
 		}
@@ -238,7 +238,7 @@ func (c *Client) GetIamUser(iamUsername string) (*GetIamUserResponse, *AlksError
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -249,7 +249,7 @@ func (c *Client) GetIamUser(iamUsername string) (*GetIamUserResponse, *AlksError
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("error parsing GetLongTermKeyResponse: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("error parsing GetLongTermKeyResponse: %s", err),
 		}
 	}
 
@@ -334,7 +334,7 @@ func (c *Client) CreateIamUser(options *IamUserOptions) (*CreateIamUserResponse,
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -342,14 +342,14 @@ func (c *Client) CreateIamUser(options *IamUserOptions) (*CreateIamUserResponse,
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, keyErr.Errors),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(keyErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -360,7 +360,7 @@ func (c *Client) CreateIamUser(options *IamUserOptions) (*CreateIamUserResponse,
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("error parsing CreateLongTermKeyResponse: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("error parsing CreateLongTermKeyResponse: %s", err),
 		}
 	}
 	return cr, nil
@@ -413,7 +413,7 @@ func (c *Client) DeleteIamUser(iamUsername string) (*DeleteIamUserResponse, *Alk
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -421,13 +421,13 @@ func (c *Client) DeleteIamUser(iamUsername string) (*DeleteIamUserResponse, *Alk
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, keyErr.Errors),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(keyErr.Errors, ", ")),
 			}
 		}
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -438,7 +438,7 @@ func (c *Client) DeleteIamUser(iamUsername string) (*DeleteIamUserResponse, *Alk
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("error parsing DeleteLongTermKeyResponse: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("error parsing DeleteLongTermKeyResponse: %s", err),
 		}
 	}
 	return cr, nil
@@ -525,7 +525,7 @@ func (c *Client) UpdateIamUser(options *IamUserOptions) (*UpdateIamUserResponse,
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -533,14 +533,14 @@ func (c *Client) UpdateIamUser(options *IamUserOptions) (*UpdateIamUserResponse,
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringNoReqId, resp.StatusCode, updateErr.Errors),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(updateErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 
 	}

@@ -153,7 +153,7 @@ func resourceAlksIamRoleCreate(ctx context.Context, d *schema.ResourceData, meta
 
 	resp, err := client.CreateIamRole(options)
 	if err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	d.SetId(resp.RoleName)
@@ -174,7 +174,7 @@ func resourceAlksIamRoleDelete(ctx context.Context, d *schema.ResourceData, meta
 	}
 
 	if err := client.DeleteIamRole(d.Id()); err != nil {
-		return diag.FromErr(err.Err)
+		return diag.FromErr(err)
 	}
 
 	return nil
@@ -199,7 +199,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		//If error is 404, RoleNotFound, we log it and let terraform decide how to handle it.
 		//All other errors cause a failure
 		if err.StatusCode == 404 {
-			log.Printf("[Error] %s", err.Err)
+			log.Printf("[Error] %s", err.Error())
 			d.SetId("")
 			return nil
 		}
@@ -283,13 +283,13 @@ func updateAlksAccess(d *schema.ResourceData, meta interface{}) error {
 	if alksAccess {
 		_, err := client.AddRoleMachineIdentity(roleArn)
 		if err != nil {
-			return err.Err
+			return err
 		}
 	} else {
 		// delete the machine identity
 		_, err := client.DeleteRoleMachineIdentity(roleArn)
 		if err != nil {
-			return err.Err
+			return err
 		}
 	}
 	return nil
@@ -308,7 +308,7 @@ func updateIamRoleTags(d *schema.ResourceData, meta interface{}) error {
 	foundRole, err := client.GetIamRole(d.Id())
 
 	if err != nil {
-		return err.Err
+		return err
 	}
 
 	existingTags := tagSliceToMap(foundRole.Tags)
@@ -324,7 +324,7 @@ func updateIamRoleTags(d *schema.ResourceData, meta interface{}) error {
 	}
 
 	if _, err := client.UpdateIamRole(&options); err != nil {
-		return err.Err
+		return err
 	}
 	return nil
 }

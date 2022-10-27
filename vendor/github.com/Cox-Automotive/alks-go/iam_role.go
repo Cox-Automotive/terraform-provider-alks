@@ -239,14 +239,14 @@ func (c *Client) CreateIamRole(options *CreateIamRoleOptions) (*IamRoleResponse,
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(alksResponseErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(alksResponseErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -326,14 +326,14 @@ func (c *Client) CreateIamTrustRole(options *CreateIamRoleOptions) (*IamRoleResp
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(trustErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(trustErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -425,7 +425,7 @@ func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleRes
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -433,14 +433,14 @@ func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleRes
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(updateErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(updateErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -449,14 +449,14 @@ func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleRes
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing updateRole response: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing updateRole response"),
 		}
 	}
 	if respObj.RequestFailed() {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  reqID,
-			Err:        fmt.Errorf("Error from update IAM role request: [%s] %s", respObj.RequestID, strings.Join(respObj.GetErrors(), ", ")),
+			RequestId:  respObj.RequestID,
+			Err:        fmt.Errorf("Error from update IAM role request: %s", strings.Join(respObj.GetErrors(), ", ")),
 		}
 	}
 	return respObj, nil
@@ -520,7 +520,7 @@ func (c *Client) DeleteIamRole(id string) *AlksError {
 			return &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -528,14 +528,14 @@ func (c *Client) DeleteIamRole(id string) *AlksError {
 			return &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(delErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(delErr.Errors, ", ")),
 			}
 		}
 
 		return &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -546,7 +546,7 @@ func (c *Client) DeleteIamRole(id string) *AlksError {
 		return &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing deleteRole response: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing deleteRole response: %s", err),
 		}
 	}
 
@@ -554,8 +554,8 @@ func (c *Client) DeleteIamRole(id string) *AlksError {
 	if del.RequestFailed() {
 		return &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  reqID,
-			Err:        fmt.Errorf("Error deleting role: [%s] %s", del.BaseResponse.RequestID, strings.Join(del.GetErrors(), ", ")),
+			RequestId:  del.BaseResponse.RequestID,
+			Err:        fmt.Errorf("Error deleting role: %s", strings.Join(del.GetErrors(), ", ")),
 		}
 	}
 
@@ -611,7 +611,7 @@ func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, *AlksError) {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -619,14 +619,14 @@ func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, *AlksError) {
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(getErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(getErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -637,15 +637,15 @@ func (c *Client) GetIamRole(roleName string) (*GetIamRoleResponse, *AlksError) {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing getRole response: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing getRole response: %s", err),
 		}
 	}
 
 	if cr.RequestFailed() {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  reqID,
-			Err:        fmt.Errorf("Error getting role: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", ")),
+			RequestId:  cr.BaseResponse.RequestID,
+			Err:        fmt.Errorf("Error getting role: %s", strings.Join(cr.GetErrors(), ", ")),
 		}
 	}
 
@@ -711,7 +711,7 @@ func (c *Client) AddRoleMachineIdentity(roleARN string) (*MachineIdentityRespons
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -719,14 +719,14 @@ func (c *Client) AddRoleMachineIdentity(roleARN string) (*MachineIdentityRespons
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(addErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(addErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -737,7 +737,7 @@ func (c *Client) AddRoleMachineIdentity(roleARN string) (*MachineIdentityRespons
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing MachineIdentitiyResponse response: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing MachineIdentitiyResponse response: %s", err),
 		}
 	}
 
@@ -745,7 +745,7 @@ func (c *Client) AddRoleMachineIdentity(roleARN string) (*MachineIdentityRespons
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error creating machine identity: [%s] %s", cr.BaseResponse.RequestID, strings.Join(cr.GetErrors(), ", ")),
+			Err:        fmt.Errorf("Error creating machine identity: %s", strings.Join(cr.GetErrors(), ", ")),
 		}
 	}
 
@@ -798,7 +798,7 @@ func (c *Client) DeleteRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -806,14 +806,14 @@ func (c *Client) DeleteRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(delErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(delErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -824,7 +824,7 @@ func (c *Client) DeleteRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing machineIdentity response: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing machineIdentity response: %s", err),
 		}
 	}
 
@@ -832,7 +832,7 @@ func (c *Client) DeleteRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error deleting machine identity: [%s] %s", dr.BaseResponse.RequestID, strings.Join(dr.GetErrors(), ", ")),
+			Err:        fmt.Errorf("Error deleting machine identity: %s", strings.Join(dr.GetErrors(), ", ")),
 		}
 	}
 
@@ -885,7 +885,7 @@ func (c *Client) SearchRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ParseErrorReqId, reqID, err),
+				Err:        fmt.Errorf(ParseError, err),
 			}
 		}
 
@@ -893,14 +893,14 @@ func (c *Client) SearchRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 			return nil, &AlksError{
 				StatusCode: resp.StatusCode,
 				RequestId:  reqID,
-				Err:        fmt.Errorf(ErrorStringFull, reqID, resp.StatusCode, strings.Join(searchErr.Errors, ", ")),
+				Err:        fmt.Errorf(AlksResponsErrorStrings, strings.Join(searchErr.Errors, ", ")),
 			}
 		}
 
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf(ErrorStringOnlyCodeAndReqId, reqID, resp.StatusCode),
+			Err:        fmt.Errorf(GenericAlksError),
 		}
 	}
 
@@ -911,15 +911,15 @@ func (c *Client) SearchRoleMachineIdentity(roleARN string) (*MachineIdentityResp
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
 			RequestId:  reqID,
-			Err:        fmt.Errorf("Error parsing MachineIdentity response: [%s] %s", reqID, err),
+			Err:        fmt.Errorf("Error parsing MachineIdentity response: %s", err),
 		}
 	}
 
 	if sr.RequestFailed() {
 		return nil, &AlksError{
 			StatusCode: resp.StatusCode,
-			RequestId:  reqID,
-			Err:        fmt.Errorf("Error searching machine identity [%s] %s", sr.BaseResponse.RequestID, strings.Join(sr.GetErrors(), ", ")),
+			RequestId:  sr.BaseResponse.RequestID,
+			Err:        fmt.Errorf("Error searching machine identity %s", strings.Join(sr.GetErrors(), ", ")),
 		}
 	}
 
