@@ -199,7 +199,7 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		//If error is 404, RoleNotFound, we log it and let terraform decide how to handle it.
 		//All other errors cause a failure
 		if err.StatusCode == 404 {
-			log.Printf("[Error] %s", err)
+			log.Printf("[Error] %s", err.Error())
 			d.SetId("")
 			return nil
 		}
