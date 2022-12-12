@@ -12,6 +12,7 @@ provider "alks" {
     url     = "https://alks.foo.com/rest"
 }
 
+# Create an ALKS IAM role
 resource "alks_iamrole" "test_role" {
     name                     = "My_Test_Role"
     assume_role_policy       = jsonencode({
