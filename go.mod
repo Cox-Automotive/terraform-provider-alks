@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/Cox-Automotive/alks-go v0.0.0-20221026220646-c20da5c3cb3a
-	github.com/aws/aws-sdk-go v1.31.15
+	github.com/aws/aws-sdk-go v1.33.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.21.0
 	github.com/mitchellh/go-homedir v1.1.0
 )
