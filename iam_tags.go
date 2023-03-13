@@ -62,7 +62,7 @@ func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{})
 	return nil
 }
 
-//Removes default tags from a map of role specific + default tags
+// Removes default tags from a map of role specific + default tags
 func removeDefaultTags(allTags TagMap, defaultTags TagMap) TagMap {
 	for k, v := range defaultTags {
 		//If the key and value of a tag returned from the role exists in the defaultTags list
@@ -134,7 +134,7 @@ func getExternalyManagedTags(roleTags TagMap, ignoredTags IgnoreTags) TagMap {
 	return externalTags
 }
 
-//Combine two tag maps.  Values in map2 will overwrite values in map1 if they exist in both maps
+// Combine two tag maps.  Values in map2 will overwrite values in map1 if they exist in both maps
 func combineTagMaps(baseMap TagMap, mergeMap TagMap) TagMap {
 	LocalMap := TagMap{}
 
