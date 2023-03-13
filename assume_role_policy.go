@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strings"
 
@@ -39,21 +38,6 @@ func SuppressEquivalentTrustPolicyDiffs(key string, old string, new string, d *s
 	}
 
 	return equivalent
-}
-
-// Broken into seperate function to allow for returning of errors.
-func UnmarshalAndMarshal(policy []byte) ([]byte, error) {
-	unmarshaledPolicy := TrustPolicyDocument{}
-	if err := json.Unmarshal(policy, &unmarshaledPolicy); err != nil {
-		return nil, fmt.Errorf("Error unmarshaling trust policy: %s", err)
-	}
-
-	marshaledPolicy, err := json.Marshal(unmarshaledPolicy)
-	if err != nil {
-		return nil, fmt.Errorf("Error marshaling trust policy: %s", err)
-	}
-
-	return marshaledPolicy, nil
 }
 
 // Using a diff function is the currently accepted way to compare the configuration of two different attributes at plan time.
