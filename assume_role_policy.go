@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
+	"strings"
 
+	awspolicy "github.com/hashicorp/awspolicyequivalence"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -16,13 +17,31 @@ type TrustPolicyDocument struct {
 }
 
 func SuppressEquivalentTrustPolicyDiffs(key string, old string, new string, d *schema.ResourceData) bool {
-	oldPolicy, _ := UnmarshalAndMarshal([]byte(old))
-	newPolicy, _ := UnmarshalAndMarshal([]byte(new))
+	if strings.TrimSpace(old) == "" && strings.TrimSpace(new) == "" {
+		return true
+	}
 
-	return bytes.Compare(oldPolicy, newPolicy) == 0
+	if strings.TrimSpace(old) == "{}" && strings.TrimSpace(new) == "" {
+		return true
+	}
+
+	if strings.TrimSpace(old) == "" && strings.TrimSpace(new) == "{}" {
+		return true
+	}
+
+	if strings.TrimSpace(old) == "{}" && strings.TrimSpace(new) == "{}" {
+		return true
+	}
+
+	equivalent, err := awspolicy.PoliciesAreEquivalent(old, new)
+	if err != nil {
+		return false
+	}
+
+	return equivalent
 }
 
-//Broken into seperate function to allow for returning of errors.
+// Broken into seperate function to allow for returning of errors.
 func UnmarshalAndMarshal(policy []byte) ([]byte, error) {
 	unmarshaledPolicy := TrustPolicyDocument{}
 	if err := json.Unmarshal(policy, &unmarshaledPolicy); err != nil {
