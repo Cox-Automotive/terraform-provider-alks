@@ -1,11 +1,11 @@
 package main
 
 import (
-	"bytes"
 	"context"
-	"encoding/json"
 	"fmt"
+	"strings"
 
+	awspolicy "github.com/hashicorp/awspolicyequivalence"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -16,25 +16,28 @@ type TrustPolicyDocument struct {
 }
 
 func SuppressEquivalentTrustPolicyDiffs(key string, old string, new string, d *schema.ResourceData) bool {
-	oldPolicy, _ := UnmarshalAndMarshal([]byte(old))
-	newPolicy, _ := UnmarshalAndMarshal([]byte(new))
-
-	return bytes.Compare(oldPolicy, newPolicy) == 0
-}
-
-//Broken into seperate function to allow for returning of errors.
-func UnmarshalAndMarshal(policy []byte) ([]byte, error) {
-	unmarshaledPolicy := TrustPolicyDocument{}
-	if err := json.Unmarshal(policy, &unmarshaledPolicy); err != nil {
-		return nil, fmt.Errorf("Error unmarshaling trust policy: %s", err)
+	if strings.TrimSpace(old) == "" && strings.TrimSpace(new) == "" {
+		return true
 	}
 
-	marshaledPolicy, err := json.Marshal(unmarshaledPolicy)
+	if strings.TrimSpace(old) == "{}" && strings.TrimSpace(new) == "" {
+		return true
+	}
+
+	if strings.TrimSpace(old) == "" && strings.TrimSpace(new) == "{}" {
+		return true
+	}
+
+	if strings.TrimSpace(old) == "{}" && strings.TrimSpace(new) == "{}" {
+		return true
+	}
+
+	equivalent, err := awspolicy.PoliciesAreEquivalent(old, new)
 	if err != nil {
-		return nil, fmt.Errorf("Error marshaling trust policy: %s", err)
+		return false
 	}
 
-	return marshaledPolicy, nil
+	return equivalent
 }
 
 // Using a diff function is the currently accepted way to compare the configuration of two different attributes at plan time.
