@@ -54,6 +54,37 @@ func TestSuppressEquivalentTrustPolicyDiffs(t *testing.T) {
 		{
 			policy1: string(`
 			{
+				"Version": "2012-10-17",
+				"Statement": [
+				  {
+					"Action": "sts:AssumeRole",
+					"Effect": "Allow",
+					"Principal": {
+					  "Service": ["lambda.amazonaws.com", "ec2.amazonaws.com"]
+					}
+				  }
+				]
+			  }
+			`),
+			policy2: string(`
+			{
+				"Version": "2012-10-17",
+				"Statement": [
+				  {
+					"Action": "sts:AssumeRole",
+					"Effect": "Allow",
+					"Principal": {
+					  "Service": ["ec2.amazonaws.com", "lambda.amazonaws.com"]
+					}
+				  }
+				]
+			  }
+			`),
+			expected: true,
+		},
+		{
+			policy1: string(`
+			{
 				"Version": "1234",
 				"Id": "Something",
 				"Statement": [
