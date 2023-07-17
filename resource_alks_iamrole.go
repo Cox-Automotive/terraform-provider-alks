@@ -50,7 +50,7 @@ func resourceAlksIamRole() *schema.Resource {
 			"assume_role_policy": {
 				Type:             schema.TypeString,
 				Optional:         true,
-				ForceNew:         true,
+				ForceNew:         false,
 				ExactlyOneOf:     []string{"assume_role_policy", "type"},
 				DiffSuppressFunc: SuppressEquivalentTrustPolicyDiffs,
 			},
@@ -249,6 +249,13 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta interface{}) diag.Diagnostics {
 	log.Printf("[INFO] ALKS IAM Role Update")
 
+	providerStruct := meta.(*AlksClient)
+	client := providerStruct.client
+
+	if err := validateIAMEnabled(client); err != nil {
+		return diag.FromErr(err)
+	}
+
 	// enable partial state mode
 	d.Partial(true)
 
@@ -259,11 +266,44 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 		}
 	}
 
-	if d.HasChange("tags_all") {
-		// try updating enable_alks_access
-		if err := updateIamRoleTags(d, meta); err != nil {
+	//Do a read to get existing tags.  If any of those are in ignore_tags, then they are externally managed
+	//and they should be included in the update so they don't get removed.
+	foundRole, err := client.GetIamRole(d.Id())
+
+	if err != nil {
+		return diag.FromErr(err)
+	}
+
+	options := alks.CreateIamRoleOptions{
+		RoleName: &foundRole.RoleName,
+	}
+
+	if d.HasChange("tags_all"){
+	
+		existingTags := tagSliceToMap(foundRole.Tags)
+		externalTags := getExternalyManagedTags(existingTags, *providerStruct.ignoreTags)
+		internalTags := d.Get("tags_all").(map[string]interface{})
+
+		//Tags includes default tags, role specific tags, and tags that exist externally on the role itself and are specified in ignored_tags
+		tags := tagMapToSlice(combineTagMaps(internalTags, externalTags))
+
+		options.Tags = &tags
+
+	}
+
+	if d.HasChange("assume_role_policy") {
+		// try updating assume_role_policy
+		trustPolicyString := d.Get("assume_role_policy").(string)
+		trustPolicy := new(map[string]interface{})
+		err := json.Unmarshal([]byte(trustPolicyString), trustPolicy)
+		if err != nil {
 			return diag.FromErr(err)
 		}
+		options.TrustPolicy = trustPolicy
+	}
+
+	if _, err := client.UpdateIamRole(&options); err != nil {
+		return diag.FromErr(err)
 	}
 
 	d.Partial(false)
