@@ -274,12 +274,12 @@ func resourceAlksIamRoleUpdate(ctx context.Context, d *schema.ResourceData, meta
 		return diag.FromErr(err)
 	}
 
-	options := alks.CreateIamRoleOptions{
+	options := alks.UpdateIamRoleRequest{
 		RoleName: &foundRole.RoleName,
 	}
 
-	if d.HasChange("tags_all"){
-	
+	if d.HasChange("tags_all") {
+
 		existingTags := tagSliceToMap(foundRole.Tags)
 		externalTags := getExternalyManagedTags(existingTags, *providerStruct.ignoreTags)
 		internalTags := d.Get("tags_all").(map[string]interface{})

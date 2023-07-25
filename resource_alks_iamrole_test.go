@@ -9,6 +9,7 @@ import (
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
+	awspolicy "github.com/hashicorp/awspolicyequivalence"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
@@ -139,6 +140,59 @@ func TestAccAlksIamRole_DefaultTags_TrustPolicy(t *testing.T) {
 			},
 		},
 	})
+}
+
+func TestAccAlksIamRole_DefaultTags_TrustPolicyUpdate(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicy,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey2", "defaultTagValue2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicyUpdate,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "name", "bar430"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey4", "testValue4"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.defaultTagKey1", "defaultTagValue1"),
+					// Check the Assume Role Policy after the update
+					testCheckAssumeRolePolicy("assume_role_policy", expectedAssumeRolePolicyAfterUpdate),
+				),
+			},
+		},
+	})
+}
+
+func testCheckAssumeRolePolicy(attr, expected string) resource.TestCheckFunc {
+	return func(s *terraform.State) error {
+		actual := s.RootModule().Resources["alks_iamrole.foo"].Primary.Attributes[attr]
+		equivalent, err := awspolicy.PoliciesAreEquivalent(actual, expected)
+		if err != nil {
+			return fmt.Errorf("Unexpected error %s occured while comparing policies %s, and %s", err, expected, actual)
+		}
+		if !equivalent {
+			return fmt.Errorf("Expected %s to be %s, got %s", attr, expected, actual)
+		}
+		return nil
+
+	}
 }
 
 func TestAccAlksIamRole_DefaultTags_RoleType(t *testing.T) {
@@ -767,6 +821,49 @@ const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicy = `
 		}
 	}
 `
+
+const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicyUpdate = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey1 = "defaultTagValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		assume_role_policy       = jsonencode({
+			Version = "2012-10-17",
+			Statement = [
+			  {
+				Action    = "sts:AssumeRole",
+				Effect    = "Allow",
+				Principal = {
+				  Service = "lambda.amazonaws.com"
+				}
+			  }
+			]
+		  })
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey4 = "testValue4"
+		}
+	}
+`
+
+const expectedAssumeRolePolicyAfterUpdate = `{
+	"Version": "2012-10-17",
+	"Statement": [
+		{
+			"Action": "sts:AssumeRole",
+			"Effect": "Allow",
+			"Principal": {
+				"Service": "lambda.amazonaws.com"
+			}
+		}
+	]
+}`
 
 const testAccCheckAlksIamRoleUpdateWithTags = `
 resource "alks_iamrole" "foo" {

@@ -1,8 +1,8 @@
 cloud.google.com/go v0.26.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 cloud.google.com/go v0.34.0/go.mod h1:aQUYkXzVsufM+DwF1aE+0xfcU+56JwCaLick0ClmMTw=
 github.com/BurntSushi/toml v0.3.1/go.mod h1:xHWCNGjB5oqiDr8zfno3MHue2Ht5sIBksp03qcyfWMU=
-github.com/Cox-Automotive/alks-go v0.0.0-20221026220646-c20da5c3cb3a h1:EJJqr3Dg89DRi7eqtD9OX0XOqabndVqK0r9cy8Y7aq0=
-github.com/Cox-Automotive/alks-go v0.0.0-20221026220646-c20da5c3cb3a/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
+github.com/Cox-Automotive/alks-go v0.0.0-20230724175933-0e9cb0a59b55 h1:aIZaqUtNC6gZISs1VMWo6/jhlOjJcdbkoEqQHagxfWU=
+github.com/Cox-Automotive/alks-go v0.0.0-20230724175933-0e9cb0a59b55/go.mod h1:jJNgXthl59Vt2tJHSC3WZ0vlopV9xqdclfQuLgwHjOw=
 github.com/Microsoft/go-winio v0.4.14/go.mod h1:qXqCSQ3Xa7+6tgxaGTIe4Kpcdsi+P8jBhyzoq1bpyYA=
 github.com/Microsoft/go-winio v0.4.16 h1:FtSW/jqD+l4ba5iPBj9CODVtgfYAD8w2wS923g/cFDk=
 github.com/Microsoft/go-winio v0.4.16/go.mod h1:XB6nPKklQyQ7GC9LdcBEcBl8PF76WugXOPRXwdLnMv0=
