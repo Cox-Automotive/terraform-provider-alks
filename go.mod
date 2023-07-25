@@ -3,7 +3,7 @@ module github.com/Cox-Automotive/terraform-provider-alks
 go 1.18
 
 require (
-	github.com/Cox-Automotive/alks-go v0.0.0-20221026220646-c20da5c3cb3a
+	github.com/Cox-Automotive/alks-go v0.0.0-20230724175933-0e9cb0a59b55
 	github.com/aws/aws-sdk-go v1.42.18
 	github.com/hashicorp/awspolicyequivalence v1.6.0
 	github.com/hashicorp/terraform-plugin-sdk/v2 v2.21.0

@@ -360,8 +360,9 @@ func (c *Client) CreateIamTrustRole(options *CreateIamRoleOptions) (*IamRoleResp
 }
 
 type UpdateIamRoleRequest struct {
-	RoleName *string `json:"roleName"`
-	Tags     *[]Tag  `json:"tags"`
+	RoleName    *string                 `json:"roleName"`
+	Tags        *[]Tag                  `json:"tags"`
+	TrustPolicy *map[string]interface{} `json:"trustPolicy"`
 }
 
 type UpdateIamRoleResponse struct {
@@ -375,8 +376,7 @@ type UpdateIamRoleResponse struct {
 	Tags            *[]Tag  `json:"tags"`
 }
 
-/* UpdateIamRole adds resource tags to an existing IAM role.
- */
+// Updates an IAM role with the given options.
 func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleResponse, *AlksError) {
 	if err := options.updateIamRoleValidate(); err != nil {
 		return nil, &AlksError{
@@ -385,7 +385,14 @@ func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleRes
 			Err:        err,
 		}
 	}
-	log.Printf("[INFO] update IAM role %s with Tags: %v", *options.RoleName, *options.Tags)
+	// considering a non empty tag object
+	if options.Tags != nil {
+		log.Printf("[INFO] update IAM role %s with tags: %v", *options.RoleName, *options.Tags)
+	}
+	// considering a non empty TrustPolicy map
+	if options.TrustPolicy != nil {
+		log.Printf("[INFO] update IAM role %s with trust policy: %v", *options.RoleName, *options.TrustPolicy)
+	}
 
 	b, err := json.Marshal(struct {
 		UpdateIamRoleRequest
@@ -465,9 +472,6 @@ func (c *Client) UpdateIamRole(options *UpdateIamRoleRequest) (*UpdateIamRoleRes
 func (req *UpdateIamRoleRequest) updateIamRoleValidate() error {
 	if req.RoleName == nil {
 		return fmt.Errorf("roleName option must not be nil")
-	}
-	if req.Tags == nil {
-		return fmt.Errorf("tags option must not be nil")
 	}
 	return nil
 }
