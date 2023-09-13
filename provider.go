@@ -86,7 +86,8 @@ func Provider() *schema.Provider {
 		},
 
 		DataSourcesMap: map[string]*schema.Resource{
-			"alks_keys": dataSourceAlksKeys(),
+			"alks_keys":    dataSourceAlksKeys(),
+			"alks_session": dataSourceAlksSession(),
 		},
 
 		ConfigureContextFunc: providerConfigure,
