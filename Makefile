@@ -11,6 +11,9 @@ build:
 test:
 	go test -timeout 1200s -v .
 
+testacc:
+	TF_ACC=1 go test -timeout 1200s -v . $(TESTARGS)
+
 plan:
 	@terraform plan
 

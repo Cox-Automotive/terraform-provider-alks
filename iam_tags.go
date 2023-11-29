@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"strings"
 
 	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/go-cty/cty"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
 
@@ -64,17 +66,19 @@ func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{})
 
 // Removes default tags from a map of role specific + default tags
 func removeDefaultTags(allTags TagMap, defaultTags TagMap) TagMap {
-	for k, v := range defaultTags {
-		//If the key and value of a tag returned from the role exists in the defaultTags list
-		//We will assume it was set as a default tag and remove it from role specific tag list
-		if val, ok := allTags[k]; ok {
-			if val == v {
-				delete(allTags, k)
-			}
-		}
-
+	if defaultTags == nil {
+		return allTags
 	}
-	return allTags
+
+	result := make(TagMap)
+	// keep the tag if the values in allTags and default tags are different
+	for k, v := range allTags {
+		if defaultVal, ok := defaultTags[k]; !ok || v != defaultVal {
+			result[k] = v
+		}
+	}
+
+	return result
 }
 
 func removeIgnoredTags(allTags TagMap, ignoredTags IgnoreTags) TagMap {
@@ -146,4 +150,70 @@ func combineTagMaps(baseMap TagMap, mergeMap TagMap) TagMap {
 	}
 
 	return LocalMap
+}
+
+// see: https://github.com/LumaC0/terraform-provider-aws/blob/7f0a73253c273a9ef143189f94890fc66d0dcb9c/internal/tags/key_value_tags.go#L771
+func resolveDuplicates(allTags, defaultTags TagMap, d *schema.ResourceData) TagMap {
+	// remove default tags
+	t := removeDefaultTags(allTags, defaultTags)
+	result := make(TagMap)
+	for k, v := range t {
+		result[k] = v
+	}
+
+	configTags := make(TagMap)
+
+	// raw config only seems to exist during creation
+	if cf := d.GetRawConfig(); !cf.IsNull() && cf.IsKnown() {
+		c := cf.GetAttr("tags")
+
+		if c.IsNull() {
+			return t
+		}
+
+		if !c.IsNull() && c.IsKnown() {
+			normalizeTagsFromRaw(c.AsValueMap(), &configTags)
+		}
+	}
+
+	if pl := d.GetRawPlan(); !pl.IsNull() && pl.IsKnown() {
+		c := pl.GetAttr("tags")
+		if !c.IsNull() && c.IsKnown() {
+			normalizeTagsFromRaw(c.AsValueMap(), &configTags)
+		}
+		log.Printf("[INFO] config tags with plan tags: %#v", configTags)
+	}
+
+	// capturing state tags during refresh
+	if st := d.GetRawState(); !st.IsNull() && st.IsKnown() {
+		c := st.GetAttr("tags")
+		if !c.IsNull() {
+			normalizeTagsFromRaw(c.AsValueMap(), &configTags)
+		}
+		log.Printf("[INFO] config tags with state tags: %#v", configTags)
+	}
+
+	// add configTags to result if key-value pair is in defaultTags
+	for k, v := range configTags {
+		if _, ok := result[k]; !ok {
+			if defaultTags != nil {
+				if val, ok := defaultTags[k]; ok && val == v {
+					result[k] = v
+				}
+			}
+		}
+	}
+
+	return result
+}
+
+func normalizeTagsFromRaw(m map[string]cty.Value, configTags *TagMap) {
+	t := *configTags
+	for k, v := range m {
+		if !v.IsNull() {
+			if _, ok := t[k]; !ok {
+				t[k] = v.AsString()
+			}
+		}
+	}
 }

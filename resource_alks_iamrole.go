@@ -7,6 +7,7 @@ import (
 	"log"
 
 	"github.com/Cox-Automotive/alks-go"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -232,9 +233,14 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-	roleSpecificTags := removeDefaultTags(localTags, defaultTags)
+	// roleSpecificTags := localTags
+	tflog.Debug(ctx, "show raw data", map[string]interface{}{
+		"raw_config": d.GetRawConfig(),
+		"raw_plan":   d.GetRawPlan(),
+		"raw_state":  d.GetRawState(),
+	})
 
-	if err := d.Set("tags", roleSpecificTags); err != nil {
+	if err := d.Set("tags", removeIgnoredTags(resolveDuplicates(allTags, defaultTags, d), *ignoreTags)); err != nil {
 		return diag.FromErr(err)
 	}
 
