@@ -7,7 +7,6 @@ import (
 	"log"
 
 	"github.com/Cox-Automotive/alks-go"
-	"github.com/hashicorp/terraform-plugin-log/tflog"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/diag"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/customdiff"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
@@ -233,21 +232,9 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-	// roleSpecificTags := localTags
-	tflog.Debug(ctx, "show raw data", map[string]interface{}{
-		"raw_config": d.GetRawConfig(),
-		"raw_plan":   d.GetRawPlan(),
-		"raw_state":  d.GetRawState(),
-	})
-
 	if err := d.Set("tags", removeIgnoredTags(resolveDuplicates(allTags, defaultTags, d), *ignoreTags)); err != nil {
 		return diag.FromErr(err)
 	}
-
-	// TODO: In the future, our API or tags need to dynamically grab these values.
-	//  Till then, all imports require a destroy + create.
-	//_ = d.Set("type", foundrole.RoleType)
-	//_ = d.Set("include_default_policies", foundrole.InclDefaultPolicies)
 
 	return nil
 }
