@@ -11,6 +11,10 @@ build:
 test:
 	go test -timeout 1200s -v .
 
+testacc:
+	@echo "set TESTARGS=\"-run TestAccXXX\" to run individual tests"
+	TF_ACC=1 go test -timeout 1200s -v . $(TESTARGS)
+
 plan:
 	@terraform plan
 

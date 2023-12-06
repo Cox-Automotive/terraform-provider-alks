@@ -7,9 +7,9 @@ import (
 	"testing"
 
 	"github.com/Cox-Automotive/alks-go"
+	awspolicy "github.com/hashicorp/awspolicyequivalence"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/resource"
 	"github.com/hashicorp/terraform-plugin-sdk/v2/terraform"
-	awspolicy "github.com/hashicorp/awspolicyequivalence"
 )
 
 func TestAccAlksIamRole_Basic(t *testing.T) {
@@ -279,6 +279,40 @@ func TestAccAlksIamRole_DefaultTagsEmpty(t *testing.T) {
 						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
 					resource.TestCheckResourceAttr(
 						"alks_iamrole.foo", "tags.testKey2", "testValue2"),
+				),
+			},
+		},
+	})
+}
+
+func TestAccAlksIamRole_DefaultTagSameAsResourceTag(t *testing.T) {
+	var resp alks.IamRoleResponse
+
+	resource.Test(t, resource.TestCase{
+		PreCheck:     func() { testAccPreCheck(t) },
+		Providers:    testAccProviders,
+		CheckDestroy: testAccCheckAlksIamRoleDestroy(&resp),
+		Steps: []resource.TestStep{
+			{
+				// create resource with tags
+				Config: testAccCheckAlksIamRoleCreateWithDefaultTagSameAsResourceTag,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
+				),
+			},
+			{
+				// update resource with tags
+				Config: testAccCheckAlksIamRoleUpdateDefaultTagsWithDefaultTagSameAsResourceTag,
+				Check: resource.ComposeTestCheckFunc(
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.testKey1", "testValue1"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags_all.testKey2", "testValue2"),
+					resource.TestCheckResourceAttr(
+						"alks_iamrole.foo", "tags.testKey1", "testValue1"),
 				),
 			},
 		},
@@ -633,6 +667,25 @@ const testAccCheckAlksIamRoleCreateWithTagsWithDefault_RoleType = `
 	}
 `
 
+const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_RoleType = `
+	provider "alks" {
+		default_tags {
+			tags = {
+				defaultTagKey2 = "defaultTagValue2"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name = "bar430"
+		type = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+			testKey3 = "testValue3"
+		}
+	}
+`
+
 const testAccCheckAlksIamRoleCreateWithTagsWithDefault_TrustPolicy = `
 	provider "alks" {
 		default_tags {
@@ -679,6 +732,46 @@ const testAccCheckAlksIamRoleCreateWithTagsWithEmptyDefault = `
 		}
 	}
 `
+
+const testAccCheckAlksIamRoleCreateWithDefaultTagSameAsResourceTag = `
+
+	provider "alks" {
+		default_tags {
+			tags = {
+				testKey1 = "testValue1"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name 					 = "test-role"
+		type 				     = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+		}
+	}
+`
+
+const testAccCheckAlksIamRoleUpdateDefaultTagsWithDefaultTagSameAsResourceTag = `
+
+	provider "alks" {
+		default_tags {
+			tags = {
+				testKey1 = "testValue1"
+				testKey2 = "testValue2"
+			}
+		}
+	}
+	resource "alks_iamrole" "foo" {
+		name 					 = "test-role"
+		type 				     = "Amazon EC2"
+		include_default_policies = false
+		tags = {
+			testKey1 = "testValue1"
+		}
+	}
+`
+
 const testAccCheckAlksIamRoleCreateWithTagsWithDefaultTagsEmpty = `
 	provider "alks" {
 		default_tags {
@@ -773,25 +866,6 @@ const testAccCheckAlksIamRoleUpdateWithTagsWithIgnoredTags = `
 		}
 	}
 `
-const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_RoleType = `
-	provider "alks" {
-		default_tags {
-			tags = {
-				defaultTagKey2 = "defaultTagValue2"
-			}
-		}
-	}
-	resource "alks_iamrole" "foo" {
-		name = "bar430"
-		type = "Amazon EC2"
-		include_default_policies = false
-		tags = {
-			testKey1 = "testValue1"
-			testKey3 = "testValue3"
-		}
-	}
-`
-
 const testAccCheckAlksIamRoleUpdateWithTagsWithDefault_TrustPolicy = `
 	provider "alks" {
 		default_tags {

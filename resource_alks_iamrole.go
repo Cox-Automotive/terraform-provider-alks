@@ -232,16 +232,9 @@ func resourceAlksIamRoleRead(ctx context.Context, d *schema.ResourceData, meta i
 		return diag.FromErr(err)
 	}
 
-	roleSpecificTags := removeDefaultTags(localTags, defaultTags)
-
-	if err := d.Set("tags", roleSpecificTags); err != nil {
+	if err := d.Set("tags", removeIgnoredTags(resolveDuplicates(allTags, defaultTags, d), *ignoreTags)); err != nil {
 		return diag.FromErr(err)
 	}
-
-	// TODO: In the future, our API or tags need to dynamically grab these values.
-	//  Till then, all imports require a destroy + create.
-	//_ = d.Set("type", foundrole.RoleType)
-	//_ = d.Set("include_default_policies", foundrole.InclDefaultPolicies)
 
 	return nil
 }
