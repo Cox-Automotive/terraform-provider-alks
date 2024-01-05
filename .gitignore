@@ -17,3 +17,9 @@ gpg/
 
 # ignore. For testing we don't want to store a specific provider.
 .terraform.lock.hcl
+
+# Adding to disregard some testing framework standup. - dbarcelo
+node_modules/
+package-lock.json
+package.json
+test.js
