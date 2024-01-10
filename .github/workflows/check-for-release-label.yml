@@ -1,3 +1,5 @@
+# For this check to pass you must have a release label on your PR.
+# valid labels are: release/patch, release/minor, release/major, release/skip
 name: Check For Release Label
 
 on:
