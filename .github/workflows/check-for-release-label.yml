@@ -1,0 +1,23 @@
+# For this check to pass you must have a release label on your PR.
+# valid labels are: release/patch, release/minor, release/major, release/skip
+name: Check For Release Label
+
+on:
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  check_for_release_label:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Get release label
+      uses: actions-ecosystem/action-release-label@v1.2.0
+      id: release-label
+
+    - run: echo "Release level is ${{ steps.release-label.outputs.level }}"
+
+    - name: Fail if label does not exist, or skip if release/skip label exists
+      if: ${{ ( ! contains(github.event.pull_request.labels.*.name, 'release/skip') ) && ( steps.release-label.outputs.level == null ) }}
+      run: echo "Please label your PR with a release label" && exit 1
