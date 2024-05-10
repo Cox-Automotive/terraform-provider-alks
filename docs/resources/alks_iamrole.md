@@ -92,7 +92,8 @@ The following arguments are supported:
 
 * `name` - (Optional/Computed) The name of the ALKS IAM role which will be reflected in AWS and the ALKS UI.
 * `name_prefix` - (Optional/Computed) A prefix for a generated name of the ALKS IAM role which will be reflected in AWS and the ALKS UI.
-* `type` - (Required) The role type to use. To see a list of available roles, [call this endpoint](https://pages.ghe.coxautoinc.com/ETS-CloudAutomation/ALKS-Documentation/#/aws-role-type-rest-service/getAllAwsRoleTypesUsingGET).
+* `type` - (Required) The role type to use.  This argument is mutually exclusive with `assume_role_policy`. To see a list of available roles, [call this endpoint](https://pages.ghe.coxautoinc.com/ETS-CloudAutomation/ALKS-Documentation/#/aws-role-type-rest-service/getAllAwsRoleTypesUsingGET).
+* `assume_role_policy` - (Required) A JSON string representing the trust policy for the role. This is only supported for single-service trust policies trusting an approved AWS service.  This argument is mutually exclusive with `type`.
 * `include_default_policies` - (Required) Whether or not the default manages policies should be attached to the role.
 * `role_added_to_ip` - (Computed) Indicates whether or not an instance profile role was created.
 * `arn` - (Computed) Provides the ARN of the role that was created.
