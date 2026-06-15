@@ -9,11 +9,11 @@ on:
 jobs:
   check_for_release_label:
 
-    runs-on: ubuntu-latest
+    runs-on: cai-standard-x86-linux
 
     steps:
     - name: Get release label
-      uses: actions-ecosystem/action-release-label@v1.2.0
+      uses: actions-ecosystem/action-release-label@955bf130fba6be3d99d2c14457d0dc7f176bc563
       id: release-label
 
     - run: echo "Release level is ${{ steps.release-label.outputs.level }}"
