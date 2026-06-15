@@ -8,14 +8,14 @@ on:
 jobs:
   test-coverage:
     name: Upload Coverage to Sonarqube
-    runs-on: ubuntu-latest
+    runs-on: cai-standard-x86-linux
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
       - name: Set up Go
-        uses: actions/setup-go@v2
+        uses: actions/setup-go@v5
         with:
-          go-version: 1.18.x
+          go-version-file: go.mod
       - name: generate coverage report
         run: go test -timeout 1200s -v . -coverprofile=coverage.out
       - name: SonarQube Scan
