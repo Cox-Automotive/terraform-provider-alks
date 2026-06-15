@@ -20,7 +20,7 @@ import (
 // to set, add `-ldflags "-X main.versionNumber=1.2.3"` to the go build command
 var versionNumber string
 var errNoValidCredentialSources = errors.New(`No valid credential sources found for ALKS Provider.
-Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
+Please see https://ghe.coxautoinc.com/ETS-CloudAutomation/terraform-provider-alks#authentication for more information on
 providing credentials for the ALKS Provider`)
 
 // Config stores ALKS configuration and credentials
