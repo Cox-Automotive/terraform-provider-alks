@@ -63,8 +63,9 @@ jobs:
           git tag "$NEW_TAG" -m "$NEW_TAG: PR #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}"
           git push "https://x-access-token:${{ secrets._GITHUB_TOKEN }}@ghe.coxautoinc.com/${{ github.repository }}.git" "$NEW_TAG"
 
-      - name: Push new tag to github.com
+      - name: Mirror master + new tag to github.com
         run: |
+          git push "https://x-access-token:${{ secrets.GITHUB_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" master
           git push "https://x-access-token:${{ secrets.GITHUB_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" "${{ steps.bump-semver.outputs.new_version }}"
 
       - name: Set up Go
@@ -87,3 +88,5 @@ jobs:
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_COM_TOKEN }}
+          GITHUB_SERVER_URL: https://github.com
+          GITHUB_API_URL: https://api.github.com
