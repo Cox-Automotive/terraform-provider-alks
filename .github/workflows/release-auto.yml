@@ -65,8 +65,8 @@ jobs:
 
       - name: Mirror master + new tag to github.com
         run: |
-          git push "https://x-access-token:${{ secrets.GITHUB_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" master
-          git push "https://x-access-token:${{ secrets.GITHUB_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" "${{ steps.bump-semver.outputs.new_version }}"
+          git push "https://x-access-token:${{ secrets.GH_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" master
+          git push "https://x-access-token:${{ secrets.GH_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" "${{ steps.bump-semver.outputs.new_version }}"
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -87,6 +87,6 @@ jobs:
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_COM_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_COM_TOKEN }}
           GITHUB_SERVER_URL: https://github.com
           GITHUB_API_URL: https://api.github.com
