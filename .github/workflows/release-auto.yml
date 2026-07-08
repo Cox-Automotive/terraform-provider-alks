@@ -58,15 +58,20 @@ jobs:
           level: ${{ steps.release-label.outputs.level }}
 
       - name: Push new tag to GHE
+        env:
+          NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ needs.get_pull_request.outputs.pull_request_title }}
         run: |
-          NEW_TAG="${{ steps.bump-semver.outputs.new_version }}"
-          git tag "$NEW_TAG" -m "$NEW_TAG: PR #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}"
+          git tag "$NEW_TAG" -m "$NEW_TAG: PR #${PR_NUMBER} ${PR_TITLE}"
           git push "https://x-access-token:${{ secrets._GITHUB_TOKEN }}@ghe.coxautoinc.com/${{ github.repository }}.git" "$NEW_TAG"
 
       - name: Mirror master + new tag to github.com
+        env:
+          NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
         run: |
           git push "https://x-access-token:${{ secrets.GH_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" master
-          git push "https://x-access-token:${{ secrets.GH_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" "${{ steps.bump-semver.outputs.new_version }}"
+          git push "https://x-access-token:${{ secrets.GH_COM_TOKEN }}@github.com/Cox-Automotive/terraform-provider-alks.git" "$NEW_TAG"
 
       - name: Set up Go
         uses: actions/setup-go@v5
