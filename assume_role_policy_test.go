@@ -144,6 +144,20 @@ func TestSuppressEquivalentTrustPolicyDiffs_BothWhitespace(t *testing.T) {
 	}
 }
 
+func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyBracesNewEmpty(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "{}", "", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true when old is {} and new is empty")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyNewEmptyBraces(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "", "{}", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true when old is empty and new is {}")
+	}
+}
+
 func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyNewValid(t *testing.T) {
 	newPolicy := `{"Version":"2012-10-17","Statement":[]}`
 	result := SuppressEquivalentTrustPolicyDiffs("key", "", newPolicy, &schema.ResourceData{})
