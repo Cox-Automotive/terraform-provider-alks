@@ -8,6 +8,7 @@ import (
 
 func TestMigrateV0toV1_AddsEnableAlksAccess(t *testing.T) {
 	state := &terraform.InstanceState{
+		ID: "test-role-id",
 		Attributes: map[string]string{
 			"name": "test-role",
 			"type": "Amazon EC2",
@@ -35,6 +36,7 @@ func TestMigrateV0toV1_EmptyState(t *testing.T) {
 
 func TestMigrateV0toV1_PreservesExistingValue(t *testing.T) {
 	state := &terraform.InstanceState{
+		ID: "test-role-id",
 		Attributes: map[string]string{
 			"name":               "test-role",
 			"enable_alks_access": "true",
@@ -51,6 +53,7 @@ func TestMigrateV0toV1_PreservesExistingValue(t *testing.T) {
 
 func TestMigrateV0toV1_PreservesOtherAttributes(t *testing.T) {
 	state := &terraform.InstanceState{
+		ID: "test-role-id",
 		Attributes: map[string]string{
 			"name": "my-role",
 			"type": "Amazon EC2",
@@ -71,6 +74,7 @@ func TestMigrateV0toV1_PreservesOtherAttributes(t *testing.T) {
 
 func TestMigrateState_V0ToV1(t *testing.T) {
 	state := &terraform.InstanceState{
+		ID:         "test-id",
 		Attributes: map[string]string{"name": "test"},
 	}
 	result, err := migrateState(0, state, nil)
@@ -84,6 +88,7 @@ func TestMigrateState_V0ToV1(t *testing.T) {
 
 func TestMigrateState_UnknownVersion(t *testing.T) {
 	state := &terraform.InstanceState{
+		ID:         "test-id",
 		Attributes: map[string]string{"name": "test"},
 	}
 	_, err := migrateState(99, state, nil)
