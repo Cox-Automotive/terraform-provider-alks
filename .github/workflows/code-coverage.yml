@@ -24,4 +24,5 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarqube.coxautoinc.com
         with:
+          # internal SonarQube mirror does not publish action signatures
           skipSignatureVerification: true
