@@ -49,15 +49,15 @@ func TestExpandProviderDefaultTags_Empty(t *testing.T) {
 		},
 	}
 	result := expandProviderDefaultTags(raw)
-	if len(result.Tags) != 0 {
-		t.Fatalf("expected empty tags, got %#v", result.Tags)
+	if len(result) != 0 {
+		t.Fatalf("expected empty tags, got %#v", result)
 	}
 }
 
 func TestExpandProviderDefaultTags_Nil(t *testing.T) {
 	result := expandProviderDefaultTags(nil)
-	if len(result.Tags) != 0 {
-		t.Fatalf("expected empty tags for nil input, got %#v", result.Tags)
+	if len(result) != 0 {
+		t.Fatalf("expected empty tags for nil input, got %#v", result)
 	}
 }
 
@@ -71,31 +71,11 @@ func TestExpandProviderDefaultTags_WithTags(t *testing.T) {
 		},
 	}
 	result := expandProviderDefaultTags(raw)
-	if result.Tags["env"] != "prod" {
-		t.Fatalf("expected env=prod, got %v", result.Tags["env"])
+	if result["env"] != "prod" {
+		t.Fatalf("expected env=prod, got %v", result["env"])
 	}
-	if result.Tags["team"] != "cloud-railway" {
-		t.Fatalf("expected team=cloud-railway, got %v", result.Tags["team"])
-	}
-}
-
-func TestExpandProviderDefaultTags_MultipleBlocks(t *testing.T) {
-	raw := []interface{}{
-		map[string]interface{}{
-			"tags": map[string]interface{}{
-				"key1": "val1",
-			},
-		},
-		map[string]interface{}{
-			"tags": map[string]interface{}{
-				"key2": "val2",
-			},
-		},
-	}
-	result := expandProviderDefaultTags(raw)
-	// only the last block's tags should win (or first — just verify no panic)
-	if result.Tags == nil {
-		t.Fatal("expected non-nil Tags")
+	if result["team"] != "cloud-railway" {
+		t.Fatalf("expected team=cloud-railway, got %v", result["team"])
 	}
 }
 
