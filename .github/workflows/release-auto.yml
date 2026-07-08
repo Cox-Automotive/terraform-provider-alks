@@ -15,8 +15,9 @@ jobs:
         id: get-merged-pull-request
         env:
           PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
         run: |
-          echo "labels=${{ join(github.event.pull_request.labels.*.name, ',') }}" >> $GITHUB_OUTPUT
+          echo "labels=${PR_LABELS}" >> $GITHUB_OUTPUT
           echo "title=${PR_TITLE}" >> $GITHUB_OUTPUT
     outputs:
       pull_request_labels: ${{ steps.get-merged-pull-request.outputs.labels }}
@@ -30,6 +31,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
         with:
+          ref: master
           token: ${{ secrets._GITHUB_TOKEN }}
           fetch-depth: 0
 
@@ -57,24 +59,19 @@ jobs:
           current_version: ${{ steps.previoustag.outputs.tag }}
           level: ${{ steps.release-label.outputs.level }}
 
-      - name: Push new tag to GHE
+      - name: Create release tag
         env:
           NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           PR_TITLE: ${{ needs.get_pull_request.outputs.pull_request_title }}
-          GHE_TOKEN: ${{ secrets._GITHUB_TOKEN }}
-          GH_REPO: ${{ github.repository }}
         run: |
           git tag "$NEW_TAG" -m "$NEW_TAG: PR #${PR_NUMBER} ${PR_TITLE}"
-          git push "https://x-access-token:${GHE_TOKEN}@ghe.coxautoinc.com/${GH_REPO}.git" "$NEW_TAG"
 
-      - name: Mirror master + new tag to github.com
+      - name: Mirror master to github.com
         env:
-          NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
           GHCOM_TOKEN: ${{ secrets.GH_COM_TOKEN }}
         run: |
-          git push "https://x-access-token:${GHCOM_TOKEN}@github.com/Cox-Automotive/terraform-provider-alks.git" master
-          git push "https://x-access-token:${GHCOM_TOKEN}@github.com/Cox-Automotive/terraform-provider-alks.git" "$NEW_TAG"
+          git push "https://x-access-token:${GHCOM_TOKEN}@github.com/Cox-Automotive/terraform-provider-alks.git" HEAD:refs/heads/master
 
       - name: Set up Go
         uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
@@ -98,3 +95,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GH_COM_TOKEN }}
           GITHUB_SERVER_URL: https://github.com
           GITHUB_API_URL: https://api.github.com
+
+      - name: Push release tag to GHE
+        env:
+          NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
+          GHE_TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git push "https://x-access-token:${GHE_TOKEN}@ghe.coxautoinc.com/${GH_REPO}.git" "$NEW_TAG"
