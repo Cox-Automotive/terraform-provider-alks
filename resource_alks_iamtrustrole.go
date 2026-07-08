@@ -88,7 +88,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 	var trustArn = d.Get("trust_arn").(string)
 	var enableAlksAccess = d.Get("enable_alks_access").(bool)
 	var tags = d.Get("tags").(map[string]interface{})
-	var max_session_duration_in_seconds = d.Get("max_session_duration_in_seconds").(int)
+	var maxSessionDurationInSeconds = d.Get("max_session_duration_in_seconds").(int)
 
 	providerStruct := meta.(*AlksClient)
 	client := providerStruct.client
@@ -109,7 +109,7 @@ func resourceAlksIamTrustRoleCreate(ctx context.Context, d *schema.ResourceData,
 			TrustArn:                    &trustArn,
 			AlksAccess:                  &enableAlksAccess,
 			Tags:                        &allTags,
-			MaxSessionDurationInSeconds: &max_session_duration_in_seconds,
+			MaxSessionDurationInSeconds: &maxSessionDurationInSeconds,
 		}
 		resp, err = client.CreateIamTrustRole(options)
 		if err != nil {
