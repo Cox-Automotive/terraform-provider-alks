@@ -6,7 +6,31 @@ import (
 
 	"github.com/Cox-Automotive/alks-go"
 	"github.com/hashicorp/go-cty/cty"
+	"github.com/hashicorp/terraform-plugin-sdk/v2/helper/schema"
 )
+
+func TestTagsSchema(t *testing.T) {
+	s := TagsSchema()
+	if s.Type != schema.TypeMap {
+		t.Fatalf("expected TypeMap, got %v", s.Type)
+	}
+	if !s.Optional {
+		t.Fatal("expected Optional=true")
+	}
+}
+
+func TestTagsSchemaComputed(t *testing.T) {
+	s := TagsSchemaComputed()
+	if s.Type != schema.TypeMap {
+		t.Fatalf("expected TypeMap, got %v", s.Type)
+	}
+	if !s.Computed {
+		t.Fatal("expected Computed=true")
+	}
+	if !s.Optional {
+		t.Fatal("expected Optional=true")
+	}
+}
 
 func TestRemoveDefaultTags(t *testing.T) {
 	cases := []struct {
