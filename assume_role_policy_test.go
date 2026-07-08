@@ -183,8 +183,9 @@ func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyBracesNewPopulated(t *testin
 
 func TestSuppressEquivalentTrustPolicyDiffs_InvalidJSON(t *testing.T) {
 	result := SuppressEquivalentTrustPolicyDiffs("key", "not-json", "also-not-json", &schema.ResourceData{})
-	// Both invalid — function should handle gracefully (not panic); exact return value is implementation-defined
-	_ = result
+	if result {
+		t.Fatal("expected false for invalid JSON inputs")
+	}
 }
 
 func TestSuppressEquivalentTrustPolicyDiffs_OneInvalidJSON(t *testing.T) {
