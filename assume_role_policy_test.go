@@ -129,3 +129,69 @@ func TestSuppressEquivalentTrustPolicyDiffs(t *testing.T) {
 		}
 	}
 }
+
+func TestSuppressEquivalentTrustPolicyDiffs_BothEmpty(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "", "", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true for both empty strings")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_BothWhitespace(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "   ", "   ", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true for both whitespace-only strings")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyBracesNewEmpty(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "{}", "", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true when old is {} and new is empty")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyNewEmptyBraces(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "", "{}", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true when old is empty and new is {}")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyNewValid(t *testing.T) {
+	newPolicy := `{"Version":"2012-10-17","Statement":[]}`
+	result := SuppressEquivalentTrustPolicyDiffs("key", "", newPolicy, &schema.ResourceData{})
+	if result {
+		t.Fatal("expected false when old is empty and new has content")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_BothEmptyBraces(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "{}", "{}", &schema.ResourceData{})
+	if !result {
+		t.Fatal("expected true for both empty JSON objects")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_OldEmptyBracesNewPopulated(t *testing.T) {
+	newPolicy := `{"Version":"2012-10-17","Statement":[{"Effect":"Allow","Action":"sts:AssumeRole"}]}`
+	result := SuppressEquivalentTrustPolicyDiffs("key", "{}", newPolicy, &schema.ResourceData{})
+	if result {
+		t.Fatal("expected false when old is empty braces and new has content")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_InvalidJSON(t *testing.T) {
+	result := SuppressEquivalentTrustPolicyDiffs("key", "not-json", "also-not-json", &schema.ResourceData{})
+	if result {
+		t.Fatal("expected false for invalid JSON inputs")
+	}
+}
+
+func TestSuppressEquivalentTrustPolicyDiffs_OneInvalidJSON(t *testing.T) {
+	validPolicy := `{"Version":"2012-10-17","Statement":[]}`
+	result := SuppressEquivalentTrustPolicyDiffs("key", "not-json", validPolicy, &schema.ResourceData{})
+	if result {
+		t.Fatal("expected false when one policy is invalid JSON")
+	}
+}

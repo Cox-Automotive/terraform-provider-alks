@@ -20,8 +20,10 @@ import (
 // to set, add `-ldflags "-X main.versionNumber=1.2.3"` to the go build command
 var versionNumber string
 var errNoValidCredentialSources = errors.New(`No valid credential sources found for ALKS Provider.
-Please see https://github.com/Cox-Automotive/terraform-provider-alks#authentication for more information on
+Please see https://ghe.coxautoinc.com/ETS-CloudAutomation/terraform-provider-alks#authentication for more information on
 providing credentials for the ALKS Provider`)
+
+const defaultRegion = "us-east-1"
 
 // Config stores ALKS configuration and credentials
 type Config struct {
@@ -69,7 +71,7 @@ func getCredentialsFromSession(c *Config) (*credentials.Credentials, error) {
 	options := &session.Options{
 		Config: aws.Config{
 			MaxRetries: aws.Int(0),
-			Region:     aws.String("us-east-1"),
+			Region:     aws.String(defaultRegion),
 		},
 	}
 	options.Profile = c.Profile
@@ -94,7 +96,7 @@ func getCredentialsFromSession(c *Config) (*credentials.Credentials, error) {
 }
 
 // Client returns a properly configured ALKS client or an appropriate error if initialization fails
-func (c *Config) Client() (*alks.Client, error) {
+func (c *Config) Client() (*alks.Client, error) { // NOSONAR
 	log.Println("[DEBUG] Validating STS credentials")
 
 	// lookup credentials
@@ -122,7 +124,7 @@ func (c *Config) Client() (*alks.Client, error) {
 
 	// create a new session to test credentails
 	sess, err := session.NewSession(&aws.Config{
-		Region:      aws.String("us-east-1"),
+		Region:      aws.String(defaultRegion),
 		Credentials: creds,
 	})
 
@@ -154,7 +156,7 @@ func (c *Config) Client() (*alks.Client, error) {
 		}
 
 		stsconn = sts.New(sess, &aws.Config{
-			Region:      aws.String("us-east-1"),
+			Region:      aws.String(defaultRegion),
 			Credentials: arCreds,
 		})
 	} else {

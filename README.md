@@ -1,7 +1,9 @@
+> **Canonical source.** This repository was migrated from [`github.com/Cox-Automotive/terraform-provider-alks`](https://github.com/Cox-Automotive/terraform-provider-alks). Development and releases continue here.
+
+[![Build Status](https://ghe.coxautoinc.com/ETS-CloudAutomation/terraform-provider-alks/actions/workflows/go.yml/badge.svg)](https://ghe.coxautoinc.com/ETS-CloudAutomation/terraform-provider-alks/actions)
+
 ALKS Provider for Terraform
 =========
-
-[![Build Status](https://travis-ci.org/Cox-Automotive/terraform-provider-alks.svg?branch=master)](https://travis-ci.org/Cox-Automotive/terraform-provider-alks)
 
 This provider is for creating and modifying IAM roles via the ALKS API.
 
@@ -20,7 +22,7 @@ To build the ALKS provider, install [Go](http://www.golang.org/) (preferably ver
 Clone this repository and `cd` into the cloned directory. All the necessary dependencies are vendored, so type `make build test` to build and test the project. If this exits with exit status `0`, then everything is working! Check your `examples` directory for an example Terraform script and the generated binary.
 
 ```bash
-git clone https://github.com/Cox-Automotive/terraform-provider-alks.git
+git clone https://ghe.coxautoinc.com/ETS-CloudAutomation/terraform-provider-alks.git
 cd terraform-provider-alks
 make build test
 ```

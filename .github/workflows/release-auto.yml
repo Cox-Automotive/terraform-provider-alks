@@ -1,86 +1,105 @@
-# This GitHub action can publish assets for release when a tag is created.
-# Currently its setup to run on any tag that matches the pattern "v*" (ie. v0.1.0).
-#
-# This uses an action (paultyng/ghaction-import-gpg) that assumes you set your
-# private key in the `GPG_PRIVATE_KEY` secret and passphrase in the `PASSPHRASE`
-# secret. If you would rather own your own GPG handling, please fork this action
-# or use an alternative one for key handling.
-#
-# You will need to pass the `--batch` flag to `gpg` in your signing step
-# in `goreleaser` to indicate this is being used in a non-interactive mode.
-#
-name: release-auto2
+name: ALKS TFP Release
 
 on:
   pull_request:
     types: [closed]
+    branches:
+      - master
 
 jobs:
-  auto-release:
-    runs-on: ubuntu-latest
+  get_pull_request:
     if: ${{ github.event.pull_request.merged == true }}
+    runs-on: cai-standard-x86-linux
+    steps:
+      - name: Extract PR metadata from event payload
+        id: get-merged-pull-request
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_LABELS: ${{ join(github.event.pull_request.labels.*.name, ',') }}
+        run: |
+          echo "labels=${PR_LABELS}" >> $GITHUB_OUTPUT
+          echo "title=${PR_TITLE}" >> $GITHUB_OUTPUT
+    outputs:
+      pull_request_labels: ${{ steps.get-merged-pull-request.outputs.labels }}
+      pull_request_title: ${{ steps.get-merged-pull-request.outputs.title }}
+
+  release:
+    runs-on: cai-standard-x86-linux
+    needs: get_pull_request
+    if: ${{ contains(needs.get_pull_request.outputs.pull_request_labels, 'release/patch') || contains(needs.get_pull_request.outputs.pull_request_labels, 'release/minor') || contains(needs.get_pull_request.outputs.pull_request_labels, 'release/major') }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          ref: master
+          token: ${{ secrets._GITHUB_TOKEN }}
+          fetch-depth: 0
 
-      - name: Unshallow fetch
-        run: git fetch --prune --unshallow
+      - name: Set git user
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Get release label
-        uses: actions-ecosystem/action-release-label@v1
+      - name: Get the release level from labels
+        uses: actions-ecosystem/action-release-label@955bf130fba6be3d99d2c14457d0dc7f176bc563
         id: release-label
-        if: ${{ github.event.pull_request.merged == true }}
+        with:
+          labels: ${{ needs.get_pull_request.outputs.pull_request_labels }}
 
       - name: Get latest tag
-        uses: actions-ecosystem/action-get-latest-tag@v1
-        id: get-latest-tag
-        if: ${{ steps.release-label.outputs.level != null }}
-      
-      - run: |
-          echo "Latest tag: ${{ steps.get-latest-tag.outputs.tag }}"
-          echo "Release level: ${{ steps.release-label.outputs.level }}"
-
-      - name: Bump the version
-        uses: actions-ecosystem/action-bump-semver@v1
-        id: bump-semver
-        if: ${{ steps.release-label.outputs.level != null }}
+        id: previoustag
+        uses: WyriHaximus/github-action-get-previous-tag@8656db79964f6757c940965c172d371ceedc8a7f
         with:
-          current_version: ${{ steps.get-latest-tag.outputs.tag }}
+          fallback: v0.0.0
+
+      - name: Bump semver
+        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1
+        id: bump-semver
+        with:
+          current_version: ${{ steps.previoustag.outputs.tag }}
           level: ${{ steps.release-label.outputs.level }}
 
-      - run: |
-          echo "New version: ${{ steps.bump-semver.outputs.new_version }}"
+      - name: Create release tag
+        env:
+          NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ needs.get_pull_request.outputs.pull_request_title }}
+        run: |
+          git tag "$NEW_TAG" -m "$NEW_TAG: PR #${PR_NUMBER} ${PR_TITLE}"
 
-      - name: Push new tag
-        uses: actions-ecosystem/action-push-tag@v1
-        if: ${{ steps.release-label.outputs.level != null }}
-        with:
-          tag: ${{ steps.bump-semver.outputs.new_version }}
-          message: '${{ steps.bump-semver.outputs.new_version }}: PR #${{ github.event.pull_request.number }} ${{ github.event.pull_request.title }}'
-      
+      - name: Mirror master to github.com
+        env:
+          GHCOM_TOKEN: ${{ secrets.GH_COM_TOKEN }}
+        run: |
+          git push "https://x-access-token:${GHCOM_TOKEN}@github.com/Cox-Automotive/terraform-provider-alks.git" HEAD:refs/heads/master
+
       - name: Set up Go
-        uses: actions/setup-go@v2
-        if: ${{ steps.release-label.outputs.level != null }}
+        uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5
         with:
-          go-version: 1.18.x
+          go-version-file: go.mod
 
       - name: Import GPG key
         id: import_gpg
-        uses: paultyng/ghaction-import-gpg@v2.1.0
-        if: ${{ steps.release-label.outputs.level != null }}
-        env:
-          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
-          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6
+        with:
+          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
+          passphrase: ${{ secrets.PASSPHRASE }}
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@v2
-        if: ${{ steps.release-label.outputs.level != null }}
+        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
         with:
           version: latest
           args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_COM_TOKEN }}
+          GITHUB_SERVER_URL: https://github.com
+          GITHUB_API_URL: https://api.github.com
 
-          
-    
+      - name: Push release tag to GHE
+        env:
+          NEW_TAG: ${{ steps.bump-semver.outputs.new_version }}
+          GHE_TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          git push "https://x-access-token:${GHE_TOKEN}@ghe.coxautoinc.com/${GH_REPO}.git" "$NEW_TAG"

@@ -51,11 +51,7 @@ func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{})
 		if err := diff.SetNew("tags_all", localTags); err != nil {
 			return fmt.Errorf("error setting new tags_all diff: %w", err)
 		}
-	} else if len(diff.Get("tags_all").(map[string]interface{})) > 0 {
-		if err := diff.SetNewComputed("tags_all"); err != nil {
-			return fmt.Errorf("error setting tags_all to computed: %w", err)
-		}
-	} else if diff.HasChange("tags_all") {
+	} else if len(diff.Get("tags_all").(map[string]interface{})) > 0 || diff.HasChange("tags_all") {
 		if err := diff.SetNewComputed("tags_all"); err != nil {
 			return fmt.Errorf("error setting tags_all to computed: %w", err)
 		}
@@ -65,7 +61,7 @@ func SetTagsDiff(_ context.Context, diff *schema.ResourceDiff, meta interface{})
 }
 
 // Removes default tags from a map of role specific + default tags
-func removeDefaultTags(allTags TagMap, defaultTags TagMap) TagMap {
+func removeDefaultTags(allTags, defaultTags TagMap) TagMap {
 	if defaultTags == nil {
 		return allTags
 	}
@@ -139,7 +135,7 @@ func getExternalyManagedTags(roleTags TagMap, ignoredTags IgnoreTags) TagMap {
 }
 
 // Combine two tag maps.  Values in map2 will overwrite values in map1 if they exist in both maps
-func combineTagMaps(baseMap TagMap, mergeMap TagMap) TagMap {
+func combineTagMaps(baseMap, mergeMap TagMap) TagMap {
 	LocalMap := TagMap{}
 
 	for k, v := range baseMap {
@@ -153,7 +149,7 @@ func combineTagMaps(baseMap TagMap, mergeMap TagMap) TagMap {
 }
 
 // see: https://github.com/LumaC0/terraform-provider-aws/blob/7f0a73253c273a9ef143189f94890fc66d0dcb9c/internal/tags/key_value_tags.go#L771
-func resolveDuplicates(allTags, defaultTags TagMap, d *schema.ResourceData) TagMap {
+func resolveDuplicates(allTags, defaultTags TagMap, d *schema.ResourceData) TagMap { // NOSONAR
 	// remove default tags
 	t := removeDefaultTags(allTags, defaultTags)
 	result := make(TagMap)

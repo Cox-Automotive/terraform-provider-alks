@@ -13,7 +13,7 @@ const MaxRoleLen = 64
 // the name if non-empty,
 // a prefix generated name if non-empty,
 // or fully generated name prefixed with "terraform-".
-func NameWithPrefix(name string, namePrefix string) string {
+func NameWithPrefix(name, namePrefix string) string {
 	if name != "" {
 		return name
 	}
