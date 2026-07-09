@@ -1,4 +1,4 @@
-## Unreleased
+## 2.8.4 (July 9, 2026)
 
 NOTES:
 
