@@ -11,14 +11,14 @@ jobs:
     steps:
       - name: Check for release label
         env:
-          TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
           LABELS=$(curl -sf -H "Authorization: token ${TOKEN}" \
             "https://ghe.coxautoinc.com/api/v3/repos/${REPO}/issues/${PR_NUMBER}/labels" \
-            | python3 -c "import sys,json; print(','.join(l['name'] for l in json.load(sys.stdin)))") \
+            | jq -r '[.[].name] | join(",")') \
             || { echo "::error::Failed to fetch labels from the GHE API"; exit 1; }
           echo "Labels: ${LABELS}"
           if echo "${LABELS}" | grep -qE '(^|,)release/(skip|patch|minor|major)(,|$)'; then

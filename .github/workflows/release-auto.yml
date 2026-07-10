@@ -53,11 +53,19 @@ jobs:
           fallback: v0.0.0
 
       - name: Bump semver
-        uses: actions-ecosystem/action-bump-semver@34e334551143a5301f38c830e44a22273c6ff5c5 # v1
         id: bump-semver
-        with:
-          current_version: ${{ steps.previoustag.outputs.tag }}
-          level: ${{ steps.release-label.outputs.level }}
+        env:
+          CURRENT_TAG: ${{ steps.previoustag.outputs.tag }}
+          LEVEL: ${{ steps.release-label.outputs.level }}
+        run: |
+          VERSION="${CURRENT_TAG#v}"
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$VERSION"
+          case "$LEVEL" in
+            major) MAJOR=$((MAJOR+1)); MINOR=0; PATCH=0 ;;
+            minor) MINOR=$((MINOR+1)); PATCH=0 ;;
+            patch) PATCH=$((PATCH+1)) ;;
+          esac
+          echo "new_version=v${MAJOR}.${MINOR}.${PATCH}" >> $GITHUB_OUTPUT
 
       - name: Create release tag
         env:
@@ -80,21 +88,43 @@ jobs:
 
       - name: Import GPG key
         id: import_gpg
-        uses: crazy-max/ghaction-import-gpg@e89d40939c28e39f97cf32126055eeae86ba74ec # v6
-        with:
-          gpg_private_key: ${{ secrets.GPG_PRIVATE_KEY }}
-          passphrase: ${{ secrets.PASSPHRASE }}
+        env:
+          GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
+          PASSPHRASE: ${{ secrets.PASSPHRASE }}
+        run: |
+          mkdir -p ~/.gnupg && chmod 700 ~/.gnupg
+          echo "allow-loopback-pinentry" >> ~/.gnupg/gpg-agent.conf
+          echo "allow-preset-passphrase" >> ~/.gnupg/gpg-agent.conf
+          echo "pinentry-mode loopback" >> ~/.gnupg/gpg.conf
+          gpg-connect-agent reloadagent /bye 2>/dev/null || true
+          echo "$GPG_PRIVATE_KEY" | gpg --batch --import
+          FINGERPRINT=$(gpg --with-colons --fingerprint --list-secret-keys 2>/dev/null \
+            | awk -F: '/^fpr:/ {print $10; exit}')
+          echo "fingerprint=${FINGERPRINT}" >> $GITHUB_OUTPUT
+          KEYGRIPS=$(gpg --list-secret-keys --with-keygrip --keyid-format LONG 2>/dev/null \
+            | grep 'Keygrip' | awk '{print $3}')
+          PASS_HEX=$(printf '%s' "$PASSPHRASE" | od -An -tx1 | tr -d ' \n')
+          for KEYGRIP in $KEYGRIPS; do
+            gpg-connect-agent "PRESET_PASSPHRASE ${KEYGRIP} -1 ${PASS_HEX}" /bye
+          done
 
       - name: Run GoReleaser
-        uses: goreleaser/goreleaser-action@e435ccd777264be153ace6237001ef4d979d3a7a # v6
-        with:
-          version: latest
-          args: release --clean
         env:
           GPG_FINGERPRINT: ${{ steps.import_gpg.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ secrets.GH_COM_TOKEN }}
           GITHUB_SERVER_URL: https://github.com
           GITHUB_API_URL: https://api.github.com
+        run: |
+          cd /tmp
+          curl -fsSL --proto '=https' --tlsv1.2 \
+            "https://github.com/goreleaser/goreleaser/releases/download/v2.3.2/goreleaser_Linux_x86_64.tar.gz" \
+            -o goreleaser.tar.gz
+          curl -fsSL --proto '=https' --tlsv1.2 \
+            "https://github.com/goreleaser/goreleaser/releases/download/v2.3.2/checksums.txt" \
+            -o goreleaser_checksums.txt
+          grep 'goreleaser_Linux_x86_64.tar.gz' goreleaser_checksums.txt | sha256sum -c
+          tar xzf goreleaser.tar.gz -C /usr/local/bin goreleaser
+          goreleaser release --clean
 
       - name: Push release tag to GHE
         env:
