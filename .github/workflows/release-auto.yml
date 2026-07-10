@@ -116,14 +116,13 @@ jobs:
           GITHUB_API_URL: https://api.github.com
         run: |
           cd /tmp
-          curl -fsSL --proto '=https' --tlsv1.2 \
-            "https://github.com/goreleaser/goreleaser/releases/download/v2.3.2/goreleaser_Linux_x86_64.tar.gz" \
-            -o goreleaser_Linux_x86_64.tar.gz
-          curl -fsSL --proto '=https' --tlsv1.2 \
-            "https://github.com/goreleaser/goreleaser/releases/download/v2.3.2/checksums.txt" \
-            -o goreleaser_checksums.txt
-          grep 'goreleaser_Linux_x86_64.tar.gz$' goreleaser_checksums.txt | sha256sum -c
-          tar xzf goreleaser_Linux_x86_64.tar.gz -C /usr/local/bin goreleaser
+          GORELEASER_VERSION=v2.3.2
+          GORELEASER_ARCHIVE=goreleaser_Linux_x86_64.tar.gz
+          BASE_URL="https://github.com/goreleaser/goreleaser/releases/download/${GORELEASER_VERSION}"
+          curl -fsSL --proto '=https' --tlsv1.2 "${BASE_URL}/${GORELEASER_ARCHIVE}" -o "${GORELEASER_ARCHIVE}"
+          curl -fsSL --proto '=https' --tlsv1.2 "${BASE_URL}/checksums.txt" -o goreleaser_checksums.txt
+          grep "${GORELEASER_ARCHIVE}\$" goreleaser_checksums.txt | sha256sum -c
+          tar xzf "${GORELEASER_ARCHIVE}" -C /usr/local/bin goreleaser
           goreleaser release --clean
 
       - name: Push release tag to GHE
