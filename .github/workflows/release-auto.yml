@@ -122,8 +122,8 @@ jobs:
           curl -fsSL --proto '=https' --tlsv1.2 "${BASE_URL}/${GORELEASER_ARCHIVE}" -o "${GORELEASER_ARCHIVE}"
           curl -fsSL --proto '=https' --tlsv1.2 "${BASE_URL}/checksums.txt" -o goreleaser_checksums.txt
           grep "${GORELEASER_ARCHIVE}\$" goreleaser_checksums.txt | sha256sum -c
-          tar xzf "${GORELEASER_ARCHIVE}" -C /usr/local/bin goreleaser
-          goreleaser release --clean
+          tar xzf "${GORELEASER_ARCHIVE}" goreleaser
+          ./goreleaser release --clean
 
       - name: Push release tag to GHE
         env:
