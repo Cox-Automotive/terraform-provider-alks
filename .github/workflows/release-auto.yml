@@ -115,16 +115,17 @@ jobs:
           GITHUB_SERVER_URL: https://github.com
           GITHUB_API_URL: https://api.github.com
         run: |
-          cd "$RUNNER_TEMP"
           GORELEASER_VERSION=v2.3.2
           GORELEASER_ARCHIVE=goreleaser_Linux_x86_64.tar.gz
           BASE_URL="https://github.com/goreleaser/goreleaser/releases/download/${GORELEASER_VERSION}"
+          cd "$RUNNER_TEMP"
           curl -fsSL --proto '=https' --tlsv1.2 "${BASE_URL}/${GORELEASER_ARCHIVE}" -o "${GORELEASER_ARCHIVE}"
           curl -fsSL --proto '=https' --tlsv1.2 "${BASE_URL}/checksums.txt" -o goreleaser_checksums.txt
           grep "${GORELEASER_ARCHIVE}\$" goreleaser_checksums.txt | sha256sum -c
           tar xzf "${GORELEASER_ARCHIVE}" goreleaser
           chmod +x goreleaser
-          ./goreleaser release --clean
+          cd "$GITHUB_WORKSPACE"
+          "$RUNNER_TEMP/goreleaser" release --clean
 
       - name: Push release tag to GHE
         env:
