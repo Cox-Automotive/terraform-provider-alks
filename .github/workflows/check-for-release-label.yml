@@ -1,5 +1,3 @@
-# For this check to pass you must have a release label on your PR.
-# valid labels are: release/patch, release/minor, release/major, release/skip
 name: Check For Release Label
 
 on:
@@ -9,16 +7,23 @@ on:
 
 jobs:
   check_for_release_label:
-
     runs-on: cai-standard-x86-linux
-
     steps:
-    - name: Get release label
-      uses: actions-ecosystem/action-release-label@955bf130fba6be3d99d2c14457d0dc7f176bc563
-      id: release-label
-
-    - run: echo "Release level is ${{ steps.release-label.outputs.level }}"
-
-    - name: Fail if label does not exist, or skip if release/skip label exists
-      if: ${{ ( ! contains(github.event.pull_request.labels.*.name, 'release/skip') ) && ( steps.release-label.outputs.level == null ) }}
-      run: echo "Please label your PR with a release label" && exit 1
+      - name: Check for release label
+        env:
+          TOKEN: ${{ secrets._GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          LABELS=$(curl -sf -H "Authorization: token ${TOKEN}" \
+            "https://ghe.coxautoinc.com/api/v3/repos/${REPO}/issues/${PR_NUMBER}/labels" \
+            | python3 -c "import sys,json; print(','.join(l['name'] for l in json.load(sys.stdin)))") \
+            || { echo "::error::Failed to fetch labels from the GHE API"; exit 1; }
+          echo "Labels: ${LABELS}"
+          if echo "${LABELS}" | grep -qE '(^|,)release/(skip|patch|minor|major)(,|$)'; then
+            echo "Release label found — OK"
+          else
+            echo "Please label your PR with a release label (release/patch, release/minor, release/major, or release/skip)"
+            exit 1
+          fi
