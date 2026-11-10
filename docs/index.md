@@ -54,7 +54,9 @@ provider "alks" {
 ```
 
 ### Environment variables
-You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables. If you need to pass multiple AWS credentials (when using a combination of Roles, like PowerUser and IAMAdmin) you can use the ALKS_ prefix in place of AWS_ (ex: ALKS_ACCESS_KEY_ID) as these are prioritized over the AWS_ prefixed environment varaibles for the provider.
+You can provide your credentials via the `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY` and `AWS_SESSION_TOKEN` environment variables. The `ALKS_` names (for example `ALKS_ACCESS_KEY_ID`) are also read, but only when the matching `AWS_` name is not set: `AWS_*` takes precedence. If you need the ALKS provider to use different credentials from other AWS tooling in the same shell (for example PowerUser for the AWS provider and IAMAdmin for ALKS), use the `ALKSTFP_` names (for example `ALKSTFP_ACCESS_KEY_ID`), which take precedence over `AWS_*` for this provider only. See [Environment variables](#environment-variables-reference) for every variable.
+
+~> **Changed in 2.9.0:** earlier versions of this page said `ALKS_` credentials take priority over `AWS_`. The provider has always used `AWS_` first; the page was wrong, and the behaviour is unchanged.
 
 Terraform file:
 ```hcl
@@ -194,12 +196,14 @@ resource "alks_iamrole" "test_role_nonprod" {
 
 In addition to [generic `provider` arguments](https://www.terraform.io/docs/configuration/providers.html?_ga=2.182283811.562816692.1597670778-20010454.1565803281) (e.g. `alias` and `version`), the following arguments are supported in the ALKS provider block:
 
-* `url` - (Required) The URL to your ALKS server. Also read from ENV.ALKS_URL
-* `access_key` - (Optional) The access key from a valid STS session. Also read from ENV.ALKS_ACCESS_KEY_ID and ENV.AWS_ACCESS_KEY_ID.
-* `secret_key` - (Optional) The secret key from a valid STS session. Also read from ENV.ALKS_SECRET_ACCESS_KEY and ENV.AWS_SECRET_ACCESS_KEY.
-* `token` - (Optional) The session token from a valid STS session. Also read from ENV.ALKS_SESSION_TOKEN and ENV.AWS_SESSION_TOKEN.
-* `shared_credentials_file` - (Optional) The the path to the shared credentials file. Also read from ENV.AWS_SHARED_CREDENTIALS_FILE.
-* `profile` - (Optional) This is the AWS profile name as set in the shared credentials file. Also read from ENV.AWS_PROFILE.
+* `url` - (Required) The URL to your ALKS server. Also read from ENV.ALKSTFP_URL or ENV.ALKS_URL
+* `access_key` - (Optional) The access key from a valid STS session. Also read from ENV.ALKSTFP_ACCESS_KEY_ID, ENV.AWS_ACCESS_KEY_ID and ENV.ALKS_ACCESS_KEY_ID, in that order.
+* `secret_key` - (Optional) The secret key from a valid STS session. Also read from ENV.ALKSTFP_SECRET_ACCESS_KEY, ENV.AWS_SECRET_ACCESS_KEY and ENV.ALKS_SECRET_ACCESS_KEY, in that order.
+* `token` - (Optional) The session token from a valid STS session. Also read from ENV.ALKSTFP_SESSION_TOKEN, ENV.AWS_SESSION_TOKEN and ENV.ALKS_SESSION_TOKEN, in that order.
+* `shared_credentials_file` - (Optional) The the path to the shared credentials file. Also read from ENV.ALKSTFP_SHARED_CREDENTIALS_FILE, ENV.AWS_SHARED_CREDENTIALS_FILE and ENV.ALKS_SHARED_CREDENTIALS_FILE, in that order.
+* `profile` - (Optional) This is the AWS profile name as set in the shared credentials file. Also read from ENV.ALKSTFP_PROFILE, ENV.AWS_PROFILE and ENV.ALKS_PROFILE, in that order.
+* `proxy_mode` - (Optional) How ALKS requests choose a proxy: `auto` (default), `environment` or `none`. See [Proxies](#proxies). Applies to ALKS requests only, never to AWS calls. Added in 2.9.0.
+* `proxy_url` - (Optional) Send every ALKS request through this proxy, for example `http://host.docker.internal:9000`. `NO_PROXY` does not apply to it. Cannot be combined with `proxy_mode = "none"`. The URL has no path, query or fragment; percent-encode `/`, `?`, `#` and `@` in a proxy password. Added in 2.9.0.
 * `assume_role` - (Optional) This is the role information to assume before making calling ALKS. This feature works the same as the assume_role feature of the AWS Terraform Provider.
     * `role_arn` - (Required) The Role ARN to assume for calling the ALKS API.
     * `session_name` - (Optional) The session name to provide to AWS when creating STS credentials. Please see the AWS SDK documentation for more information.
@@ -212,6 +216,75 @@ In addition to [generic `provider` arguments](https://www.terraform.io/docs/conf
     * `key_prefixes` - (Optional) List of key prefixes to ignore. Any key starting with a string in this list will be ignored. 
 
 ---
+### Environment variables reference
+
+Every provider argument can also come from the environment. **A value in the provider block wins for that argument**, and then that argument's environment variables are not read. Otherwise the first variable that is set wins, left to right. This is decided argument by argument, not for the identity as a whole: for example, a `profile` in the provider block does not stop `AWS_ACCESS_KEY_ID` from being used, because access keys take precedence over a profile.
+
+| Argument | Environment variables, in precedence order |
+|---|---|
+| `url` | `ALKSTFP_URL`, `ALKS_URL` |
+| `access_key` | `ALKSTFP_ACCESS_KEY_ID`, `AWS_ACCESS_KEY_ID`, `ALKS_ACCESS_KEY_ID` |
+| `secret_key` | `ALKSTFP_SECRET_ACCESS_KEY`, `AWS_SECRET_ACCESS_KEY`, `ALKS_SECRET_ACCESS_KEY` |
+| `token` | `ALKSTFP_SESSION_TOKEN`, `AWS_SESSION_TOKEN`, `ALKS_SESSION_TOKEN` |
+| `profile` | `ALKSTFP_PROFILE`, `AWS_PROFILE`, `ALKS_PROFILE` |
+| `shared_credentials_file` | `ALKSTFP_SHARED_CREDENTIALS_FILE`, `AWS_SHARED_CREDENTIALS_FILE`, `ALKS_SHARED_CREDENTIALS_FILE` |
+| `account` | `ALKSTFP_ACCOUNT`, `ALKS_ACCOUNT`, `Account` |
+| `role` | `ALKSTFP_ROLE`, `ALKS_ROLE`, `Role` |
+| `proxy_mode` | `ALKSTFP_PROXY_MODE`, `ALKS_PROXY_MODE` |
+| `proxy_url` | `ALKSTFP_PROXY_URL`, `ALKS_PROXY_URL` |
+
+**Conflicts are errors.** If two of the provider's own names for the same argument are set (`ALKSTFP_*`, `ALKS_*`, or the legacy `Account`/`Role`), the provider stops with an error naming them, even if their values are equal. Unset one, or set the argument in the provider block. `AWS_*` names are not part of this check, so `AWS_ACCESS_KEY_ID` and `ALKS_ACCESS_KEY_ID` together is fine; `AWS_*` wins.
+
+**Newly read in 2.9.0:** `ALKS_PROFILE`, `ALKS_SHARED_CREDENTIALS_FILE`, `ALKS_ACCOUNT` and `ALKS_ROLE` were ignored before 2.9.0. If your shell already exports them for other ALKS tooling, the provider now uses them. `ALKS_ACCOUNT` with `ALKS_ROLE` switches it to that account and role. Unset them, or set the argument in the provider block, to keep the earlier result.
+
+`Account` and `Role` are the original names and keep working. On macOS and Linux they are case-sensitive (`ACCOUNT` is a different variable).
+
+**`ALKSTFP_*` gives this provider its own identity.**
+- **Credentials are a set.** If any of `ALKSTFP_ACCESS_KEY_ID`, `ALKSTFP_SECRET_ACCESS_KEY` or `ALKSTFP_SESSION_TOKEN` is set, all three come from `ALKSTFP_`. A missing one stays empty; it is never filled from `AWS_*` or `ALKS_*`, so a key pair from one session is never combined with another session's token.
+- **Not mixed with the provider block.** Setting `access_key`, `secret_key` or `token` in the provider block while an `ALKSTFP_` credential variable is set is an error. Put all the credentials in one place.
+- **An incomplete set is an error.** If an `ALKSTFP_` credential is set but the access key or secret key is still missing, and no profile is set, the provider stops with an error. It does not fall back to `AWS_*` keys, `AWS_PROFILE` or the default profile. While an `ALKSTFP_` credential is set, the profile comes only from `ALKSTFP_PROFILE` (or the provider block), never from `AWS_PROFILE` or `ALKS_PROFILE`.
+- **The profile wins.** If `ALKSTFP_PROFILE` is set, `AWS_*` and `ALKS_*` keys exported for other tooling are ignored, so the profile is used.
+- **Scope.** These rules apply only when the `ALKSTFP_` variables are used. Otherwise the behaviour is as in earlier versions, where access keys, including `AWS_*`, take precedence over a profile, as in the AWS provider. A value in the provider block wins for its own argument.
+- **`shared_credentials_file` is honoured throughout.** When a credentials file is given in the provider block or through `ALKSTFP_`/`ALKS_`, profiles are read only from that file, and a file that cannot be read is an error. Profiles are never silently read from the default `~/.aws/credentials`.
+
+`access_key`, `secret_key`, `token` and `proxy_url` are marked sensitive, so Terraform does not show them.
+
+### Proxies
+
+From 2.9.0 the provider finds a proxy for its **ALKS** requests the way a browser does. It never changes how it calls AWS. With the default, `proxy_mode = "auto"`, each ALKS request uses:
+
+1. `HTTPS_PROXY`, unless `NO_PROXY` matches the ALKS host. This is the same as earlier versions.
+2. Otherwise the operating system's proxy settings: on **macOS** the system proxy and PAC file; on **Windows** the WinHTTP / Internet Options settings, PAC file and automatic detection. Linux has no OS step.
+3. Otherwise a direct connection.
+
+Rules:
+- Only the first entry of a PAC answer is used. If that proxy does not answer, the request fails with an error naming it.
+- `NO_PROXY` also exempts hosts from an OS proxy.
+- `localhost` is never proxied.
+
+This means Zscaler laptops that only route proxy-aware applications reach ALKS with nothing to configure.
+
+| `proxy_mode` | Behaviour |
+|---|---|
+| `auto` (default) | As above |
+| `environment` | `HTTPS_PROXY`/`NO_PROXY` only: exactly the behaviour before 2.9.0 |
+| `none` | Always direct, ignoring every proxy setting |
+
+`proxy_url` forces one proxy for every ALKS request.
+
+**In a container** the host's proxy settings are not visible, so `auto` falls back to `HTTPS_PROXY`, or direct. With Docker Desktop, the Zscaler local proxy is reachable as `host.docker.internal`:
+
+```hcl
+provider "alks" {
+  url       = "https://alks.example.com/rest"
+  proxy_url = "http://host.docker.internal:9000"   # or set ALKS_PROXY_URL
+}
+```
+
+`127.0.0.1:9000` does not work inside a container: it is the container itself. Setting `HTTPS_PROXY` instead also sends AWS calls through the proxy. `proxy_url`/`ALKS_PROXY_URL` affect ALKS only.
+
+**Debugging:** with `TF_LOG=DEBUG`, the log has one line per client with the proxy decision, for example `alks-go: proxy mode=auto source=pac proxy=http://127.0.0.1:9000`. It never contains credentials.
+
 ### Supported Versions
 
 | Terraform 0.10.x       |  Terraform 0.11.x        | Terraform 0.12.x - Terraform 0.15.x  | Terraform 1.0.x   |
